@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: backend
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: serxan.babayev.06@gmail.com
+    password: klmp yxwd jtdz ptmn
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        debug: true
+
+  datasource:
+    first:
+      url: jdbc:postgresql://localhost:5450/User
+      # Alternative: jdbc:postgresql://users_service:5432/User
+      username: root
+      password: root
+    second:
+      url: jdbc:postgresql://localhost:5451/Product
+      # Alternative: jdbc:postgresql://content_service:5432/Content
+      username: root
+      password: root
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+cloudinary:
+  cloud_name: dddwkgrcy
+  api_key: 668583881613156
+  api_secret: 7jymaVAgMxu5Pc50toz0YvwJ2ro
