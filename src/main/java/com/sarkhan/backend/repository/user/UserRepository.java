@@ -1,4 +1,13 @@
 package com.sarkhan.backend.repository.user;
 
-public interface UserRepository {
+import com.sarkhan.backend.model.user.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByEmail(String email); // findByUsername -> findByEmail
 }
