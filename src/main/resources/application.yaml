@@ -13,6 +13,7 @@ spring:
         smtp:
           auth: true
           starttls:
+
             enable: true
         debug: true
 
@@ -32,6 +33,8 @@ spring:
       ddl-auto: create-drop
 
 cloudinary:
-  cloud_name: dddwkgrcy
-  api_key: 668583881613156
-  api_secret: 7jymaVAgMxu5Pc50toz0YvwJ2ro
+  cloud:
+    name: dddwkgrcy
+  api:
+    key: 668583881613156
+    secret: 7jymaVAgMxu5Pc50toz0YvwJ2ro
