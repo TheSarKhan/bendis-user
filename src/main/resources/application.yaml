@@ -13,24 +13,25 @@ spring:
         smtp:
           auth: true
           starttls:
-
             enable: true
         debug: true
-
   datasource:
     first:
       url: jdbc:postgresql://localhost:5450/User
-      # Alternative: jdbc:postgresql://users_service:5432/User
       username: root
       password: root
     second:
       url: jdbc:postgresql://localhost:5451/Product
-      # Alternative: jdbc:postgresql://content_service:5432/Content
       username: root
       password: root
   jpa:
     hibernate:
       ddl-auto: create-drop
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      # password: your-redis-password (əgər varsa)
 
 cloudinary:
   cloud:
