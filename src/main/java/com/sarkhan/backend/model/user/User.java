@@ -27,7 +27,7 @@ public class User implements UserDetails {
 
     private String nameSoname;
 
-    private String email; // username -> email olaraq dəyişdi
+    private String email; //
 
     private String password;
 
