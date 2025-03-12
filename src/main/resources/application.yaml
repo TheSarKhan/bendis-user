@@ -9,6 +9,8 @@ spring:
             client-id: 285600651558-sul468mr6jv6ts4e0tfknq02vq05d06l.apps.googleusercontent.com
             client-secret: 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
             scope: profile, email
+
+
   mail:
     host: smtp.gmail.com
     port: 587

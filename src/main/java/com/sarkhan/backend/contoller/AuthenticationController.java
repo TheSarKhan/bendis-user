@@ -4,17 +4,25 @@ import com.sarkhan.backend.dto.LoginRequest;
 import com.sarkhan.backend.dto.RegisterRequest;
 import com.sarkhan.backend.dto.TokenResponse;
 import com.sarkhan.backend.jwt.JwtService;
+import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.user.User;
+import com.sarkhan.backend.redis.RedisService;
 import com.sarkhan.backend.repository.user.UserRepository;
 import com.sarkhan.backend.service.AuthenticationService;
+import com.sarkhan.backend.service.impl.CustomOAuth2UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,8 +34,9 @@ public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl;
+    private final RedisService redisService;
 
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest dto) {
@@ -51,4 +60,31 @@ if (user.isEmpty()) {
 return ResponseEntity.status(200).body(tokenResponse);
     }
 
+    @PostMapping("/google-login")
+    @Operation(summary = "Google linki istifadə edərək asan login üçün endpoint")
+    public ResponseEntity<TokenResponse> googleLogin(@RequestBody Map<String, String> body) throws Exception {
+        String idToken = body.get("id_token");
+        try {
+            TokenResponse response = customOAuth2UserServiceImpl.processGoogleLogin(idToken);
+            return ResponseEntity.ok(response);
+        } catch (GeneralSecurityException | IOException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
+
+    @GetMapping("/oauth2-failure")
+    public ResponseEntity<String> oauth2Failure() {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("OAuth2 login failed.");
+    }
+    @PostMapping("/refresh-token")
+    public TokenResponse refresh(@RequestPart("Authorization") String token) {
+        String accessToken = jwtService.generateAccessToken(token, null);
+        String refreshToken = jwtService.generateRefreshToken(token);
+        String email=jwtService.extractEmail(accessToken);
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        userOptional.get().setRefreshToken(refreshToken);
+        redisService.saveTokenToRedis(accessToken, email);
+        return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+    }
 }
