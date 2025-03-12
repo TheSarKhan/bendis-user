@@ -38,12 +38,9 @@ spring:
   data:
     redis:
       host: localhost
-      port: 6379
-      # password: your-redis-password (əgər varsa)
+      port: 6380
+      password: redispass  # Buraya Docker Compose'daki şifreyi gir
 
-  docker:
-    compose:
-          enabled: false
 
 
 
