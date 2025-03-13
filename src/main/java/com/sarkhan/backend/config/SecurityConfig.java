@@ -29,7 +29,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll() // Auth endpointleri serbest
-                        .anyRequest().authenticated() // Diğer her şey auth ister
+                        //.requestMatchers("/email/send").permitAll()
+                        .anyRequest().authenticated()// Diğer her şey auth ister
+
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // JWT filtresi
                 .addFilterAfter(jwtFilter, OAuth2LoginAuthenticationFilter.class); // OAuth2 sonrası JWT kontrolü
