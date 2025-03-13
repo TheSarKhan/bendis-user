@@ -78,10 +78,11 @@ return ResponseEntity.status(200).body(tokenResponse);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("OAuth2 login failed.");
     }
     @PostMapping("/refresh-token")
-    public TokenResponse refresh(@RequestPart("Authorization") String token) {
+    public TokenResponse refresh(@RequestHeader("Authorization") String token) {
+        token=token.substring(7);
+        String email=jwtService.extractEmail(token);
         String accessToken = jwtService.generateAccessToken(token, null);
         String refreshToken = jwtService.generateRefreshToken(token);
-        String email=jwtService.extractEmail(accessToken);
         Optional<User> userOptional = userRepository.findByEmail(email);
         userOptional.get().setRefreshToken(refreshToken);
         redisService.saveTokenToRedis(accessToken, email);

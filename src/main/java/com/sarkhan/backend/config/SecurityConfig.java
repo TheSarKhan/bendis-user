@@ -34,20 +34,7 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
-                        // ❌ Bu satırı kaldır:
-                        // .loginPage("/login")
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .successHandler((request, response, authentication) -> {
-                            // ✅ Başarılı girişte JWT token oluştur ve döndür
-                            String token = jwtService.generateToken(authentication);
-                            response.setHeader("Authorization", "Bearer " + token);
-                            response.setStatus(HttpStatus.OK.value());
-                        })
-                        .failureHandler((request, response, exception) -> {
-                            response.sendError(HttpStatus.UNAUTHORIZED.value(), "OAuth2 authentication failed");
-                        })
-                )
+
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(jwtFilter, OAuth2LoginAuthenticationFilter.class);
 
