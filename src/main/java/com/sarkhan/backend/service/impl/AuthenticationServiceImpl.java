@@ -1,9 +1,8 @@
 package com.sarkhan.backend.service.impl;
 
-import com.google.api.client.auth.oauth2.RefreshTokenRequest;
-import com.sarkhan.backend.dto.LoginRequest;
-import com.sarkhan.backend.dto.RegisterRequest;
-import com.sarkhan.backend.dto.TokenResponse;
+import com.sarkhan.backend.dto.authorization.LoginRequest;
+import com.sarkhan.backend.dto.authorization.RegisterRequest;
+import com.sarkhan.backend.dto.authorization.TokenResponse;
 import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.redis.RedisService;
@@ -12,9 +11,6 @@ import com.sarkhan.backend.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestPart;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

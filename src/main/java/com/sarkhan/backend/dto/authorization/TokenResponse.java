@@ -1,4 +1,4 @@
-package com.sarkhan.backend.dto;
+package com.sarkhan.backend.dto.authorization;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
