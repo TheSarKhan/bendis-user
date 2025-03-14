@@ -1,11 +1,8 @@
-package com.sarkhan.backend.model.product;
+package com.sarkhan.backend.dto.product;
 
 import com.sarkhan.backend.model.product.items.Color;
 import com.sarkhan.backend.model.product.items.Comment;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.sarkhan.backend.model.product.items.Plus;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -15,25 +12,18 @@ import org.hibernate.type.SqlTypes;
 import java.util.HashMap;
 import java.util.List;
 
-@Entity
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Product {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
+public class ProductRequest {
     String name;
     Double price;
     String category;
-    Double rating;
+    Double stock;
     @JdbcTypeCode(SqlTypes.JSON)
-    List<Color>colors;
+    List<Color> colors;
     @JdbcTypeCode(SqlTypes.JSON)
     List<String>descriptions;
-    @JdbcTypeCode(SqlTypes.JSON)
-    List<Comment>comments;
-    @JdbcTypeCode(SqlTypes.JSON)
-    List<Long>pluses;
+     List<Long>pluses;
     @JdbcTypeCode(SqlTypes.JSON)
     HashMap<String, String> specifications;
 }

@@ -1,10 +1,9 @@
-package com.sarkhan.backend.contoller;
+package com.sarkhan.backend.controller;
 
-import com.sarkhan.backend.dto.LoginRequest;
-import com.sarkhan.backend.dto.RegisterRequest;
-import com.sarkhan.backend.dto.TokenResponse;
+import com.sarkhan.backend.dto.authorization.LoginRequest;
+import com.sarkhan.backend.dto.authorization.RegisterRequest;
+import com.sarkhan.backend.dto.authorization.TokenResponse;
 import com.sarkhan.backend.jwt.JwtService;
-import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.redis.RedisService;
 import com.sarkhan.backend.repository.user.UserRepository;
@@ -14,14 +13,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
