@@ -34,6 +34,10 @@ spring:
       url: jdbc:postgresql://localhost:5451/Product
       username: root
       password: root
+    third: # Üçüncü datasource
+        url: jdbc:postgresql://localhost:5452/Story
+        username: root
+        password: root
   jpa:
     hibernate:
       ddl-auto: create-drop
