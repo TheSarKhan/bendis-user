@@ -18,17 +18,17 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
-public class User  {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String nameAndSurname;
-String googleId;
-String profileImg;
+    String googleId;
+    String profileImg;
     private String email;
-String refreshToken;
+    String refreshToken;
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -41,7 +41,6 @@ String refreshToken;
     @UpdateTimestamp
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDateTime updatedAt;
-
 
 
 }

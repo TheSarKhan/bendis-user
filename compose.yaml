@@ -25,6 +25,19 @@ services:
       - ProductData:/var/lib/postgresql/data
     networks:
       - bendis
+  story_service:
+    container_name: story
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: Story
+    ports:
+      - '5452:5432'
+    volumes:
+      - StoryData:/var/lib/postgresql/data
+    networks:
+      - bendis
   redis:
     image: redis:7.2
     ports:
@@ -33,6 +46,7 @@ services:
 volumes:
   UserData: {}
   ProductData: {}
+  StoryData: {}
   redis_data: {}
 
 networks:

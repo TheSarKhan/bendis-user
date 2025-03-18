@@ -27,10 +27,11 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(
+                        SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                        .requestMatchers("/api/v1/auth/**","api/v1/product").permitAll()
+                        .requestMatchers("/api/v1/auth/**","api/v1/product","/api/v1/stories","/api/v1/stories/get-all").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .anyRequest().authenticated()
                 )
