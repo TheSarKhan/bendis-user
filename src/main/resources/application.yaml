@@ -6,10 +6,16 @@ spring:
       client:
         registration:
           google:
-            client-id: 285600651558-sul468mr6jv6ts4e0tfknq02vq05d06l.apps.googleusercontent.com
+            client-id: 407408718192.apps.googleusercontent.com
             client-secret: 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
-            scope: profile, email
-
+            scope: openid email profile
+            redirect-uri: "http://localhost:8080/callback"  # Burada `{baseUrl}` uygulamanın temel URL'si olacak
+  provider:
+    google:
+      authorization-uri: https://accounts.google.com/o/oauth2/auth
+      token-uri: https://oauth2.googleapis.com/token
+      user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+      jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
 
   mail:
     host: smtp.gmail.com

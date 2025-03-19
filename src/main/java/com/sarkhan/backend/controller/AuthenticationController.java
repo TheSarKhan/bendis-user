@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -30,8 +31,8 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+private final RedisService redisService;
     private final CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl;
-    private final RedisService redisService;
 
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest dto) {
@@ -55,6 +56,7 @@ if (user.isEmpty()) {
 return ResponseEntity.status(200).body(tokenResponse);
     }
 
+
     @PostMapping("/google-login")
     @Operation(summary = "Google linki istifadə edərək asan login üçün endpoint")
     public ResponseEntity<TokenResponse> googleLogin(@RequestBody Map<String, String> body) throws Exception {
@@ -66,7 +68,6 @@ return ResponseEntity.status(200).body(tokenResponse);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
-
 
     @GetMapping("/oauth2-failure")
     public ResponseEntity<String> oauth2Failure() {
