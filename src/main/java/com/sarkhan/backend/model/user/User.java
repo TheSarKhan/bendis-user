@@ -25,10 +25,10 @@ public class User  {
     private Long id;
 
     private String nameAndSurname;
-String googleId;
-String profileImg;
+    String googleId;
+    String profileImg;
     private String email;
-String refreshToken;
+    String refreshToken;
     private String password;
 
     @Enumerated(EnumType.STRING)
@@ -41,7 +41,5 @@ String refreshToken;
     @UpdateTimestamp
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDateTime updatedAt;
-
-
 
 }

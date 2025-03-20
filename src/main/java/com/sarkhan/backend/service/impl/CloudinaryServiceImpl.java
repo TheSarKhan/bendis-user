@@ -1,8 +1,6 @@
 package com.sarkhan.backend.service.impl;
 
-
-
- import com.cloudinary.Cloudinary;
+import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
  import com.sarkhan.backend.service.CloudinaryService;
  import lombok.RequiredArgsConstructor;
