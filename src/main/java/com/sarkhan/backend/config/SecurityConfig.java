@@ -1,5 +1,6 @@
 package com.sarkhan.backend.config;
 
+
 import com.sarkhan.backend.jwt.JwtFilter;
 import com.sarkhan.backend.service.impl.CustomOAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+<<<<<<< HEAD
     @Bean
+=======
+     @Bean
+>>>>>>> 75aa8255132ebcfbcb66f2c9fae51d6015e630d9
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
@@ -74,10 +79,17 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
+<<<<<<< HEAD
                         auth
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers("/api/v1/auth/google-login","/login").permitAll()
                                 .anyRequest().authenticated()
+=======
+                                auth
+                                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                                        .requestMatchers("/api/v1/auth/google-login","/login").permitAll()
+                                         .anyRequest().authenticated()
+>>>>>>> 75aa8255132ebcfbcb66f2c9fae51d6015e630d9
                 )
 
                 .oauth2Login(oauth2 -> oauth2
@@ -94,7 +106,11 @@ public class SecurityConfig {
 
 
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+<<<<<<< HEAD
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+=======
+                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+>>>>>>> 75aa8255132ebcfbcb66f2c9fae51d6015e630d9
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
