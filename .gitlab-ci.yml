@@ -23,4 +23,4 @@ sast_scan:
     reports:
       sast: sast_results.json
     paths:
-      - sast_results.json
+      - sast_results.json 
