@@ -1,0 +1,37 @@
+stages:
+  - build
+  - test
+  - security_scan
+
+build:
+  stage: build
+  script:
+    - echo "Building Java project..."
+    - mvn clean package
+  artifacts:
+    paths:
+      - target/*.jar
+
+test:
+  stage: test
+  script:
+    - echo "Running unit tests..."
+    - mvn test
+
+sast:
+  stage: security_scan
+  script:
+    - echo "Running SAST Analysis..."
+    - mvn dependency-check:check
+    - mv target/dependency-check-reports/dependency-check-report.json dependency-check-report.json
+  artifacts:
+    paths:
+      - dependency-check-report.json
+
+sonar_results:
+  stage: security_scan
+  script:
+    - curl -u "$SONAR_TOKEN:" "http://localhost:9000/api/issues/search?format=json" -o sonar-report.json
+  artifacts:
+    paths:
+      - sonar-report.json
