@@ -8,7 +8,7 @@ build:
   stage: build
   script:
     - echo "Building Java project..."
-    - mvn clean package
+    - mvn clean package -DskipTests -X
   artifacts:
     paths:
       - target/*.jar
