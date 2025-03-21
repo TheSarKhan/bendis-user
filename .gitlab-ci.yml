@@ -34,4 +34,4 @@ sonar_results:
     - curl -u "$SONAR_TOKEN:" "http://localhost:9000/api/issues/search?format=json" -o sonar-report.json
   artifacts:
     paths:
-      - sonar-report.json
+      - sonar-report.json 
