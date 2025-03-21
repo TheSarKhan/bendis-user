@@ -18,7 +18,7 @@ sast_scan:
   image: registry.gitlab.com/gitlab-org/security-products/analyzers/semgrep:latest
   script:
     - echo "Running SAST Scan..."
-    - /analyzer run --output sast_results.json
+    - /analyzer run | tee sast_results.json
   artifacts:
     reports:
       sast: sast_results.json
