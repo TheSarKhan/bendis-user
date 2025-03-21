@@ -1,7 +1,8 @@
+image: maven:3.8.6-eclipse-temurin-17
+
 stages:
   - build
-  - test
-  - security_scan
+  - sast_scan
 
 build:
   stage: build
@@ -12,26 +13,14 @@ build:
     paths:
       - target/*.jar
 
-test:
-  stage: test
+sast_scan:
+  stage: sast_scan
+  image: registry.gitlab.com/gitlab-org/security-products/analyzers/semgrep:latest
   script:
-    - echo "Running unit tests..."
-    - mvn test
-
-sast:
-  stage: security_scan
-  script:
-    - echo "Running SAST Analysis..."
-    - mvn dependency-check:check
-    - mv target/dependency-check-reports/dependency-check-report.json dependency-check-report.json
+    - echo "Running SAST Scan..."
+    - /analyzer run --json > sast_results.json
   artifacts:
+    reports:
+      sast: sast_results.json
     paths:
-      - dependency-check-report.json
-
-sonar_results:
-  stage: security_scan
-  script:
-    - curl -u "$SONAR_TOKEN:" "http://localhost:9000/api/issues/search?format=json" -o sonar-report.json
-  artifacts:
-    paths:
-      - sonar-report.json 
+      - sast_results.json
