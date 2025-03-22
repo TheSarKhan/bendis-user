@@ -43,9 +43,6 @@ spring:
       port: 6380
       password: redispass  # Buraya Docker Compose'daki şifreyi gir
 
-
-
-
 cloudinary:
   cloud:
     name: dddwkgrcy
