@@ -1,19 +1,27 @@
+image: maven:3.8-jdk-11  # Maven və Java 11 quraşdırılmış Docker imajı
+
 stages:
   - build
   - test
   - deploy
 
+# Build mərhələsi: Java kodunu təmizləyib qurur
 build:
   stage: build
   script:
-    - mvn clean install
+    - mvn clean install  # Maven ilə layihəni qurmaq
 
+# Test mərhələsi: Testləri işə salır
 test:
   stage: test
   script:
-    - mvn test
+    - mvn test  # Testləri işə salmaq
 
+# Deploy mərhələsi: Tətbiqi serverə yerləşdirir
 deploy:
   stage: deploy
   script:
-    - scp target/myapp.jar user@server:/path/to/deploy
+    - echo "Deploying to server..."
+    - scp target/myapp.jar user@server:/path/to/deploy  # SSH ilə faylı serverə göndərmək
+  only:
+    - master  # Yalnız master branch-da deploy etmək
