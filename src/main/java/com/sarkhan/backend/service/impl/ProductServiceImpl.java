@@ -1,6 +1,7 @@
 package com.sarkhan.backend.service.impl;
 
 import com.sarkhan.backend.dto.product.ProductRequest;
+import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.Color;
 import com.sarkhan.backend.repository.product.ProductRepository;
@@ -19,9 +20,11 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CloudinaryService cloudinaryService;
+    private final JwtService jwtService;
 
     @Override
     public Product addProduct(ProductRequest productRequest, List<MultipartFile> images,String token) throws IOException {
+       String brand=jwtService.extractEmail(token);
         Product product = new Product();
         product.setName(productRequest.getName());
         product.setPrice(productRequest.getPrice());
@@ -53,7 +56,13 @@ public class ProductServiceImpl implements ProductService {
             System.out.println("Reng elave edildi: " + color.getColor());
         }
         product.setColors(colors);
+        product.generateSlug();
+        product.setBrand(brand);
         return productRepository.save(product);
 
+    }
+    @Override
+    public Product getProductByDetails(String brand, String slug, Long productId) {
+        return productRepository.findByBrandAndSlugAndId(brand, slug, productId).orElse(null);
     }
 }

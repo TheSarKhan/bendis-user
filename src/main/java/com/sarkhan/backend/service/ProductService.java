@@ -10,4 +10,5 @@ import java.util.List;
 public interface ProductService {
 
     Product addProduct(ProductRequest productRequest, List<MultipartFile> images,String token) throws IOException;
+    Product getProductByDetails(String brand, String slug, Long productId);
 }
