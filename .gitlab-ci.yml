@@ -1,4 +1,8 @@
-image: maven:3.8-jdk-11  # Maven və Java 11 quraşdırılmış Docker imajı
+image: ruby:3.1  # Ruby imajı
+
+before_script:
+  # Maven və Java-nı quraşdırırıq
+  - apt-get update && apt-get install -y maven openjdk-11-jdk
 
 stages:
   - build
