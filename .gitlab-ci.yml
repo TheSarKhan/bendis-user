@@ -1,26 +1,19 @@
-image: maven:3.8.6-eclipse-temurin-17
-
 stages:
   - build
-  - sast_scan
+  - test
+  - deploy
 
 build:
   stage: build
   script:
-    - echo "Building Java project..."
-    - mvn clean package -DskipTests -X
-  artifacts:
-    paths:
-      - target/*.jar
+    - mvn clean install
 
-sast_scan:
-  stage: sast_scan
-  image: registry.gitlab.com/gitlab-org/security-products/analyzers/semgrep:latest
+test:
+  stage: test
   script:
-    - echo "Running SAST Scan..."
-    - /analyzer run | tee sast_results.json
-  artifacts:
-    reports:
-      sast: sast_results.json
-    paths:
-      - sast_results.json 
+    - mvn test
+
+deploy:
+  stage: deploy
+  script:
+    - scp target/myapp.jar user@server:/path/to/deploy
