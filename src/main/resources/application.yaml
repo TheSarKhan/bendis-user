@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: backend
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 407408718192.apps.googleusercontent.com
+            client-secret: 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
+            scope: openid email profile
+            redirect-uri: "http://localhost:8080/callback"  # Burada `{baseUrl}` uygulamanın temel URL'si olacak
+  provider:
+    google:
+      authorization-uri: https://accounts.google.com/o/oauth2/auth
+      token-uri: https://oauth2.googleapis.com/token
+      user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+      jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: serxan.babayev.06@gmail.com
+    password: klmp yxwd jtdz ptmn
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        debug: true
+  datasource:
+    first:
+      url: jdbc:postgresql://localhost:5450/User
+      username: root
+      password: root
+    second:
+      url: jdbc:postgresql://localhost:5451/Product
+      username: root
+      password: root
+    third: # Üçüncü datasource
+        url: jdbc:postgresql://localhost:5452/Story
+        username: root
+        password: root
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  data:
+    redis:
+      host: localhost
+      port: 6380
+      password: redispass  # Buraya Docker Compose'daki şifreyi gir
+
+cloudinary:
+  cloud:
+    name: dddwkgrcy
+  api:
+    key: 668583881613156
+    secret: 7jymaVAgMxu5Pc50toz0YvwJ2ro
+
