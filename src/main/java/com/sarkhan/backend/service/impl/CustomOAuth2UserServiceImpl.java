@@ -3,7 +3,9 @@ package com.sarkhan.backend.service.impl;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.sarkhan.backend.dto.authorization.TokenResponse;
 import com.sarkhan.backend.jwt.JwtService;
@@ -12,6 +14,7 @@ import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -33,8 +36,7 @@ import java.util.Optional;
 public class CustomOAuth2UserServiceImpl implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
     private final UserRepository userRepository;
     private final JwtService jwtService;
-    @Value("${spring.security.oauth2.client.registration.google.client-id}")
-    private String clientId;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -45,9 +47,9 @@ public class CustomOAuth2UserServiceImpl implements OAuth2UserService<OAuth2User
         String firstName = oAuth2User.getAttribute("given_name");
         String lastName = oAuth2User.getAttribute("family_name");
         String imageUrl = oAuth2User.getAttribute("picture");
-        String googleId = oAuth2User.getAttribute("google_id");
+        String googleId = oAuth2User.getAttribute("sub");
 
-        TokenResponse authResponse = registerOrLoginUser(email, firstName, lastName, imageUrl,googleId);
+        TokenResponse authResponse = registerOrLoginUser(email, firstName, lastName, imageUrl, googleId);
 
 
         Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
@@ -80,7 +82,7 @@ public class CustomOAuth2UserServiceImpl implements OAuth2UserService<OAuth2User
             newUser.setRole(Role.USER);
             newUser.setCreatedAt(LocalDateTime.now());
             newUser.setUpdatedAt(LocalDateTime.now());
-            newUser.setPassword("default_password");
+            newUser.setPassword(passwordEncoder.encode("default_password"));
 
 
             userRepository.save(newUser);
@@ -96,12 +98,17 @@ public class CustomOAuth2UserServiceImpl implements OAuth2UserService<OAuth2User
                     .build();
         }
     }
+
     public TokenResponse processGoogleLogin(String idTokenString) throws GeneralSecurityException, IOException {
-        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
+        String clientId = "407408718192.apps.googleusercontent.com";
+         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                 .setAudience(Collections.singletonList(clientId))
                 .build();
 
+        System.out.println("Received idTokenString: " + idTokenString);
         GoogleIdToken idToken = verifier.verify(idTokenString);
+        System.out.println("Verified idToken: " + idToken);
+
         if (idToken != null) {
             GoogleIdToken.Payload payload = idToken.getPayload();
 
@@ -124,4 +131,6 @@ public class CustomOAuth2UserServiceImpl implements OAuth2UserService<OAuth2User
             throw new RuntimeException("Invalid ID token.");
         }
     }
+
+
 }

@@ -21,7 +21,7 @@ public class ProductServiceImpl implements ProductService {
     private final CloudinaryService cloudinaryService;
 
     @Override
-    public Product addProduct(ProductRequest productRequest, List<MultipartFile> images) throws IOException {
+    public Product addProduct(ProductRequest productRequest, List<MultipartFile> images,String token) throws IOException {
         Product product = new Product();
         product.setName(productRequest.getName());
         product.setPrice(productRequest.getPrice());

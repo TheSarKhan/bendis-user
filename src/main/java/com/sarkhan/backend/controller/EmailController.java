@@ -1,4 +1,4 @@
-package com.sarkhan.backend.contoller;
+package com.sarkhan.backend.controller;
 
 
 import com.sarkhan.backend.dto.EmailRequest;
