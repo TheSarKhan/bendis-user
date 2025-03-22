@@ -21,6 +21,11 @@ import java.util.List;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Product {
+    public void generateSlug() {
+    this.slug = this.name.toLowerCase()
+            .replace(" ", "-")
+            .replaceAll("[^a-z0-9-]", "");
+}
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
@@ -28,6 +33,8 @@ public class Product {
     Double price;
     String category;
     Double rating;
+    String brand;
+    String slug;
     @JdbcTypeCode(SqlTypes.JSON)
     List<Color>colors;
     @JdbcTypeCode(SqlTypes.JSON)
@@ -39,3 +46,4 @@ public class Product {
     @JdbcTypeCode(SqlTypes.JSON)
     HashMap<String, String> specifications;
 }
+

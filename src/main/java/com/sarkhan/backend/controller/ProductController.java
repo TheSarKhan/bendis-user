@@ -5,6 +5,7 @@ import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.repository.product.ProductRepository;
 import com.sarkhan.backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,12 +27,18 @@ public class ProductController {
 
     @PostMapping
     public Product addProduct(@RequestPart ProductRequest productRequest, List<MultipartFile> images,@RequestHeader("Authorization") String token) throws IOException {
-         Product product = productService.addProduct(productRequest,images,token);
+        token=token.substring(7);
+        Product product = productService.addProduct(productRequest,images,token);
         return productRepository.save(product);
     }
-    @GetMapping("/{seller}/{productName}")
-    public Product getProduct(@RequestHeader("Authorization") String token,@PathVariable String seller,@PathVariable String productName,@RequestParam String color) throws IOException {
-        Optional<Product>product=productRepository.findById(4L);
-        return product.get();
+    @GetMapping("/{brand}/{slug}-p-{productId}")
+    public ResponseEntity<Product> getProductByCustomUrl(@PathVariable String brand,
+                                                         @PathVariable String slug,
+                                                         @PathVariable Long productId) {
+        Product product = productService.getProductByDetails(brand, slug, productId);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(product);
     }
 }
