@@ -25,14 +25,14 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-     Long id;
-     String nameAndSurname;
+    Long id;
+    String nameAndSurname;
     String googleId;
     String profileImg;
-     String email;
+    String email;
     String refreshToken;
-     String password;
-     Gender gender;
+    String password;
+    Gender gender;
 
     @CreationTimestamp
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -44,7 +44,7 @@ public class User {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-     Set<Role> roles;
+    Set<Role> roles;
 
     @JdbcTypeCode(SqlTypes.JSON)
     UserProfile profile;

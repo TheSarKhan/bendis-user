@@ -1,7 +1,7 @@
 package com.sarkhan.backend.controller;
 
 import com.sarkhan.backend.model.story.Story;
-import com.sarkhan.backend.service.StoryService;
+import com.sarkhan.backend.service.impl.StoryServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,13 +9,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/stories")
 @RequiredArgsConstructor
 public class StoryController {
 
-    private final StoryService storyService;
+    private final StoryServiceImpl storyService;
 
     // Yeni story yaratmaq üçün
     @PostMapping
@@ -39,4 +40,18 @@ public class StoryController {
         String adImageUrl = storyService.getAdImageUrl(id);
         return ResponseEntity.ok(adImageUrl);
     }
+
+    @PostMapping("/like/story-id/{story-id}")
+    public ResponseEntity<String> addAndRemoveLike(@PathVariable("story-id") String storyId,
+                                                   @RequestParam String userId) {
+         storyService.addAndRemoveLike(storyId, userId);
+
+         return ResponseEntity.ok("Success");
+    }
+
+    @GetMapping("/get-like/story-id/{story-id}")
+    public Optional<Long> getLike(@PathVariable("story-id") String storyId){
+        return storyService.getLike(storyId);
+    }
+
 }
