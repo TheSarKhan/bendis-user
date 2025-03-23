@@ -3,22 +3,23 @@ stages:
   - test
   - deploy
 
-# Maven imajı istifadə edirik
-image: maven:3.8.4-openjdk-11
+# Java 17 və Maven imajını istifadə edirik
+image: maven:3.8.4-openjdk-17
 
-# Maven və Java-nı quraşdırmaq üçün `before_script` istifadə edirik
 before_script:
-  - apt-get update && apt-get install -y git
+  - apt-get update && apt-get install -y maven openjdk-17-jdk  # Java 17 və Maven quraşdırırıq
+  - java -version  # Java versiyasını yoxlayırıq
+  - mvn -version   # Maven versiyasını yoxlayırıq
 
 # Build mərhələsi: Java kodunu təmizləyib qurur
 build:
   stage: build
   script:
-    - mvn clean install  # Maven ilə layihəni qurmaq
-    - mvn compile        # Layihəni təmizləyib, yenidən qurmaq
+    - mvn clean install -Dmaven.compiler.source=17 -Dmaven.compiler.target=17  # Java 17 istifadə edirik
+    - mvn compile  # Layihəni təmizləyib, yenidən qurmaq
   artifacts:
     paths:
-      - target/*.jar      # JAR faylını artefakt olaraq saxlayırıq
+      - target/*.jar  # JAR faylını artefakt olaraq saxlayırıq
   only:
     - sprint1/sarkhan  # Yalnız sprint1/sarkhan branch-da işləyir
 
