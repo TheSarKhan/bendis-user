@@ -15,7 +15,8 @@ public class UserController {
     private final SellerService sellerService;
 
     @PostMapping("/create/seller")
-    public ResponseEntity<?>createBrand(@RequestBody SellerRequest sellerRequest,@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?>createBrand(@RequestBody SellerRequest sellerRequest,
+                                        @RequestHeader("Authorization") String token) {
        token=token.substring(7);
         User user=sellerService.createSeller(sellerRequest, token);
         return ResponseEntity.status(201).body(user);
