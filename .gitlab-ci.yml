@@ -1,33 +1,40 @@
-image: ruby:3.1  # Ruby imajı
-image: rvancea/maven-chrome-jdk8:latest
-
-before_script:
-  # Maven və Java-nı quraşdırırıq
-  - apt-get update && apt-get install -y maven openjdk-11-jdk
-
 stages:
   - build
   - test
   - deploy
+
+# Maven imajı istifadə edirik
+image: maven:3.8.4-openjdk-11
+
+# Maven və Java-nı quraşdırmaq üçün `before_script` istifadə edirik
+before_script:
+  - apt-get update && apt-get install -y git
 
 # Build mərhələsi: Java kodunu təmizləyib qurur
 build:
   stage: build
   script:
     - mvn clean install  # Maven ilə layihəni qurmaq
-    - mvn compile
+    - mvn compile        # Layihəni təmizləyib, yenidən qurmaq
+  artifacts:
+    paths:
+      - target/*.jar      # JAR faylını artefakt olaraq saxlayırıq
+  only:
+    - sprint1/sarkhan  # Yalnız sprint1/sarkhan branch-da işləyir
 
 # Test mərhələsi: Testləri işə salır
 test:
   stage: test
   script:
-    - mvn clean test  # Testləri işə salmaq
+    - mvn test  # Testləri işə salmaq
+  only:
+    - sprint1/sarkhan  # Yalnız sprint1/sarkhan branch-da işləyir
 
 # Deploy mərhələsi: Tətbiqi serverə yerləşdirir
 deploy:
   stage: deploy
   script:
     - echo "Deploying to server..."
-    - scp target/myapp.jar user@server:/path/to/deploy  # SSH ilə faylı serverə göndərmək
+    - scp target/myapp.jar user@server:/path/to/deploy  # Faylı serverə göndəririk
   only:
-    - master  # Yalnız master branch-da deploy etmək
+    - sprint1/sarkhan  # Yalnız sprint1/sarkhan branch-da deploy edir
