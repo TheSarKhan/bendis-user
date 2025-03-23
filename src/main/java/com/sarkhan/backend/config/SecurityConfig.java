@@ -34,7 +34,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-     @Bean
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
@@ -45,6 +45,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 
     private ClientRegistration googleClientRegistration() {
         return ClientRegistration.withRegistrationId("google")
@@ -75,10 +76,10 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth ->
-                                auth
-                                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                                        .requestMatchers("/api/v1/auth/google-login","/login","/api/v1/auth/**","/api/v1/product/**").permitAll()
-                                         .anyRequest().authenticated()
+                        auth
+                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                                .requestMatchers("/api/v1/auth/google-login", "/login", "api/v1/product","/api/v1/auth/email/consultation","/api/v1/auth/email/appeal").permitAll()
+                                .anyRequest().authenticated()
                 )
 
                 .oauth2Login(oauth2 -> oauth2
@@ -93,13 +94,13 @@ public class SecurityConfig {
                 )
 
 
-
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
+
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
@@ -111,6 +112,8 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
+
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
