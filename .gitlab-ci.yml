@@ -21,7 +21,7 @@ build:
 test:
   stage: test
   script:
-    - mvn test  # Testləri işə salmaq
+    - mvn clean test  # Testləri işə salmaq
 
 # Deploy mərhələsi: Tətbiqi serverə yerləşdirir
 deploy:
