@@ -78,7 +78,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                                .requestMatchers("/api/v1/auth/google-login", "/login", "api/v1/product","/api/v1/auth/email/consultation","/api/v1/auth/email/appeal").permitAll()
+                                .requestMatchers("/api/v1/auth/google-login", "/login", "api/v1/product","/api/v1/auth/email/consultation","/api/v1/auth/email/appeal","/api/v1/auth/**").permitAll()
                                 .anyRequest().authenticated()
                 )
 

@@ -3,9 +3,7 @@ package com.sarkhan.backend.service.impl;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.sarkhan.backend.dto.authorization.TokenResponse;
 import com.sarkhan.backend.jwt.JwtService;
@@ -13,7 +11,6 @@ import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -79,7 +76,7 @@ public class CustomOAuth2UserServiceImpl implements OAuth2UserService<OAuth2User
             newUser.setNameAndSurname(firstName + " " + lastName);
             newUser.setGoogleId(googleId);
             newUser.setProfileImg(imageUrl);
-            newUser.setRole(Role.USER);
+            newUser.setRoles(Collections.singleton(Role.USER));
             newUser.setCreatedAt(LocalDateTime.now());
             newUser.setUpdatedAt(LocalDateTime.now());
             newUser.setPassword(passwordEncoder.encode("default_password"));
@@ -131,6 +128,4 @@ public class CustomOAuth2UserServiceImpl implements OAuth2UserService<OAuth2User
             throw new RuntimeException("Invalid ID token.");
         }
     }
-
-
 }

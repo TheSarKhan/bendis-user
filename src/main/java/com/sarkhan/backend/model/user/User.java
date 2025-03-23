@@ -1,38 +1,38 @@
 package com.sarkhan.backend.model.user;
 
+import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @Builder
 @Entity
 @Table(name = "users")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-
-    private String nameAndSurname;
+     Long id;
+     String nameAndSurname;
     String googleId;
     String profileImg;
-    private String email;
+     String email;
     String refreshToken;
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    Role role;
+     String password;
+     Gender gender;
 
     @CreationTimestamp
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -42,5 +42,13 @@ public class User {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDateTime updatedAt;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+     Set<Role> roles;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    UserProfile profile;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    Seller seller;
 }
