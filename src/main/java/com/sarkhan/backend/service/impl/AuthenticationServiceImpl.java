@@ -4,6 +4,8 @@ import com.sarkhan.backend.dto.authorization.LoginRequest;
 import com.sarkhan.backend.dto.authorization.RegisterRequest;
 import com.sarkhan.backend.dto.authorization.TokenResponse;
 import com.sarkhan.backend.jwt.JwtService;
+import com.sarkhan.backend.model.enums.Gender;
+import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.redis.RedisService;
 import com.sarkhan.backend.repository.user.UserRepository;
@@ -13,7 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +36,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         LocalDateTime now = LocalDateTime.now();
         String refreshToken = jwtService.generateRefreshToken(request.getEmail());
         User user = new User();
-        user.setNameAndSurname(request.getNameAndSurname());
+        if (request.getGenderInt()==0){
+            user.setGender(Gender.MALE);
+        }else if (request.getGenderInt()==1) {
+            user.setGender(Gender.FEMALE);
+        }
+Set<Role>roles=new HashSet<>();
+        roles.add(Role.USER);
+        user.setRoles(roles);
+    user.setNameAndSurname(request.getNameAndSurname());
         user.setEmail(request.getEmail());
          user.setCreatedAt(now);
         user.setUpdatedAt(now);

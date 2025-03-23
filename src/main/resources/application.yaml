@@ -50,7 +50,7 @@ spring:
       password: root
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
   data:
     redis:
       host: localhost
