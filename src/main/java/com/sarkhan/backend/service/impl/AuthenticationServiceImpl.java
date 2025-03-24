@@ -35,20 +35,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
         LocalDateTime now = LocalDateTime.now();
         String refreshToken = jwtService.generateRefreshToken(request.getEmail());
+        redisService.saveRefreshToken(request.getEmail(), refreshToken, 7);
         User user = new User();
-        if (request.getGenderInt()==0){
+        if (request.getGenderInt() == 0) {
             user.setGender(Gender.MALE);
-        }else if (request.getGenderInt()==1) {
+        } else if (request.getGenderInt() == 1) {
             user.setGender(Gender.FEMALE);
         }
-Set<Role>roles=new HashSet<>();
+        Set<Role> roles = new HashSet<>();
         roles.add(Role.USER);
         user.setRoles(roles);
-    user.setNameAndSurname(request.getNameAndSurname());
+        user.setNameAndSurname(request.getNameAndSurname());
         user.setEmail(request.getEmail());
-         user.setCreatedAt(now);
+        user.setCreatedAt(now);
         user.setUpdatedAt(now);
-        user.setRefreshToken(refreshToken);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
 
@@ -66,12 +66,13 @@ Set<Role>roles=new HashSet<>();
                 .refreshToken(refreshToken)
                 .build();
     }
+
     @Override
     public TokenResponse login(LoginRequest request) {
         Optional<User> userOptional = userRepository.findByEmail(request.getEmail());
 
         if (userOptional.isEmpty()) {
-            throw new RuntimeException("User not found with username: " + request.getEmail());
+            throw new RuntimeException("User not found with email: " + request.getEmail());
         }
 
         User user = userOptional.get();

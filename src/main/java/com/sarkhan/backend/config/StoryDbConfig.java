@@ -39,7 +39,6 @@ public class StoryDbConfig {
     private String thirdDbDdlAuto;
 
 
-
     @Bean(name = "thirdDataSource")
     public DataSource thirdDataSource() {
         DataSourceBuilder<?> builder = DataSourceBuilder.create();
@@ -48,7 +47,6 @@ public class StoryDbConfig {
         builder.password(thirdDbPassword);
         return builder.build();
     }
-
 
 
     @Bean(name = "thirdEntityManagerFactory")
@@ -62,7 +60,6 @@ public class StoryDbConfig {
                 .properties(hibernateProperties())
                 .build();
     }
-
 
 
     @Bean(name = "thirdTransactionManager")

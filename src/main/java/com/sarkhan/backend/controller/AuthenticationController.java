@@ -31,29 +31,36 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
-private final RedisService redisService;
+    private final RedisService redisService;
     private final CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl;
 
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest dto) {
-        System.out.println("Kontroller isledi");
-        return ResponseEntity.ok(authenticationService.register(dto));
+
+        TokenResponse tokenResponse = authenticationService.register(dto);
+        Optional<User> user = userRepository.findByEmail(jwtService.extractEmail(tokenResponse.getAccessToken()));
+        if (user.isPresent()) {
+            user.get().setUserCode("BD" + 10000000 + user.get().getId());
+            userRepository.save(user.get());
+        }
+
+        return ResponseEntity.ok(tokenResponse);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         Optional<User> user = userRepository.findByEmail(request.getEmail());
-TokenResponse tokenResponse = authenticationService.login(request);
-if (request.getEmail() == null || request.getPassword() == null) {
-    ResponseEntity.status(400).body("Email or Password is null");
-}
-if (user.isEmpty()) {
-    ResponseEntity.status(400).body("Email does not exist");
-}
-         if (!Objects.equals(request.getPassword(), user.get().getPassword())) {
-             ResponseEntity.status(400).body("Passwords do not match");
-         }
-return ResponseEntity.status(200).body(tokenResponse);
+        TokenResponse tokenResponse = authenticationService.login(request);
+        if (request.getEmail() == null || request.getPassword() == null) {
+            ResponseEntity.status(400).body("Email or Password is null");
+        }
+        if (user.isEmpty()) {
+            ResponseEntity.status(400).body("Email does not exist");
+        }
+        if (!Objects.equals(request.getPassword(), user.get().getPassword())) {
+            ResponseEntity.status(400).body("Passwords do not match");
+        }
+        return ResponseEntity.status(200).body(tokenResponse);
     }
 
 
@@ -73,15 +80,33 @@ return ResponseEntity.status(200).body(tokenResponse);
     public ResponseEntity<String> oauth2Failure() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("OAuth2 login failed.");
     }
-    @PostMapping("/refresh-token")
-    public TokenResponse refresh(@RequestHeader("Authorization") String token) {
-        token=token.substring(7);
-        String email=jwtService.extractEmail(token);
-        String accessToken = jwtService.generateAccessToken(token, null);
-        String refreshToken = jwtService.generateRefreshToken(token);
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        userOptional.get().setRefreshToken(refreshToken);
-        redisService.saveTokenToRedis(accessToken, email);
-        return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestParam String refreshToken) {
+         String email = jwtService.extractEmail(refreshToken);
+
+        if (email.isEmpty()) {
+            return ResponseEntity.status(401).body("Invalid refresh token");
+        }
+
+        // 2. Redis'teki refresh token ile eşleşiyor mu kontrol et
+        String storedRefreshToken = redisService.getRefreshToken(email);
+        System.out.println(storedRefreshToken +"Stored Refresh Token");
+        System.out.println(refreshToken + "Current Refresh token");
+        if (storedRefreshToken == null || !storedRefreshToken.equals(refreshToken)) {
+            return ResponseEntity.status(401).body("Refresh token mismatch or expired");
+        }
+
+        // 3. Yeni access token üret
+        String newAccessToken = jwtService.generateAccessToken(email,null);
+
+        // 4. (Opsiyonel) Yeni refresh token üretip Redis'i güncelle
+        String newRefreshToken = jwtService.generateRefreshToken(email);
+        redisService.deleteRefreshToken(email);
+        redisService.saveRefreshToken(email, newRefreshToken, 7); // 7 gün geçerli
+
+        // 5. Yeni token'ları döndür
+        return ResponseEntity.ok(new TokenResponse(newAccessToken, newRefreshToken));
     }
+
 }

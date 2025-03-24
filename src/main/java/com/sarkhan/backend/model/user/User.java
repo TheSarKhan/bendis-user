@@ -12,6 +12,7 @@ import org.hibernate.type.SqlTypes;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Set;
 
 @Data
@@ -33,6 +34,12 @@ public class User {
     String refreshToken;
     String password;
     Gender gender;
+    String userCode;
+ String countryCode;
+ String phoneNumber;
+
+ @JdbcTypeCode(SqlTypes.JSON)
+BirthDate birthDate;
 
     @CreationTimestamp
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -46,8 +53,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     Set<Role> roles;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    UserProfile profile;
 
     @JdbcTypeCode(SqlTypes.JSON)
     Seller seller;

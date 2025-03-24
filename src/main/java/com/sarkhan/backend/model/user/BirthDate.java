@@ -6,8 +6,8 @@ import lombok.experimental.FieldDefaults;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserProfile {
-    String fincode;
-    String phoneNumber;
-    String userCode;
+public class BirthDate {
+    int year;
+    int month;
+    int day;
 }
