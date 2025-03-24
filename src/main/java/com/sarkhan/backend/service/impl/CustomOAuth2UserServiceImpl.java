@@ -98,7 +98,7 @@ public class CustomOAuth2UserServiceImpl implements OAuth2UserService<OAuth2User
 
     public TokenResponse processGoogleLogin(String idTokenString) throws GeneralSecurityException, IOException {
         String clientId = "407408718192.apps.googleusercontent.com";
-         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
                 .setAudience(Collections.singletonList(clientId))
                 .build();
 

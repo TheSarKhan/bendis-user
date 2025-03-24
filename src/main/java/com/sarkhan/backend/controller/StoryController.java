@@ -44,13 +44,13 @@ public class StoryController {
     @PostMapping("/like/story-id/{story-id}")
     public ResponseEntity<String> addAndRemoveLike(@PathVariable("story-id") String storyId,
                                                    @RequestParam String userId) {
-         storyService.addAndRemoveLike(storyId, userId);
+        storyService.addAndRemoveLike(storyId, userId);
 
-         return ResponseEntity.ok("Success");
+        return ResponseEntity.ok("Success");
     }
 
     @GetMapping("/get-like/story-id/{story-id}")
-    public Optional<Long> getLike(@PathVariable("story-id") String storyId){
+    public Optional<Long> getLike(@PathVariable("story-id") String storyId) {
         return storyService.getLike(storyId);
     }
 

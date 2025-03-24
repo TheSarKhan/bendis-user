@@ -24,20 +24,20 @@ public class SellerServiceImpl implements SellerService {
 
     @Override
     public User createSeller(SellerRequest sellerRequest, String token) {
-        String email=jwtService.extractEmail(token);
-        Optional<User>user=userRepository.findByEmail(email);
-        if(user.isPresent()) {
-            Seller seller=new Seller();
-             seller.setBrandEmail(user.get().getEmail());
-seller.setBrandName(sellerRequest.getBrandName());
-seller.setNameAndSurname(user.get().getNameAndSurname());
-seller.setFatherName(sellerRequest.getFatherName());
-seller.setFinCode(user.get().getProfile().getFincode());
-seller.setBrandVOEN(sellerRequest.getBrandVOEN());
-seller.setBrandPhone(user.get().getProfile().getPhoneNumber());
-user.get().getRoles().add(Role.SELLER);
-user.get().setSeller(seller);
-userRepository.save(user.get());
+        String email = jwtService.extractEmail(token);
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            Seller seller = new Seller();
+            seller.setBrandEmail(user.get().getEmail());
+            seller.setBrandName(sellerRequest.getBrandName());
+            seller.setNameAndSurname(user.get().getNameAndSurname());
+            seller.setFatherName(sellerRequest.getFatherName());
+            seller.setFinCode(sellerRequest.getFinCode());
+            seller.setBrandVOEN(sellerRequest.getBrandVOEN());
+            seller.setBrandPhone(user.get().getPhoneNumber());
+            user.get().getRoles().add(Role.SELLER);
+            user.get().setSeller(seller);
+            userRepository.save(user.get());
         }
         return user.get();
     }

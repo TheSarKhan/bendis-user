@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 public class RegisterRequest {
 
      String nameAndSurname;
-     String email; // username -> email
+     String email;
      String password;
      byte genderInt;
 }

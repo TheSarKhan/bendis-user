@@ -10,4 +10,5 @@ public class SellerRequest {
     String brandName;
     String brandVOEN;
     String fatherName;
+    String finCode;
 }

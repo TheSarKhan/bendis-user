@@ -1,6 +1,5 @@
 package com.sarkhan.backend.redis;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -14,6 +13,7 @@ public class RedisService {
     private RedisTemplate<String, String> redisTemplate;
 
     private static final String TOKEN_PREFIX = "token:";
+    private static final String REFRESH_TOKEN_PREFIX = "refresh-token:";
     private static final String RESET_TOKEN_PREFIX = "reset-token:";
 
     // 🔹 Kullanıcı için JWT token'ı Redis'e kaydetme
@@ -31,8 +31,23 @@ public class RedisService {
         redisTemplate.delete(TOKEN_PREFIX + username);
     }
 
+    // 🔹 Refresh token'ı Redis'e kaydetme (Örn: 7 gün geçerli)
+    public void saveRefreshToken(String username, String refreshToken, int timeout) {
+        redisTemplate.opsForValue().set(REFRESH_TOKEN_PREFIX + username, refreshToken, timeout, TimeUnit.DAYS);
+    }
+
+    // 🔹 Kullanıcının refresh token'ını alma
+    public String getRefreshToken(String username) {
+        return redisTemplate.opsForValue().get(REFRESH_TOKEN_PREFIX + username);
+    }
+
+    // 🔹 Kullanıcının refresh token'ını silme (Örn: Logout veya token yenileme sonrası)
+    public void deleteRefreshToken(String username) {
+        redisTemplate.delete(REFRESH_TOKEN_PREFIX + username);
+    }
+
     // 🔹 Şifre sıfırlama için geçici token'ı kaydetme (10 dakika geçerli)
-    public void saveResetToken(String email, String token,int timeout) {
+    public void saveResetToken(String email, String token, int timeout) {
         redisTemplate.opsForValue().set(RESET_TOKEN_PREFIX + email, token, timeout, TimeUnit.MINUTES);
     }
 
@@ -46,4 +61,3 @@ public class RedisService {
         redisTemplate.delete(RESET_TOKEN_PREFIX + email);
     }
 }
-

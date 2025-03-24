@@ -23,8 +23,8 @@ public class ProductServiceImpl implements ProductService {
     private final JwtService jwtService;
 
     @Override
-    public Product addProduct(ProductRequest productRequest, List<MultipartFile> images,String token) throws IOException {
-       String brand=jwtService.extractEmail(token);
+    public Product addProduct(ProductRequest productRequest, List<MultipartFile> images, String token) throws IOException {
+        String brand = jwtService.extractEmail(token);
         Product product = new Product();
         product.setName(productRequest.getName());
         product.setPrice(productRequest.getPrice());
@@ -43,13 +43,13 @@ public class ProductServiceImpl implements ProductService {
             color.setStock(productRequest.getColors().get(i).getStock());
             color.setPhotoCount(productRequest.getColors().get(i).getPhotoCount());
             for (int j = 0; j < productRequest.getColors().get(i).getPhotoCount(); j++) {
-          if (photoIndex < colorPhotos.size()) {
-            String photo = colorPhotos.get(photoIndex);
-            photoUrls.add(photo);
-            photoIndex++;
-                }else {
-              break;
-          }
+                if (photoIndex < colorPhotos.size()) {
+                    String photo = colorPhotos.get(photoIndex);
+                    photoUrls.add(photo);
+                    photoIndex++;
+                } else {
+                    break;
+                }
             }
             color.setImages(photoUrls);
             colors.add(color);
@@ -61,6 +61,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
 
     }
+
     @Override
     public Product getProductByDetails(String brand, String slug, Long productId) {
         return productRepository.findByBrandAndSlugAndId(brand, slug, productId).orElse(null);
