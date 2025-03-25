@@ -1,4 +1,6 @@
 spring:
+  app:
+    base-url: "http://localhost:8080"
   application:
     name: backend
   security:
@@ -9,7 +11,7 @@ spring:
             client-id: 407408718192.apps.googleusercontent.com
             client-secret: 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
             scope: openid email profile
-            redirect-uri: "http://localhost:8080/callback"  # Burada `{baseUrl}` uygulamanın temel URL'si olacak
+            redirect-uri: "http://localhost:8080/login/oauth2/code/google"  # Burada `{baseUrl}` uygulamanın temel URL'si olacak
   provider:
     google:
       authorization-uri: https://accounts.google.com/o/oauth2/auth

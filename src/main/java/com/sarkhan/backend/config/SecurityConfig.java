@@ -1,16 +1,19 @@
 package com.sarkhan.backend.config;
 
-
+import com.sarkhan.backend.handler.CustomAccessDeniedHandler;
+import com.sarkhan.backend.handler.CustomAuthenticationEntryPoint;
 import com.sarkhan.backend.jwt.JwtFilter;
+import org.springframework.security.authentication.AuthenticationProvider;
 import com.sarkhan.backend.service.impl.CustomOAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -24,8 +27,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-import org.springframework.security.authentication.AuthenticationProvider;
 
 import java.util.List;
 
@@ -34,18 +35,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    @Value("${spring.app.base-url}")
+    private String baseUrl;
+
+    private final JwtFilter jwtFilter;
+    private final AuthenticationProvider authenticationProvider;
+    private final CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 
     private ClientRegistration googleClientRegistration() {
         return ClientRegistration.withRegistrationId("google")
@@ -69,21 +79,25 @@ public class SecurityConfig {
         return new InMemoryClientRegistrationRepository(this.googleClientRegistration());
     }
 
-
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl, JwtFilter jwtFilter) throws Exception {
-        AuthenticationProvider authenticationProvider = null;
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth ->
-                        auth
-                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/api/v1/stories/**",
-                                        "/api/v1/stories/like/story-id").permitAll()
-                                .requestMatchers("/api/v1/auth/google-login", "/login", "api/v1/product",
-                                        "/api/v1/auth/email/consultation", "/api/v1/auth/email/appeal", "/api/v1/auth/**","/api/v1/auth/refresh-token").permitAll()
-                                .anyRequest().authenticated()
+                .csrf(csrf -> csrf.disable())
+                .exceptionHandling(exception ->
+                        exception.accessDeniedHandler(accessDeniedHandler)
+                                .authenticationEntryPoint(authenticationEntryPoint)
                 )
-
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html",
+                                "/api/v1/stories/**", "/api/v1/stories/like/story-id",
+                                "/api/v1/auth/google-login", "/login", "/api/v1/product",
+                                "/api/v1/auth/email/consultation", "/api/v1/auth/email/appeal",
+                                "/api/v1/auth/**", "/api/v1/auth/refresh-token"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserServiceImpl))
@@ -94,31 +108,9 @@ public class SecurityConfig {
                             response.sendRedirect("/login?error=true");
                         })
                 )
-
-
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .authenticationProvider(authenticationProvider);
 
         return http.build();
     }
-
-    @Bean
-    public CorsFilter corsFilter() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("localhost:3000")); // Buraya frontend URL'ni ekleyebilirsin
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        config.setAllowedHeaders(List.of("*"));
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
-    }
-
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
 }
