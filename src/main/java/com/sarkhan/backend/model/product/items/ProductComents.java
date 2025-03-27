@@ -8,17 +8,17 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
-@Entity
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class Comment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
-    String comment;
-    String author;
-    Double rating;
-    String date;
-    Long productId;
-
-}
+//@Entity
+//@Data
+//@FieldDefaults(level = AccessLevel.PRIVATE)
+//public class ProductComents {
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+//    Long id;
+//    String comment;
+//    String author;
+//    Double rating;
+//    String date;
+//    Long productId;
+//
+//}

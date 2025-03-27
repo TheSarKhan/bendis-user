@@ -31,7 +31,7 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
-private final RedisService redisService;
+    private final RedisService redisService;
     private final CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl;
 
     @PostMapping("/register")

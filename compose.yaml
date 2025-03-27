@@ -38,6 +38,19 @@ services:
       - StoryData:/var/lib/postgresql/data
     networks:
       - bendis
+  comment_service:
+    container_name: comment
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: Comment
+    ports:
+      - '5453:5432'
+    volumes:
+      - CommentData:/var/lib/postgresql/data
+    networks:
+      - bendis
   redis:
     image: redis:7.2
     ports:
@@ -48,6 +61,7 @@ volumes:
   ProductData: {}
   StoryData: {}
   redis_data: {}
+  CommentData: {}
 
 networks:
   bendis:
