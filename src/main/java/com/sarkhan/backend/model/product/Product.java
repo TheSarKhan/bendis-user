@@ -31,6 +31,7 @@ public class Product {
     String name;
     Double price;
     String category;
+    String seller;
     Double rating;
     String brand;
     String slug;
