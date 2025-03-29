@@ -66,4 +66,6 @@ public class ProductServiceImpl implements ProductService {
     public Product getProductByDetails(String brand, String slug, Long productId) {
         return productRepository.findByBrandAndSlugAndId(brand, slug, productId).orElse(null);
     }
+
+
 }
