@@ -1,8 +1,8 @@
 package com.sarkhan.backend.model.product;
 
+import com.sarkhan.backend.dto.comment.CommentResponse;
 import com.sarkhan.backend.model.product.items.Color;
-import com.sarkhan.backend.model.product.items.Comment;
-import jakarta.persistence.Entity;
+ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,7 +40,7 @@ public class Product {
     @JdbcTypeCode(SqlTypes.JSON)
     List<String> descriptions;
     @JdbcTypeCode(SqlTypes.JSON)
-    List<Comment> comments;
+    List<CommentResponse> comments;
     @JdbcTypeCode(SqlTypes.JSON)
     List<Long> pluses;
     @JdbcTypeCode(SqlTypes.JSON)
