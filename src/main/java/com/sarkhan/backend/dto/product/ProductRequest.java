@@ -1,8 +1,6 @@
 package com.sarkhan.backend.dto.product;
 
 import com.sarkhan.backend.model.product.items.Color;
-import com.sarkhan.backend.model.product.items.Comment;
-import com.sarkhan.backend.model.product.items.Plus;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -26,4 +24,5 @@ public class ProductRequest {
      List<Long>pluses;
     @JdbcTypeCode(SqlTypes.JSON)
     HashMap<String, String> specifications;
+
 }
