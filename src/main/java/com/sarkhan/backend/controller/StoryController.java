@@ -47,8 +47,6 @@ public class StoryController {
 
         storyService.addAndRemoveLike(storyId, userId);
 
-        System.out.println("Bu test meqsedi dasiyir");
-
         return ResponseEntity.ok("Success");
     }
 
