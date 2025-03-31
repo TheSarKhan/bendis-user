@@ -44,7 +44,10 @@ public class StoryController {
     @PostMapping("/like/story-id/{story-id}")
     public ResponseEntity<String> addAndRemoveLike(@PathVariable("story-id") String storyId,
                                                    @RequestParam String userId) {
+
         storyService.addAndRemoveLike(storyId, userId);
+
+        System.out.println("Bu test meqsedi dasiyir");
 
         return ResponseEntity.ok("Success");
     }
