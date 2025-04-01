@@ -1,6 +1,7 @@
 version: '3.8'
 services:
   redis:
+    read_only: true
     restart: always  # Restart automatically after failure or reboot
     image: redis:7.2
     container_name: redis
@@ -14,6 +15,7 @@ services:
   users_service:
     restart: always  # Restart automatically after failure or reboot
     container_name: user
+    read_only: true
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -29,6 +31,7 @@ services:
   product_service:
     restart: always  # Restart automatically after failure or reboot
     container_name: product
+    read_only: true
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -44,6 +47,7 @@ services:
   story_service:
     restart: always  # Restart automatically after failure or reboot
     container_name: story
+    read_only: true
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -59,6 +63,7 @@ services:
   comment_service:
     restart: always  # Restart automatically after failure or reboot
     container_name: comment
+    read_only: true
     image: postgres
     environment:
       POSTGRES_USER: root
