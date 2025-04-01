@@ -2,9 +2,7 @@ package com.sarkhan.backend.model.product;
 
 import com.sarkhan.backend.dto.comment.CommentResponse;
 import com.sarkhan.backend.model.product.items.Color;
-
-
-import jakarta.persistence.Entity;
+ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,27 +20,29 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Product {
     public void generateSlug() {
-    this.slug = this.name.toLowerCase()
-            .replace(" ", "-")
-            .replaceAll("[^a-z0-9-]", "");
-}
+        this.slug = this.name.toLowerCase()
+                .replace(" ", "-")
+                .replaceAll("[^a-z0-9-]", "");
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
     String name;
     Double price;
     String category;
+    String seller;
     Double rating;
     String brand;
     String slug;
     @JdbcTypeCode(SqlTypes.JSON)
-    List<Color>colors;
+    List<Color> colors;
     @JdbcTypeCode(SqlTypes.JSON)
-    List<String>descriptions;
+    List<String> descriptions;
     @JdbcTypeCode(SqlTypes.JSON)
-    List<CommentResponse>comments;
+    List<CommentResponse> comments;
     @JdbcTypeCode(SqlTypes.JSON)
-    List<Long>pluses;
+    List<Long> pluses;
     @JdbcTypeCode(SqlTypes.JSON)
     HashMap<String, String> specifications;
 }

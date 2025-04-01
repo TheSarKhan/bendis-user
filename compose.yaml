@@ -1,6 +1,21 @@
+version: '3.8'
 services:
+  redis:
+    read_only: true
+    restart: always  # Restart automatically after failure or reboot
+    image: redis:7.2
+    container_name: redis
+    ports:
+      - '6380:6379'
+    networks:
+      - bendis
+    volumes:
+      - redis_data:/data
+
   users_service:
+    restart: always  # Restart automatically after failure or reboot
     container_name: user
+    read_only: true
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -12,8 +27,11 @@ services:
       - UserData:/var/lib/postgresql/data
     networks:
       - bendis
+
   product_service:
+    restart: always  # Restart automatically after failure or reboot
     container_name: product
+    read_only: true
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -25,8 +43,11 @@ services:
       - ProductData:/var/lib/postgresql/data
     networks:
       - bendis
+
   story_service:
+    restart: always  # Restart automatically after failure or reboot
     container_name: story
+    read_only: true
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -38,8 +59,11 @@ services:
       - StoryData:/var/lib/postgresql/data
     networks:
       - bendis
+
   comment_service:
+    restart: always  # Restart automatically after failure or reboot
     container_name: comment
+    read_only: true
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -51,17 +75,26 @@ services:
       - CommentData:/var/lib/postgresql/data
     networks:
       - bendis
-  redis:
-    image: redis:7.2
-    ports:
-      - '6380:6379'
+
+# backend:
+#   restart: always  # Restart automatically after failure or reboot
+#   container_name: backend
+#   image: bendis:latest
+#   networks:
+#     - bendis
+#   ports:
+#     - "8080:8080"
+# environment:
+#   - SPRING_DATASOURCE_URL=jdbc:postgresql://user:5432/User
+#   - SPRING_DATASOURCE_USERNAME=root
+#   - SPRING_DATASOURCE_PASSWORD=root
 
 volumes:
   UserData: {}
   ProductData: {}
   StoryData: {}
-  redis_data: {}
   CommentData: {}
+  redis_data: {}
 
 networks:
   bendis:
