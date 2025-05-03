@@ -1,5 +1,6 @@
 package com.sarkhan.backend.service.impl;
 
+import com.sarkhan.backend.dto.cloudinary.CloudinaryUploadResponse;
 import com.sarkhan.backend.model.story.Like;
 import com.sarkhan.backend.model.story.Story;
 import com.sarkhan.backend.repository.story.LikeRepository;
@@ -67,14 +68,14 @@ public class StoryServiceImpl implements StoryService, LikeService {
     @Override
     public Story createStory(MultipartFile storyImage, MultipartFile adImage) throws IOException {
 
-        String storyImageUrl = cloudinaryService.uploadFile(storyImage, "story_images");
+        CloudinaryUploadResponse storyImageUrl = cloudinaryService.uploadFile(storyImage, "story_images");
 
-        String adImageUrl = cloudinaryService.uploadFile(adImage, "product_ads");
+        CloudinaryUploadResponse adImageUrl = cloudinaryService.uploadFile(adImage, "product_ads");
 
 
         Story story = new Story();
-        story.setStoryImageUrl(storyImageUrl);
-        story.setAdImageUrl(adImageUrl);
+        story.setStoryImageUrl(storyImageUrl.getUrl());
+        story.setAdImageUrl(adImageUrl.getUrl());
         story.setCreatedAt(LocalDateTime.now().toString());
 
 

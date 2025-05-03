@@ -1,5 +1,6 @@
 package com.sarkhan.backend.service.impl;
 
+import com.sarkhan.backend.dto.cloudinary.CloudinaryUploadResponse;
 import com.sarkhan.backend.dto.product.ProductRequest;
 import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.model.product.Product;
@@ -32,7 +33,7 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(productRequest.getCategory());
         product.setSpecifications(productRequest.getSpecifications());
         product.setPluses(productRequest.getPluses());
-        List<String> colorPhotos = cloudinaryService.uploadFiles(images, "color");
+        List<CloudinaryUploadResponse> colorPhotos = cloudinaryService.uploadFiles(images, "color");
 
         List<Color> colors = new ArrayList<>();
         int photoIndex = 0;
@@ -44,7 +45,7 @@ public class ProductServiceImpl implements ProductService {
             color.setPhotoCount(productRequest.getColors().get(i).getPhotoCount());
             for (int j = 0; j < productRequest.getColors().get(i).getPhotoCount(); j++) {
                 if (photoIndex < colorPhotos.size()) {
-                    String photo = colorPhotos.get(photoIndex);
+                    String photo = String.valueOf(colorPhotos.get(photoIndex));
                     photoUrls.add(photo);
                     photoIndex++;
                 } else {
