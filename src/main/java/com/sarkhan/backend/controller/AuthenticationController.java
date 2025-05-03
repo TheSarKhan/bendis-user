@@ -44,7 +44,7 @@ public class AuthenticationController {
             userRepository.save(user.get());
         }
 
-        return ResponseEntity.ok(tokenResponse);
+        return ResponseEntity.status(200).body(tokenResponse);
     }
 
     @PostMapping("/login")
