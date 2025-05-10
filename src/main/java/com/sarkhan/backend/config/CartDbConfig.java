@@ -1,5 +1,6 @@
 package com.sarkhan.backend.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -24,7 +26,12 @@ import java.util.Map;
         entityManagerFactoryRef = "fifthEntityManagerFactory",
         transactionManagerRef = "fifthTransactionManager"
 )
+
 public class CartDbConfig {
+    @Bean
+    public EntityManagerFactoryBuilder entityManagerFactoryBuilder() {
+        return new EntityManagerFactoryBuilder(new HibernateJpaVendorAdapter(), new HashMap<>(), null);
+    }
     @Value("${spring.datasource.fifth.url}")
     private String fifthDbUrl;
 
@@ -37,14 +44,22 @@ public class CartDbConfig {
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String fifthDbDdlAuto;
 
+
+
     @Bean(name = "fifthDataSource")
-    public DataSource thirdDataSource() {
-        DataSourceBuilder<?> builder = DataSourceBuilder.create();
-        builder.url(fifthDbUrl);
-        builder.username(fifthDbUsername);
-        builder.password(fifthDbPassword);
-        return builder.build();
+    public DataSource fifthDataSource() {
+        HikariDataSource dataSource = DataSourceBuilder.create()
+                .type(HikariDataSource.class)
+                .url(fifthDbUrl)
+                .username(fifthDbUsername)
+                .password(fifthDbPassword)
+                .build();
+
+        dataSource.setPoolName("CartDbHikariPool"); // ✅ Buraya anlamlı pool adı veriyorsun
+        return dataSource;
     }
+
+
 
     @Bean(name = "fifthEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean fifthEntityManagerFactory(
@@ -58,6 +73,7 @@ public class CartDbConfig {
                 .build();
     }
 
+
     @Bean(name = "fifthTransactionManager")
     public PlatformTransactionManager fifthTransactionManager(
             @Qualifier("fifthEntityManagerFactory") EntityManagerFactory fifthEntityManagerFactory) {
@@ -70,3 +86,5 @@ public class CartDbConfig {
         return properties;
     }
 }
+
+

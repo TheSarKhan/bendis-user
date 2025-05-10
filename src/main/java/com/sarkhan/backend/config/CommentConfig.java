@@ -1,5 +1,6 @@
 package com.sarkhan.backend.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,12 +40,16 @@ public class CommentConfig {
     private String fourDbDdlAuto;
 
     @Bean(name = "fourDataSource")
-    public DataSource fourDataSource() {
-        return DataSourceBuilder.create()
+    public DataSource thirdDataSource() {
+        HikariDataSource dataSource = DataSourceBuilder.create()
+                .type(HikariDataSource.class)
                 .url(fourDbUrl)
                 .username(fourDbUsername)
                 .password(fourDbPassword)
                 .build();
+
+        dataSource.setPoolName("CommentDbHikariPool"); // ✅ Buraya anlamlı pool adı veriyorsun
+        return dataSource;
     }
 
     @Bean(name = "fourEntityManagerFactory")

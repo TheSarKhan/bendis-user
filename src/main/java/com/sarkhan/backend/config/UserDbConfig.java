@@ -1,7 +1,6 @@
 package com.sarkhan.backend.config;
 
-
-
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
-
 
 @Configuration
 @EnableTransactionManagement
@@ -42,24 +40,26 @@ public class UserDbConfig {
     @Value("${spring.jpa.hibernate.ddl-auto}")
     private String firstDbDdlAuto;
 
-
     @Primary
     @Bean(name = "firstDataSource")
     public DataSource firstDataSource() {
-        DataSourceBuilder<?> builder = DataSourceBuilder.create();
-        builder.url(firstDbUrl);
-        builder.username(firstDbUsername);
-        builder.password(firstDbPassword);
-        return builder.build();
+        HikariDataSource dataSource = DataSourceBuilder.create()
+                .type(HikariDataSource.class)
+                .url(firstDbUrl)
+                .username(firstDbUsername)
+                .password(firstDbPassword)
+                .build();
+        dataSource.setPoolName("UserDbHikariPool");
+        return dataSource;
     }
-
 
     @Primary
     @Bean(name = "firstEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean firstEntityManagerFactory(
-            EntityManagerFactoryBuilder builder) {
+            EntityManagerFactoryBuilder builder,
+            @Qualifier("firstDataSource") DataSource dataSource) {
         return builder
-                .dataSource(firstDataSource())
+                .dataSource(dataSource)
                 .packages("com.sarkhan.backend.model.user")
                 .persistenceUnit("first")
                 .properties(hibernateProperties())
@@ -69,8 +69,8 @@ public class UserDbConfig {
     @Primary
     @Bean(name = "firstTransactionManager")
     public PlatformTransactionManager firstTransactionManager(
-            @Qualifier("firstEntityManagerFactory") EntityManagerFactory firstEntityManagerFactory) {
-        return new JpaTransactionManager(firstEntityManagerFactory);
+            @Qualifier("firstEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+        return new JpaTransactionManager(entityManagerFactory);
     }
 
     private Map<String, Object> hibernateProperties() {

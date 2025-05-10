@@ -2,6 +2,7 @@ package com.sarkhan.backend.config;
 
 
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,12 +46,16 @@ public class ProductDbConfig {
 
 
     @Bean(name = "secondDataSource")
-    public DataSource secondDataSource() {
-        DataSourceBuilder<?> builder = DataSourceBuilder.create();
-        builder.url(secondDbUrl);
-        builder.username(secondDbUsername);
-        builder.password(secondDbPassword);
-        return builder.build();
+    public DataSource thirdDataSource() {
+        HikariDataSource dataSource = DataSourceBuilder.create()
+                .type(HikariDataSource.class)
+                .url(secondDbUrl)
+                .username(secondDbUsername)
+                .password(secondDbPassword)
+                .build();
+
+        dataSource.setPoolName("ProductDbHikariPool"); // ✅ Buraya anlamlı pool adı veriyorsun
+        return dataSource;
     }
 
 

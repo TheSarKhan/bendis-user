@@ -2,7 +2,7 @@ version: '3.8'
 services:
   redis:
     read_only: true
-    restart: always  # Restart automatically after failure or reboot
+    restart: always
     image: redis:7.2
     container_name: redis
     ports:
@@ -11,11 +11,15 @@ services:
       - bendis
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   users_service:
-    restart: always  # Restart automatically after failure or reboot
+    restart: always
     container_name: user
-    read_only: false
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -27,11 +31,15 @@ services:
       - UserData:/var/lib/postgresql/data
     networks:
       - bendis
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "root" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   product_service:
-    restart: always  # Restart automatically after failure or reboot
+    restart: always
     container_name: product
-    read_only: false
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -43,11 +51,15 @@ services:
       - ProductData:/var/lib/postgresql/data
     networks:
       - bendis
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "root" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   story_service:
-    restart: always  # Restart automatically after failure or reboot
+    restart: always
     container_name: story
-    read_only: false
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -59,11 +71,15 @@ services:
       - StoryData:/var/lib/postgresql/data
     networks:
       - bendis
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "root" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   comment_service:
-    restart: always  # Restart automatically after failure or reboot
+    restart: always
     container_name: comment
-    read_only: false
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -75,11 +91,15 @@ services:
       - CommentData:/var/lib/postgresql/data
     networks:
       - bendis
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "root" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   cart_service:
-    restart: always  # Restart automatically after failure or reboot
+    restart: always
     container_name: cart
-    read_only: false
     image: postgres
     environment:
       POSTGRES_USER: root
@@ -91,29 +111,40 @@ services:
       - CartData:/var/lib/postgresql/data
     networks:
       - bendis
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "root" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-
-
-# backend:
-#   restart: always  # Restart automatically after failure or reboot
-#   container_name: backend
-#   image: bendis:latest
-#   networks:
-#     - bendis
-#   ports:
-#     - "8080:8080"
-# environment:
-#   - SPRING_DATASOURCE_URL=jdbc:postgresql://user:5432/User
-#   - SPRING_DATASOURCE_USERNAME=root
-#   - SPRING_DATASOURCE_PASSWORD=root
+  app:
+    build: .
+    container_name: backend
+    ports:
+      - "8080:8080"
+    networks:
+      - bendis
+    depends_on:
+      redis:
+        condition: service_healthy
+      users_service:
+        condition: service_healthy
+      product_service:
+        condition: service_healthy
+      story_service:
+        condition: service_healthy
+      comment_service:
+        condition: service_healthy
+      cart_service:
+        condition: service_healthy
 
 volumes:
-  UserData: {}
-  ProductData: {}
-  StoryData: {}
-  CommentData: {}
-  redis_data: {}
-  CartData: {}
+  UserData: { }
+  ProductData: { }
+  StoryData: { }
+  CommentData: { }
+  redis_data: { }
+  CartData: { }
 
 networks:
   bendis:

@@ -1,5 +1,6 @@
 package com.sarkhan.backend.config;
 
+import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,10 +30,10 @@ public class StoryDbConfig {
     @Value("${spring.datasource.third.url}")
     private String thirdDbUrl;
 
-    @Value("${spring.datasource.second.username}")
+    @Value("${spring.datasource.third.username}")
     private String thirdDbUsername;
 
-    @Value("${spring.datasource.second.password}")
+    @Value("${spring.datasource.third.password}")
     private String thirdDbPassword;
 
     @Value("${spring.jpa.hibernate.ddl-auto}")
@@ -41,11 +42,15 @@ public class StoryDbConfig {
 
     @Bean(name = "thirdDataSource")
     public DataSource thirdDataSource() {
-        DataSourceBuilder<?> builder = DataSourceBuilder.create();
-        builder.url(thirdDbUrl);
-        builder.username(thirdDbUsername);
-        builder.password(thirdDbPassword);
-        return builder.build();
+        HikariDataSource dataSource = DataSourceBuilder.create()
+                .type(HikariDataSource.class)
+                .url(thirdDbUrl)
+                .username(thirdDbUsername)
+                .password(thirdDbPassword)
+                .build();
+
+        dataSource.setPoolName("StoryDbHikariPool"); // ✅ Buraya anlamlı pool adı veriyorsun
+        return dataSource;
     }
 
 
