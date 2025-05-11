@@ -1,5 +1,7 @@
 package com.sarkhan.backend.jwt;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.Authentication;
@@ -29,18 +31,30 @@ public class JwtService {
     }
 
 
-    public String extractEmail(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getSubject();
-    }
+
+
 
     public boolean isTokenValid(String token, String username) {
         final String extractedUsername = extractEmail(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
 
-    private boolean isTokenExpired(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody().getExpiration().before(new Date());
+
+
+    public String extractEmail(String token) {
+        JwtParser parser = Jwts.parser()
+                .setSigningKey(SECRET_KEY) // Burada SECRET_KEY'i ayarlıyoruz
+                .build(); // Builder'ı oluşturuyoruz
+        return parser.parseClaimsJws(token).getBody().getSubject();
     }
+
+    private boolean isTokenExpired(String token) {
+        JwtParser parser = Jwts.parser()
+                .setSigningKey(SECRET_KEY)
+                .build();
+        return parser.parseClaimsJws(token).getBody().getExpiration().before(new Date());
+    }
+
     public String generateRefreshToken(String email) {
         Map<String, Object> claims = new HashMap<>();
         return Jwts.builder()

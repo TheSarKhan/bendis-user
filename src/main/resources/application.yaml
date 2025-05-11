@@ -36,28 +36,28 @@ spring:
         debug: true
   datasource:
     first:
-      url: jdbc:postgresql://users_service:5432/User
-      #url: jdbc:postgresql://localhost:5450/User
+      #url: jdbc:postgresql://users_service:5432/User
+      url: jdbc:postgresql://localhost:5450/User
       username: root
       password: root
     second:
-      url: jdbc:postgresql://product_service:5432/Product
-      #url: jdbc:postgresql://localhost:5451/Product
+      #url: jdbc:postgresql://product_service:5432/Product
+      url: jdbc:postgresql://localhost:5451/Product
       username: root
       password: root
     third: # Üçüncü datasource
-      url: jdbc:postgresql://story_service:5432/Story
-      #url: jdbc:postgresql://localhost:5452/Story
+      #url: jdbc:postgresql://story_service:5432/Story
+      url: jdbc:postgresql://localhost:5452/Story
       username: root
       password: root
     four: # 4 cu datasource
-      url: jdbc:postgresql://comment_service:5432/Comment
-      #url: jdbc:postgresql://localhost:5453/Comment
+      #url: jdbc:postgresql://comment_service:5432/Comment
+      url: jdbc:postgresql://localhost:5453/Comment
       username: root
       password: root
     fifth:
-      url: jdbc:postgresql://cart_service:5432/Cart
-      #url: jdbc:postgresql://localhost:5454/Cart
+      #url: jdbc:postgresql://cart_service:5432/Cart
+      url: jdbc:postgresql://localhost:5454/Cart
       username: root
       password: root
   jpa:
@@ -65,8 +65,8 @@ spring:
       ddl-auto: create
   data:
     redis:
-      host: redis
-      #host: localhost
+      #host: redis
+      host: localhost
       port: 6380
    #   password: redispass  # Buraya Docker Compose'daki şifreyi gir
 
