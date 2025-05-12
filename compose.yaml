@@ -117,27 +117,6 @@ services:
       timeout: 5s
       retries: 5
 
-  app:
-    build: .
-    container_name: backend
-    ports:
-      - "8080:8080"
-    networks:
-      - bendis
-    depends_on:
-      redis:
-        condition: service_healthy
-      users_service:
-        condition: service_healthy
-      product_service:
-        condition: service_healthy
-      story_service:
-        condition: service_healthy
-      comment_service:
-        condition: service_healthy
-      cart_service:
-        condition: service_healthy
-
 volumes:
   UserData: { }
   ProductData: { }
