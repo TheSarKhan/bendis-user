@@ -6,12 +6,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
-    @Query("SELECT p FROM Product p WHERE p.brand = :brand AND p.slug = :slug AND p.id = :productId")
-    Optional<Product> findByBrandAndSlugAndId(@Param("brand") String brand,
-                                              @Param("slug") String slug,
-                                              @Param("productId") Long productId);
+public interface ProductRepository extends JpaRepository<Product, Long>, ProductCustomRepository {
+    Optional<Product> getBySlug(String slug);
+
+    @Query("from products where name ilike '%' || :name || '%'")
+    List<Product> searchByName(String name);
+
+    List<Product> getBySubCategoryId(Long subCategoryId);
+
+    List<Product> getBySellerId(Long sellerId);
 }

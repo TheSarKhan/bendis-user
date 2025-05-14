@@ -25,9 +25,7 @@ public class AdminController {
         }
 
         User user = userOptional.get();
-Set<Role> roles=user.getRoles();
-roles.add(role);  // Yeni rol ekleniyor
-        user.setRoles(roles);
+        user.setRole(role);
         userRepository.save(user);
 
         return ResponseEntity.ok("Role updated successfully");

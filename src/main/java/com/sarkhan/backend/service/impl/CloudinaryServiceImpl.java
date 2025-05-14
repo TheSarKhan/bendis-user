@@ -6,14 +6,18 @@ import com.cloudinary.utils.ObjectUtils;
 import com.sarkhan.backend.dto.cloudinary.CloudinaryUploadResponse;
 import com.sarkhan.backend.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CloudinaryServiceImpl implements CloudinaryService {
@@ -69,6 +73,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         ));
         return uploadResult.get("secure_url").toString();
     }
+
     @Override
     public List<String> deleteImages(List<String> publicIds) throws IOException {
         List<String> results = new ArrayList<>();
@@ -107,4 +112,25 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         return updatedImages;
     }
 
+    @Override
+    public void deleteFile(String imageUrl) throws IOException {
+        log.warn("Remove image. Image url : " + imageUrl);
+        deleteImage(extractPublicIdFromUrl(imageUrl));
+    }
+
+    private String extractPublicIdFromUrl(String imageUrl) {
+        try {
+            String substring = imageUrl.substring(imageUrl.indexOf("/upload/") + 8);
+
+            String[] parts = substring.split("/");
+            String publicId = Arrays.stream(parts)
+                    .skip(1)
+                    .collect(Collectors.joining("/"));
+
+            return publicId.replaceAll("\\.[a-zA-Z0-9]+$", "");
+        } catch (Exception e) {
+            log.error("Error extracting publicId from URL:" + imageUrl, e);
+            return null;
+        }
+    }
 }

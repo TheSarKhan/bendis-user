@@ -36,7 +36,7 @@ public class CartServiceImpl implements CartService {
         List<CartItem> items = cartItemRepository.findByUserId(userId);
         double totalPrice = items.stream()
                 .mapToDouble(item -> productRepository.findById(item.getProductId())
-                        .map(p -> p.getPrice() * item.getQuantity())
+                        .map(p -> Double.parseDouble(p.getDiscountedPrice().toString()) * item.getQuantity())
                         .orElse(0.0))
                 .sum();
         return UserCartDTO.builder()
@@ -62,7 +62,7 @@ public class CartServiceImpl implements CartService {
             dtos.add(CartItemResponseDTO.builder()
                     .productId(item.getProductId())
                     .quantity(item.getQuantity())
-                    .totalPrice(product.getPrice() * item.getQuantity())
+                    .totalPrice(Double.parseDouble(product.getDiscountedPrice().toString()) * item.getQuantity())
                     .build());
         }
         return dtos;

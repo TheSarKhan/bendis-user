@@ -5,4 +5,6 @@ import com.sarkhan.backend.model.user.User;
 
 public interface UserService {
     User updateUserProfile(UserProfileRequest userProfileRequest, String token);
+
+    User getByEmail(String email);
 }

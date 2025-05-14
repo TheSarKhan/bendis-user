@@ -3,23 +3,28 @@ package com.sarkhan.backend.model.product.items;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "pluses")
+@Entity(name = "sub_categories")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Plus {
+public class SubCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
     @Column(nullable = false, unique = true)
-    String header;
+    String name;
 
-    String description;
+    @Column(name = "category_id")
+    Long categoryId;
 
-    @Column(name = "icon_url")
-    String iconUrl;
+    @JdbcTypeCode(SqlTypes.JSON)
+    List<String> specifications;
 }

@@ -35,11 +35,11 @@ public class User {
     String password;
     Gender gender;
     String userCode;
- String countryCode;
- String phoneNumber;
+    String countryCode;
+    String phoneNumber;
 
- @JdbcTypeCode(SqlTypes.JSON)
-BirthDate birthDate;
+    @JdbcTypeCode(SqlTypes.JSON)
+    BirthDate birthDate;
 
     @CreationTimestamp
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -49,9 +49,8 @@ BirthDate birthDate;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDateTime updatedAt;
 
-    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    Set<Role> roles;
+    Role role;
 
 
     @JdbcTypeCode(SqlTypes.JSON)

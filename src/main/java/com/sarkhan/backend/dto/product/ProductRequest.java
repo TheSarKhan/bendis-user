@@ -1,28 +1,25 @@
 package com.sarkhan.backend.dto.product;
 
+import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.product.items.Color;
-import lombok.AccessLevel;
-import lombok.Data;
-import lombok.experimental.FieldDefaults;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.HashMap;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
-@Data
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductRequest {
-    String name;
-    Double price;
-    String category;
-    Double stock;
-    @JdbcTypeCode(SqlTypes.JSON)
-    List<Color> colors;
-    @JdbcTypeCode(SqlTypes.JSON)
-    List<String>descriptions;
-     List<Long>pluses;
-    @JdbcTypeCode(SqlTypes.JSON)
-    HashMap<String, String> specifications;
-
+public record ProductRequest(@NotBlank String name,
+                             @Min(0) BigDecimal originalPrice,
+                             @Min(0) BigDecimal discountedPrice,
+                             Long subCategoryId,
+                             @JdbcTypeCode(SqlTypes.JSON)
+                             List<Color> colors,
+                             Gender gender,
+                             String description,
+                             List<Long> pluses,
+                             @JdbcTypeCode(SqlTypes.JSON)
+                             Map<String, String> specifications) {
 }

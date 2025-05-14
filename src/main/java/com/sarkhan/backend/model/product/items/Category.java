@@ -8,18 +8,13 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "pluses")
+@Entity(name = "categories")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Plus {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
     @Column(nullable = false, unique = true)
-    String header;
-
-    String description;
-
-    @Column(name = "icon_url")
-    String iconUrl;
+    String name;
 }

@@ -1,49 +1,90 @@
 package com.sarkhan.backend.model.product;
 
-import com.sarkhan.backend.dto.comment.CommentResponse;
+import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.product.items.Color;
- import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AccessLevel;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.HashMap;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-@Entity
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Entity(name = "products")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Product {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    Long id;
+
+    @Column(nullable = false)
+    String name;
+
+    @Column(name = "original_price", nullable = false)
+    BigDecimal originalPrice;
+
+    @Column(name = "discount_price")
+    BigDecimal discountedPrice;
+
+    @Column(name = "sub_category_id", nullable = false)
+    Long subCategoryId;
+
+    @Column(name = "seller_id", nullable = false)
+    Long sellerId;
+
+    String brand;
+
+    @Enumerated(value = EnumType.STRING)
+    Gender gender;
+
+    @Column(nullable = false)
+    String description;
+
+    String slug;
+
+    Double rating;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    Map<Long, Double> ratings;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    List<Long> comments;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    Set<Long> favorites;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    List<Long> pluses;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    List<Color> colors;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    Map<String, String> specifications;
+
+    @Column(name = "create_at")
+    LocalDateTime createAt;
+
+    @Column(name = "update_at")
+    LocalDateTime updateAt;
+
+    @PrePersist
+    public void init() {
+        createAt = LocalDateTime.now();
+        generateSlug();
+    }
+
     public void generateSlug() {
         this.slug = this.name.toLowerCase()
                 .replace(" ", "-")
                 .replaceAll("[^a-z0-9-]", "");
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    Long id;
-    String name;
-    Double price;
-    String category;
-    String seller;
-    Double rating;
-    String brand;
-    String slug;
-    @JdbcTypeCode(SqlTypes.JSON)
-    List<Color> colors;
-    @JdbcTypeCode(SqlTypes.JSON)
-    List<String> descriptions;
-    @JdbcTypeCode(SqlTypes.JSON)
-    List<CommentResponse> comments;
-    @JdbcTypeCode(SqlTypes.JSON)
-    List<Long> pluses;
-    @JdbcTypeCode(SqlTypes.JSON)
-    HashMap<String, String> specifications;
 }
-
