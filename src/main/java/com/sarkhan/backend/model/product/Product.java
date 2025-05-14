@@ -88,3 +88,4 @@ public class Product {
                 .replaceAll("[^a-z0-9-]", "");
     }
 }
+

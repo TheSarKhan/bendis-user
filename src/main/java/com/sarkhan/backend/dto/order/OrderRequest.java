@@ -10,9 +10,8 @@ import java.util.List;
 @Data
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderDTO {
+public class OrderRequest {
     private Long orderId;
-    private Long userId;
     private List<CartItemRequestDTO> items;
     private Double totalPrice;
 }

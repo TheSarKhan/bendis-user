@@ -3,7 +3,7 @@ package com.sarkhan.backend.service.impl.product;
 import com.sarkhan.backend.dto.cloudinary.CloudinaryUploadResponse;
 import com.sarkhan.backend.dto.product.ProductFilterRequest;
 import com.sarkhan.backend.dto.product.ProductRequest;
-import com.sarkhan.backend.mapper.ProductMapper;
+import com.sarkhan.backend.mapper.product.ProductMapper;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.Color;
