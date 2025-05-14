@@ -13,7 +13,7 @@ public class PayriffInvoiceResponse {
     @Data
     public static class Payload {
         private String invoiceUuid;
-        private String paymentUrl; // <<< En önemli yer burası
+        private String paymentUrl;
     }
 }
 
