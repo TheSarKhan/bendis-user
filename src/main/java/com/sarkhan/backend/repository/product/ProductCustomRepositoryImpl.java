@@ -21,10 +21,6 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
 
     @Override
     public List<Product> getByComplexFiltering(ProductFilterRequest request) {
-        String name = request.name();
-        if (name == null) name = "";
-        else name = name.replace("'","''");
-
         Double rating = request.rating();
         if (rating == null) rating = 0.0;
 
@@ -42,8 +38,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
 
         StringBuilder sql = new StringBuilder("""
                 select * from products
-                where name ilike '%' || :name || '%' and
-                sub_category_id = :subCategoryId and
+                where sub_category_id = :subCategoryId and
                 rating >= :rating and
                 case when discount_price is null or discount_price = 0
                 then original_price else discount_price end >= :minPrice and
@@ -52,7 +47,6 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 gender in :gender""");
 
         Map<String, Object> params = new HashMap<>();
-        params.put("name", name);
         params.put("subCategoryId", request.subCategoryId());
         params.put("rating", rating);
         params.put("minPrice", minPrice);
