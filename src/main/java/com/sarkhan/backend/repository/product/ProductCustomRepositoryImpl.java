@@ -4,6 +4,7 @@ import com.sarkhan.backend.dto.product.ProductFilterRequest;
 import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.product.Product;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -17,7 +18,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ProductCustomRepositoryImpl implements ProductCustomRepository {
 
-    private final EntityManager entityManager;
+    @PersistenceContext(unitName = "second")
+    private EntityManager entityManager;
 
     @Override
     public List<Product> getByComplexFiltering(ProductFilterRequest request) {
