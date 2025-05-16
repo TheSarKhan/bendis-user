@@ -12,8 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
 @PreAuthorize("hasRole('ADMIN')")
-@RestController("/api/v1/sub-category")
+@RequestMapping("/api/v1/sub-category")
 @RequiredArgsConstructor
 @Tag(name = "SubCategory Controller", description = "Endpoints for managing sub-categories")
 public class SubCategoryController {

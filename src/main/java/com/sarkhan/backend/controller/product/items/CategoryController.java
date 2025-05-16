@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RestController
 @PreAuthorize("hasRole('ADMIN')")
-@RestController("/api/v1/category")
+@RequestMapping("/api/v1/category")
 @RequiredArgsConstructor
 @Tag(name = "Category Controller", description = "Endpoints for managing categories")
 public class CategoryController {

@@ -70,8 +70,7 @@ spring:
       port: 6380
    #   password: redispass  # Buraya Docker Compose'daki şifreyi gir
   flyway:
-    enabled: true
-    locations: classpath:db/migration
+    enabled: false
 
 
 cloudinary:

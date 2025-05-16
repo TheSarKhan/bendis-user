@@ -13,8 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
+@RestController
 @PreAuthorize("hasRole('ADMIN')")
-@RestController("/api/v1/plus")
+@RequestMapping("/api/v1/plus")
 @RequiredArgsConstructor
 @Tag(name = "Plus Controller", description = "Endpoints for managing Plus items (header, description, icon)")
 public class PlusController {
