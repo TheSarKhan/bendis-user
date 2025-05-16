@@ -1,2 +1,4 @@
-package com.sarkhan.backend.dto.seller;public interface SellerResponseDTO {
+package com.sarkhan.backend.dto.seller;
+
+public record SellerResponseDTO() {
 }

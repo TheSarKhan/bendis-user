@@ -30,7 +30,7 @@ public class SellerServiceImpl implements SellerService {
             Seller seller = new Seller();
             seller.setBrandEmail(user.get().getEmail());
             seller.setBrandName(sellerRequest.getBrandName());
-            seller.setNameAndSurname(user.get().getNameAndSurname());
+            seller.setFullName(user.get().getFullName());
             seller.setFatherName(sellerRequest.getFatherName());
             seller.setFinCode(sellerRequest.getFinCode());
             seller.setBrandVOEN(sellerRequest.getBrandVOEN());

@@ -12,7 +12,7 @@ import org.hibernate.type.SqlTypes;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+
 import java.util.Set;
 
 @Data
@@ -27,7 +27,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long id;
-    String nameAndSurname;
+    String fullName;
     String googleId;
     String profileImg;
     String email;
@@ -35,11 +35,11 @@ public class User {
     String password;
     Gender gender;
     String userCode;
- String countryCode;
- String phoneNumber;
+    String countryCode;
+    String phoneNumber;
 
- @JdbcTypeCode(SqlTypes.JSON)
-BirthDate birthDate;
+    @JdbcTypeCode(SqlTypes.JSON)
+    BirthDate birthDate;
 
     @CreationTimestamp
     @DateTimeFormat(pattern = "yyyy-MM-dd")
