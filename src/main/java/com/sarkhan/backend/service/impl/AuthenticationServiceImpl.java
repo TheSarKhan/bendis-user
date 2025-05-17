@@ -38,8 +38,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = new User();
         Set<Role> roles = new HashSet<>();
         roles.add(Role.USER);
-        user.setRoles(roles);
-        user.setNameAndSurname(request.getNameAndSurname());
+      //  user.setRoles(roles);
+        user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setCreatedAt(now);
         user.setUpdatedAt(now);

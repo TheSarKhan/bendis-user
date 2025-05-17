@@ -1,15 +1,21 @@
 package com.sarkhan.backend.model.user;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Data;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Builder
+@Entity
+@Table(name = "sellers")
+@NoArgsConstructor
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Seller {
-
-    String nameAndSurname;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+    String fullName;
     String brandName;
     String brandEmail;
     String brandVOEN;

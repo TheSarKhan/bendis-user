@@ -1,13 +1,17 @@
 package com.sarkhan.backend.model.order;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.sarkhan.backend.model.enums.OrderStatus;
+import com.sarkhan.backend.model.product.Product;
+import com.sarkhan.backend.model.user.Seller;
+import com.sarkhan.backend.model.user.User;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -18,6 +22,18 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
-    private Long userId;
-    private Double totalPrice;
+    @ManyToOne
+    @JoinColumn(name = "user_id",nullable = false)
+    private User user;
+    @ManyToOne
+    @JoinColumn(name = "product_id",nullable = false)
+    private Product product;
+    @ManyToOne
+    @JoinColumn(name = "seller_id",nullable = false)
+    private Seller seller;
+    private BigDecimal totalPrice;
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;
+    private LocalDate orderDate;
+
 }

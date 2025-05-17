@@ -19,4 +19,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
     List<Product> getBySubCategoryId(Long subCategoryId);
 
     List<Product> getBySellerId(Long sellerId);
+
+    List<Product> findTop5BySellerIdOrderBySalesCountDesc(Long sellerId);
 }
