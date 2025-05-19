@@ -24,9 +24,9 @@ public class ProductDbInitializer {
     public void init() {
         try (Connection conn = productDataSource.getConnection()) {
             ScriptUtils.executeSqlScript(conn, new ClassPathResource("db/product/init.sql"));
-            log.info("Product DB schema.sql applied successfully.");
+            log.info("Product DB schema.Sql applied successfully.");
         } catch (Exception e) {
-            log.error("Failed to apply schema.sql to Product DB: " + e.getMessage());
+            log.error("Failed to apply schema.Sql to Product DB: " + e.getMessage());
         }
     }
 }

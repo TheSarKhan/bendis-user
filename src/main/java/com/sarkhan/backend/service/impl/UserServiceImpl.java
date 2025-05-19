@@ -21,6 +21,12 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
 
     @Override
+    public User save(User user) {
+        log.info("Someone try to create User.");
+        return userRepository.save(user);
+    }
+
+    @Override
     public User updateUserProfile(UserProfileRequest userProfileRequest, String token) {
         Optional<User> user = userRepository.findByEmail(jwtService.extractEmail(token));
         if (user.isPresent()) {
