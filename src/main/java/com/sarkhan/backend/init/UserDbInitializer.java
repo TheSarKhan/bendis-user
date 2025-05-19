@@ -19,10 +19,11 @@ public class UserDbInitializer {
     public void init() {
         User admin = User.builder()
                 .nameAndSurname("Admin")
-                .email("admin123@gmail.com")
+                .email("admin1234@gmail.com")
+                .password("Admin123")
                 .role(Role.ADMIN)
                 .build();
 
-        userService.save(admin);
+        log.info("User created :" + userService.save(admin));
     }
 }
