@@ -27,7 +27,8 @@ public class SubCategoryController {
             summary = "Add a new sub-category",
             description = "Creates a new sub-category based on the given request object. Only ADMINs can perform this operation."
     )
-    public ResponseEntity<SubCategory> add(@RequestBody SubCategoryRequest request) {
+    public ResponseEntity<SubCategory> add(@RequestHeader("Authorization") String authHeader,
+                                           @RequestBody SubCategoryRequest request) {
         return ResponseEntity.ok(service.add(request));
     }
 
@@ -36,7 +37,7 @@ public class SubCategoryController {
             summary = "Get all sub-categories",
             description = "Returns a list of all sub-categories in the system."
     )
-    public ResponseEntity<List<SubCategory>> getAll() {
+    public ResponseEntity<List<SubCategory>> getAll(@RequestHeader("Authorization") String authHeader) {
         return ResponseEntity.ok(service.getAll());
     }
 
@@ -45,7 +46,8 @@ public class SubCategoryController {
             summary = "Get sub-category by ID",
             description = "Returns the sub-category that matches the given ID."
     )
-    public ResponseEntity<SubCategory> getById(@PathVariable Long id) {
+    public ResponseEntity<SubCategory> getById(@RequestHeader("Authorization") String authHeader,
+                                               @PathVariable Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
@@ -54,7 +56,8 @@ public class SubCategoryController {
             summary = "Get sub-category by name",
             description = "Returns the sub-category that matches the given name."
     )
-    public ResponseEntity<SubCategory> getByName(@PathVariable String name) {
+    public ResponseEntity<SubCategory> getByName(@RequestHeader("Authorization") String authHeader,
+                                                 @PathVariable String name) {
         return ResponseEntity.ok(service.getByName(name));
     }
 
@@ -63,7 +66,8 @@ public class SubCategoryController {
             summary = "Get sub-categories by category ID",
             description = "Returns a list of sub-categories belonging to a specific category."
     )
-    public ResponseEntity<List<SubCategory>> getByCategoryId(@PathVariable Long categoryId) {
+    public ResponseEntity<List<SubCategory>> getByCategoryId(@RequestHeader("Authorization") String authHeader,
+                                                             @PathVariable Long categoryId) {
         return ResponseEntity.ok(service.getByCategoryId(categoryId));
     }
 
@@ -72,8 +76,9 @@ public class SubCategoryController {
             summary = "Update a sub-category",
             description = "Updates a sub-category by ID using the provided request data. Only ADMINs can perform this action."
     )
-    public ResponseEntity<SubCategory> update(@PathVariable Long id,
-                                           @RequestBody SubCategoryRequest request) {
+    public ResponseEntity<SubCategory> update(@RequestHeader("Authorization") String authHeader,
+                                              @PathVariable Long id,
+                                              @RequestBody SubCategoryRequest request) {
         return ResponseEntity.ok(service.update(id, request));
     }
 
@@ -82,7 +87,8 @@ public class SubCategoryController {
             summary = "Delete a sub-category",
             description = "Deletes the sub-category with the specified ID. Only ADMINs can delete sub-categories."
     )
-    public ResponseEntity<Void> delete(@PathVariable Long id){
+    public ResponseEntity<Void> delete(@RequestHeader("Authorization") String authHeader,
+                                       @PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

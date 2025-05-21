@@ -32,8 +32,9 @@ public class ProductController {
             summary = "Create a new product",
             description = "Adds a new product along with its images. Only users with ADMIN or SELLER roles are allowed."
     )
-    public ResponseEntity<Product> add(@RequestPart ProductRequest productRequest,
-                                       @RequestPart List<MultipartFile> images) throws IOException {
+    public ResponseEntity<Product> add(@RequestHeader("Authorization") String authHeader,
+                                       @RequestPart ProductRequest productRequest,
+                                       List<MultipartFile> images) throws IOException {
         return ResponseEntity.ok(service.add(productRequest, images));
     }
 
@@ -126,9 +127,10 @@ public class ProductController {
             summary = "Update a product",
             description = "Updates the details and images of an existing product. Only users with ADMIN or SELLER roles are allowed."
     )
-    public ResponseEntity<Product> update(@PathVariable Long id,
+    public ResponseEntity<Product> update(@RequestHeader("Authorization") String authHeader,
+                                          @PathVariable Long id,
                                           @RequestPart ProductRequest productRequest,
-                                          @RequestPart List<MultipartFile> images) throws IOException {
+                                          List<MultipartFile> images) throws IOException {
         return ResponseEntity.ok(service.update(id, productRequest, images));
     }
 
@@ -139,7 +141,8 @@ public class ProductController {
             summary = "Delete a product",
             description = "Deletes a product by its ID. Only users with ADMIN or SELLER roles are allowed to perform this operation."
     )
-    public ResponseEntity<Void> delete(@PathVariable Long id){
+    public ResponseEntity<Void> delete(@RequestHeader("Authorization") String authHeader,
+                                       @PathVariable Long id){
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
