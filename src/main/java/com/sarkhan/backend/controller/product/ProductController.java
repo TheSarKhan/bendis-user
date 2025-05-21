@@ -26,7 +26,6 @@ public class ProductController {
     private final ProductService service;
 
     @PostMapping
-    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
             summary = "Create a new product",
@@ -121,7 +120,6 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
             summary = "Update a product",
@@ -135,7 +133,6 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
             summary = "Delete a product",
