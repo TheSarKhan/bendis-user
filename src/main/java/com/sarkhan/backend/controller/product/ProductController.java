@@ -7,6 +7,7 @@ import com.sarkhan.backend.dto.product.ProductResponseForSelectedSubCategory;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,7 @@ public class ProductController {
     private final ProductService service;
 
     @PostMapping
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
             summary = "Create a new product",
@@ -118,6 +120,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
             summary = "Update a product",
@@ -130,6 +133,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
             summary = "Delete a product",

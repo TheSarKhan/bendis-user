@@ -3,6 +3,7 @@ package com.sarkhan.backend.controller.product.items;
 import com.sarkhan.backend.model.product.items.Category;
 import com.sarkhan.backend.service.product.items.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@SecurityRequirement(name = "bearerAuth")
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/category")
 @RequiredArgsConstructor
