@@ -22,7 +22,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     private EntityManager entityManager;
 
     @Override
-    public List<Product> getByComplexFiltering(ProductFilterRequest request) {
+    public List<?> getByComplexFiltering(ProductFilterRequest request) {
         Double rating = request.rating();
         if (rating == null) rating = 0.0;
 

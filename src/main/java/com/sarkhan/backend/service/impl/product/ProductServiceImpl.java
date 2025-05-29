@@ -5,7 +5,7 @@ import com.sarkhan.backend.dto.product.ProductFilterRequest;
 import com.sarkhan.backend.dto.product.ProductRequest;
 import com.sarkhan.backend.dto.product.ProductResponseForGetAll;
 import com.sarkhan.backend.dto.product.ProductResponseForSelectedSubCategory;
-import com.sarkhan.backend.mapper.product.ProductMapper;
+import com.sarkhan.backend.mapper.ProductMapper;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.Category;
@@ -18,8 +18,10 @@ import com.sarkhan.backend.service.UserService;
 import com.sarkhan.backend.service.product.ProductService;
 import com.sarkhan.backend.service.product.items.CategoryService;
 import com.sarkhan.backend.service.product.items.SubCategoryService;
+import com.sarkhan.backend.specification.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -88,7 +90,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponseForGetAll searchByName(String name) {
         log.info("Someone try to get products. Name : " + name);
-        List<Product> products = productRepository.searchByName(name);
+        List<Product> products = productRepository.findAll(ProductSpecification.searchTitle(name));
         List<Category> categories = categoryService.searchByName(name);
         Set<SubCategory> subCategories = new HashSet<>();
 
@@ -127,10 +129,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseForSelectedSubCategory getByComplexFiltering(ProductFilterRequest request) {
+    public ProductResponseForSelectedSubCategory getByComplexFiltering(ProductFilterRequest request) {//change
         log.info("Someone try to get product with complex params.");
         return new ProductResponseForSelectedSubCategory(
-                productRepository.getByComplexFiltering(request),
+                getByComplexFilteringUseSpecification(request),
                 categoryService.getAll(),
                 subCategoryService.getAll(),
                 subCategoryService.getById(request.subCategoryId()).getSpecifications(),
@@ -216,6 +218,35 @@ public class ProductServiceImpl implements ProductService {
     private User getCurrentUser() {
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return userService.getByEmail(email);
+    }
+
+    private List<Product> getByComplexFilteringUseSpecification(ProductFilterRequest request) {
+        Specification<Product> spec = Specification.where(null);
+
+        if (request.subCategoryId() != null) {
+            spec = spec.and(ProductSpecification.hasSubCategoryId(request.subCategoryId()));
+        }
+
+        if (request.specifications() != null && !(request.specifications().isEmpty())) {
+            spec = spec.and(ProductSpecification.hasSpecifications(request.specifications()));
+        }
+
+        if (request.gender() != null) {
+            spec = spec.and(ProductSpecification.hasGender(request.gender()));
+        }
+
+        if (request.rating() != null) {
+            spec = spec.and(ProductSpecification.graterThanRating(request.rating()));
+        }
+
+        if (request.minPrice() != null || request.maxPrice() != null) {
+            spec = spec.and(ProductSpecification.betweenPrice(
+                    request.minPrice() == null ? 0 : request.minPrice(),
+                    request.maxPrice() == null ? Double.MAX_VALUE : request.maxPrice()
+                    ));
+        }
+
+        return productRepository.findAll(spec);
     }
 
     private List<Color> uploadImages(ProductRequest request, List<MultipartFile> images) throws IOException {
