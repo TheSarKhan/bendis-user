@@ -1,10 +1,7 @@
 package com.sarkhan.backend.service.impl.product;
 
 import com.sarkhan.backend.dto.cloudinary.CloudinaryUploadResponse;
-import com.sarkhan.backend.dto.product.ProductFilterRequest;
-import com.sarkhan.backend.dto.product.ProductRequest;
-import com.sarkhan.backend.dto.product.ProductResponseForGetAll;
-import com.sarkhan.backend.dto.product.ProductResponseForSelectedSubCategory;
+import com.sarkhan.backend.dto.product.*;
 import com.sarkhan.backend.mapper.ProductMapper;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
@@ -19,9 +16,10 @@ import com.sarkhan.backend.service.product.ProductService;
 import com.sarkhan.backend.service.product.items.CategoryService;
 import com.sarkhan.backend.service.product.items.SubCategoryService;
 import com.sarkhan.backend.specification.ProductSpecification;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -29,10 +27,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
@@ -44,8 +44,20 @@ public class ProductServiceImpl implements ProductService {
 
     private final UserService userService;
 
+    private final Executor executor;
+
+    public ProductServiceImpl(ProductRepository productRepository, CloudinaryService cloudinaryService, CategoryService categoryService, SubCategoryService subCategoryService, UserService userService, @Qualifier("virtualExecutor") Executor executor) {
+        this.productRepository = productRepository;
+        this.cloudinaryService = cloudinaryService;
+        this.categoryService = categoryService;
+        this.subCategoryService = subCategoryService;
+        this.userService = userService;
+        this.executor = executor;
+    }
+
     @Override
-    public Product add(ProductRequest request, List<MultipartFile> images) throws IOException {
+    @Async
+    public CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images) throws IOException {
         User user = getCurrentUser();
 
         log.info(user.getNameAndSurname() + " try to create product");
@@ -57,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
         product.setColors(colors);
 
         log.info("Product create successfully.");
-        return productRepository.save(product);
+        return CompletableFuture.completedFuture(productRepository.save(product));
     }
 
     @Override
@@ -88,36 +100,106 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseForGetAll searchByName(String name) {
+    @Async
+    public CompletableFuture<ProductResponseForSearchByName> searchByName(String name) {
         log.info("Someone try to get products. Name : " + name);
-        List<Product> products = productRepository.findAll(ProductSpecification.searchTitle(name));
-        List<Category> categories = categoryService.searchByName(name);
-        Set<SubCategory> subCategories = new HashSet<>();
 
-        for (Category category : categories)
-            subCategories.addAll(subCategoryService.getByCategoryId(category.getId()));
+        CompletableFuture<List<Product>> productsFuture = CompletableFuture.supplyAsync(
+                () -> productRepository.findAll(ProductSpecification.searchTitle(name)), executor);
 
-        subCategories.addAll(subCategoryService.searchByName(name));
+        CompletableFuture<List<Category>> categoriesFuture = CompletableFuture.supplyAsync(
+                () -> categoryService.searchByName(name), executor);
 
-        for (SubCategory subCategory : subCategories)
-            products.addAll(productRepository.getBySubCategoryId(subCategory.getId()));
+        CompletableFuture<List<Category>> allCategoriesFuture =
+                CompletableFuture.supplyAsync(categoryService::getAll, executor);
 
-        return new ProductResponseForGetAll(
-                products,
-                categoryService.getAll(),
-                subCategoryService.getAll());
+        CompletableFuture<List<SubCategory>> allSubCategoriesFuture =
+                CompletableFuture.supplyAsync(subCategoryService::getAll, executor);
+
+        CompletableFuture<Set<SubCategory>> subCategoriesFuture = categoriesFuture.thenCompose(categories -> {
+            List<CompletableFuture<List<SubCategory>>> futures = categories.stream()
+                    .map(category -> CompletableFuture.supplyAsync(
+                            () -> subCategoryService.getByCategoryId(category.getId()), executor))
+                    .toList();
+
+            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .thenApply(unused -> futures.stream()
+                            .flatMap(future -> future.join().stream())
+                            .collect(Collectors.toSet()));
+        });
+
+        CompletableFuture<Set<SubCategory>> searchedSubCategoriesFuture = CompletableFuture.supplyAsync(
+                () -> new HashSet<>(subCategoryService.searchByName(name)), executor);
+
+        CompletableFuture<Set<SubCategory>> combinedSubCategoriesFuture = subCategoriesFuture.thenCombine(
+                searchedSubCategoriesFuture,
+                (set1, set2) -> {
+                    set1.addAll(set2);
+                    return set1;
+                });
+
+        CompletableFuture<List<Product>> subCategoryProductsFuture = combinedSubCategoriesFuture.thenCompose(subCategories -> {
+            List<CompletableFuture<List<Product>>> futures = subCategories.stream()
+                    .map(subCategory -> CompletableFuture.supplyAsync(
+                            () -> productRepository.getBySubCategoryId(subCategory.getId()), executor))
+                    .toList();
+
+            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .thenApply(unused -> futures.stream()
+                            .flatMap(future -> future.join().stream())
+                            .collect(Collectors.toList()));
+        });
+
+        return CompletableFuture.allOf(productsFuture, subCategoryProductsFuture, allCategoriesFuture, allSubCategoriesFuture)
+                .thenApply(unused -> {
+                    Set<Product> products = new HashSet<>();
+                    try {
+                        products.addAll(productsFuture.get());
+                        products.addAll(subCategoryProductsFuture.get());
+
+                        return new ProductResponseForSearchByName(
+                                name,
+                                products.stream().toList(),
+                                allCategoriesFuture.get(),
+                                allSubCategoriesFuture.get());
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     @Override
-    public ProductResponseForSelectedSubCategory getBySubCategoryId(Long subCategoryId) {
+    @Async
+    public CompletableFuture<ProductResponseForSelectedSubCategory> getBySubCategoryId(Long subCategoryId) {
         log.info("Someone try to get products. SubCategory id : " + subCategoryId);
-        return new ProductResponseForSelectedSubCategory(
-                productRepository.getBySubCategoryId(subCategoryId),
-                categoryService.getAll(),
-                subCategoryService.getAll(),
-                subCategoryService.getById(subCategoryId).getSpecifications(),
-                new ProductFilterRequest(subCategoryId, null, null, null, null, null));
+
+        CompletableFuture<List<Product>> productsFuture = CompletableFuture.supplyAsync(
+                () -> productRepository.getBySubCategoryId(subCategoryId), executor);
+
+        CompletableFuture<List<Category>> categoriesFuture = CompletableFuture.supplyAsync(
+                categoryService::getAll, executor);
+
+        CompletableFuture<List<SubCategory>> subCategoriesFuture = CompletableFuture.supplyAsync(
+                subCategoryService::getAll, executor);
+
+        CompletableFuture<List<String>> specsFuture = CompletableFuture.supplyAsync(
+                () -> subCategoryService.getById(subCategoryId).getSpecifications(), executor);
+
+        return CompletableFuture.allOf(productsFuture, categoriesFuture, subCategoriesFuture, specsFuture)
+                .thenApply(v -> {
+                    try {
+                        return new ProductResponseForSelectedSubCategory(
+                                productsFuture.get(),
+                                categoriesFuture.get(),
+                                subCategoriesFuture.get(),
+                                specsFuture.get(),
+                                new ProductFilterRequest(subCategoryId, null, null, null, null, null));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
+
 
     @Override
     public ProductResponseForGetAll getBySellerId(Long sellerId) {
@@ -129,14 +211,34 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseForSelectedSubCategory getByComplexFiltering(ProductFilterRequest request) {//change
+    @Async
+    public CompletableFuture<ProductResponseForSelectedSubCategory> getByComplexFiltering(ProductFilterRequest request) {
         log.info("Someone try to get product with complex params.");
-        return new ProductResponseForSelectedSubCategory(
-                getByComplexFilteringUseSpecification(request),
-                categoryService.getAll(),
-                subCategoryService.getAll(),
-                subCategoryService.getById(request.subCategoryId()).getSpecifications(),
-                request);
+        CompletableFuture<List<Product>> productsFuture = CompletableFuture.supplyAsync(() ->
+                getByComplexFilteringUseSpecification(request));
+
+        CompletableFuture<List<Category>> categoriesFuture =
+                CompletableFuture.supplyAsync(categoryService::getAll, executor);
+
+        CompletableFuture<List<SubCategory>> subCategoriesFuture =
+                CompletableFuture.supplyAsync(subCategoryService::getAll, executor);
+
+        CompletableFuture<List<String>> specsFuture = CompletableFuture.supplyAsync(() ->
+                subCategoryService.getById(request.subCategoryId()).getSpecifications(), executor);
+
+        return CompletableFuture.allOf(productsFuture, categoriesFuture, subCategoriesFuture, specsFuture)
+                .thenApply(unused -> {
+                    try {
+                        return new ProductResponseForSelectedSubCategory(
+                                productsFuture.get(),
+                                categoriesFuture.get(),
+                                subCategoriesFuture.get(),
+                                specsFuture.get(),
+                                request);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     @Override
@@ -243,7 +345,7 @@ public class ProductServiceImpl implements ProductService {
             spec = spec.and(ProductSpecification.betweenPrice(
                     request.minPrice() == null ? 0 : request.minPrice(),
                     request.maxPrice() == null ? Double.MAX_VALUE : request.maxPrice()
-                    ));
+            ));
         }
 
         return productRepository.findAll(spec);

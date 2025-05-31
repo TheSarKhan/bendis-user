@@ -1,9 +1,6 @@
 package com.sarkhan.backend.controller.product;
 
-import com.sarkhan.backend.dto.product.ProductFilterRequest;
-import com.sarkhan.backend.dto.product.ProductRequest;
-import com.sarkhan.backend.dto.product.ProductResponseForGetAll;
-import com.sarkhan.backend.dto.product.ProductResponseForSelectedSubCategory;
+import com.sarkhan.backend.dto.product.*;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/v1/product")
@@ -33,8 +31,8 @@ public class ProductController {
     )
     public ResponseEntity<Product> add(@RequestHeader("Authorization") String authHeader,
                                        @RequestPart ProductRequest productRequest,
-                                       List<MultipartFile> images) throws IOException {
-        return ResponseEntity.ok(service.add(productRequest, images));
+                                       List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException {
+        return ResponseEntity.ok(service.add(productRequest, images).get());
     }
 
     @GetMapping
@@ -69,8 +67,8 @@ public class ProductController {
             summary = "Search products by name with fuzzy search",
             description = "Returns products whose names approximately match the provided name (supports typo tolerance)"
     )
-    public ResponseEntity<ProductResponseForGetAll> search(@PathVariable String name){
-        return ResponseEntity.ok(service.searchByName(name));
+    public ResponseEntity<ProductResponseForSearchByName> search(@PathVariable String name) throws ExecutionException, InterruptedException {
+        return ResponseEntity.ok(service.searchByName(name).get());
     }
 
     @GetMapping("/sub-category/{subCategoryId}")
@@ -78,8 +76,8 @@ public class ProductController {
             summary = "Get products by sub-category",
             description = "Returns all products that belong to a given sub-category ID."
     )
-    public ResponseEntity<ProductResponseForSelectedSubCategory> getBySubCategoryId(@PathVariable Long subCategoryId) {
-        return ResponseEntity.ok(service.getBySubCategoryId(subCategoryId));
+    public ResponseEntity<ProductResponseForSelectedSubCategory> getBySubCategoryId(@PathVariable Long subCategoryId) throws ExecutionException, InterruptedException {
+        return ResponseEntity.ok(service.getBySubCategoryId(subCategoryId).get());
     }
 
     @GetMapping("/seller/{sellerId}")
@@ -96,8 +94,8 @@ public class ProductController {
             summary = "Filter products with complex criteria",
             description = "Applies multiple filtering criteria (e.g., price range, category, rating) to retrieve matching products."
     )
-    public ResponseEntity<ProductResponseForSelectedSubCategory> getByComplexFilter(@ModelAttribute ProductFilterRequest request) {
-        return ResponseEntity.ok(service.getByComplexFiltering(request));
+    public ResponseEntity<ProductResponseForSelectedSubCategory> getByComplexFilter(@ModelAttribute ProductFilterRequest request) throws ExecutionException, InterruptedException {
+        return ResponseEntity.ok(service.getByComplexFiltering(request).get());
     }
 
     @PatchMapping("/{id}/rating/{rating}")

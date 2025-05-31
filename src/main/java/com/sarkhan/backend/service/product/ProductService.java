@@ -1,17 +1,15 @@
 package com.sarkhan.backend.service.product;
 
-import com.sarkhan.backend.dto.product.ProductFilterRequest;
-import com.sarkhan.backend.dto.product.ProductRequest;
-import com.sarkhan.backend.dto.product.ProductResponseForGetAll;
-import com.sarkhan.backend.dto.product.ProductResponseForSelectedSubCategory;
+import com.sarkhan.backend.dto.product.*;
 import com.sarkhan.backend.model.product.Product;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface ProductService {
-    Product add(ProductRequest request, List<MultipartFile> images) throws IOException;
+    CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images) throws IOException;
 
     ProductResponseForGetAll getAll();
 
@@ -19,13 +17,13 @@ public interface ProductService {
 
     Product getBySlug(String slug);
 
-    ProductResponseForGetAll searchByName(String name);
+    CompletableFuture<ProductResponseForSearchByName> searchByName(String name);
 
-    ProductResponseForSelectedSubCategory getBySubCategoryId(Long subCategoryId);
+    CompletableFuture<ProductResponseForSelectedSubCategory> getBySubCategoryId(Long subCategoryId);
 
     ProductResponseForGetAll getBySellerId(Long sellerId);
 
-    ProductResponseForSelectedSubCategory getByComplexFiltering(ProductFilterRequest request);
+    CompletableFuture<ProductResponseForSelectedSubCategory> getByComplexFiltering(ProductFilterRequest request);
 
     Product giveRating(Long id, Double rating);
 
