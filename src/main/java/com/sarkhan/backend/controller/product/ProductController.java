@@ -6,6 +6,7 @@ import com.sarkhan.backend.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +32,7 @@ public class ProductController {
     )
     public ResponseEntity<Product> add(@RequestHeader("Authorization") String authHeader,
                                        @RequestPart ProductRequest productRequest,
-                                       List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException {
+                                       List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException, AuthException {
         return ResponseEntity.ok(service.add(productRequest, images).get());
     }
 
@@ -85,7 +86,7 @@ public class ProductController {
             summary = "Get products by seller",
             description = "Retrieves all products associated with a specific seller ID."
     )
-    public ResponseEntity<ProductResponseForGetAll> getBySellerId(@PathVariable Long sellerId) {
+    public ResponseEntity<ProductResponseForGetBySellerId> getBySellerId(@PathVariable Long sellerId) {
         return ResponseEntity.ok(service.getBySellerId(sellerId));
     }
 
@@ -104,7 +105,7 @@ public class ProductController {
             description = "Allows a user to submit a rating for a product by its ID."
     )
     public ResponseEntity<Product> giveRating(@PathVariable Long id,
-                                              @PathVariable Double rating) {
+                                              @PathVariable Double rating) throws AuthException {
         return ResponseEntity.ok(service.giveRating(id, rating));
     }
 
@@ -113,7 +114,8 @@ public class ProductController {
             summary = "Toggle product favorite status",
             description = "Marks or unMarks the given product as a favorite for the current user."
     )
-    public ResponseEntity<Product> toggleFavorite(@PathVariable Long id) {
+    public ResponseEntity<Product> toggleFavorite(@RequestHeader("Authorization") String authHeader,
+                                                  @PathVariable Long id) throws AuthException {
         return ResponseEntity.ok(service.toggleFavorite(id));
     }
 
@@ -126,7 +128,7 @@ public class ProductController {
     public ResponseEntity<Product> update(@RequestHeader("Authorization") String authHeader,
                                           @PathVariable Long id,
                                           @RequestPart ProductRequest productRequest,
-                                          List<MultipartFile> images) throws IOException {
+                                          List<MultipartFile> images) throws IOException, AuthException {
         return ResponseEntity.ok(service.update(id, productRequest, images));
     }
 
@@ -137,7 +139,7 @@ public class ProductController {
             description = "Deletes a product by its ID. Only users with ADMIN or SELLER roles are allowed to perform this operation."
     )
     public ResponseEntity<Void> delete(@RequestHeader("Authorization") String authHeader,
-                                       @PathVariable Long id){
+                                       @PathVariable Long id) throws AuthException {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

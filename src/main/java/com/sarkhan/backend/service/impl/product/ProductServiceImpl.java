@@ -7,17 +7,21 @@ import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.Category;
 import com.sarkhan.backend.model.product.items.Color;
+import com.sarkhan.backend.model.product.items.ProductUserHistory;
 import com.sarkhan.backend.model.product.items.SubCategory;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.product.ProductRepository;
+import com.sarkhan.backend.repository.product.items.ProductUserHistoryRepository;
 import com.sarkhan.backend.service.CloudinaryService;
 import com.sarkhan.backend.service.UserService;
 import com.sarkhan.backend.service.product.ProductService;
 import com.sarkhan.backend.service.product.items.CategoryService;
 import com.sarkhan.backend.service.product.items.SubCategoryService;
 import com.sarkhan.backend.specification.ProductSpecification;
+import jakarta.security.auth.message.AuthException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
@@ -36,6 +40,8 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
+    private final ProductUserHistoryRepository historyRepository;
+
     private final CloudinaryService cloudinaryService;
 
     private final CategoryService categoryService;
@@ -46,8 +52,24 @@ public class ProductServiceImpl implements ProductService {
 
     private final Executor executor;
 
-    public ProductServiceImpl(ProductRepository productRepository, CloudinaryService cloudinaryService, CategoryService categoryService, SubCategoryService subCategoryService, UserService userService, @Qualifier("virtualExecutor") Executor executor) {
+    @Value("${product.recommend.maxProduct}")
+    Long recommendedProductMaxSize;
+
+    @Value("${product.recommend.maxSwapDistance}")
+    Long maxSwapDistance;
+
+    @Value("${product.recommend.shuffleProbability}")
+    double shuffleProbability;
+
+    public ProductServiceImpl(ProductRepository productRepository,
+                              ProductUserHistoryRepository historyRepository,
+                              CloudinaryService cloudinaryService,
+                              CategoryService categoryService,
+                              SubCategoryService subCategoryService,
+                              UserService userService,
+                              @Qualifier("virtualExecutor") Executor executor) {
         this.productRepository = productRepository;
+        this.historyRepository = historyRepository;
         this.cloudinaryService = cloudinaryService;
         this.categoryService = categoryService;
         this.subCategoryService = subCategoryService;
@@ -57,9 +79,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Async
-    public CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images) throws IOException {
+    public CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images) throws IOException, AuthException {
         User user = getCurrentUser();
-
+        log.warn("Someone try to add product but he/she doesn't login!!!");
+        if (user == null) throw new AuthException("Someone try to add product but he/she doesn't login!!!");
         log.info(user.getNameAndSurname() + " try to create product");
 
         Product product = ProductMapper.toEntity(request, user);
@@ -78,25 +101,34 @@ public class ProductServiceImpl implements ProductService {
         return new ProductResponseForGetAll(
                 productRepository.findAll(),
                 categoryService.getAll(),
-                subCategoryService.getAll());
+                subCategoryService.getAll(),
+                getRecommendedProduct());
     }
 
     @Override
     public Product getById(Long id) {
         log.info("Someone try to get a product. Id : " + id);
-        return productRepository.findById(id).orElseThrow(() -> {
+
+        Product product = productRepository.findById(id).orElseThrow(() -> {
             log.info("Cannot find product by " + id + " id.");
             return new NoSuchElementException("Cannot find product by " + id + " id.");
         });
+
+        addProductUserHistory(product);
+        return product;
     }
 
     @Override
     public Product getBySlug(String slug) {
         log.info("Someone try to get a product. Slug : " + slug);
-        return productRepository.getBySlug(slug).orElseThrow(() -> {
+
+        Product product = productRepository.getBySlug(slug).orElseThrow(() -> {
             log.info("Cannot find product by " + slug + " slug.");
             return new NoSuchElementException("Cannot find product by " + slug + " slug.");
         });
+
+        addProductUserHistory(product);
+        return product;
     }
 
     @Override
@@ -202,9 +234,9 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductResponseForGetAll getBySellerId(Long sellerId) {
+    public ProductResponseForGetBySellerId getBySellerId(Long sellerId) {
         log.info("Someone try to get products. Seller id : " + sellerId);
-        return new ProductResponseForGetAll(
+        return new ProductResponseForGetBySellerId(
                 productRepository.getBySellerId(sellerId),
                 categoryService.getAll(),
                 subCategoryService.getAll());
@@ -242,8 +274,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product giveRating(Long id, Double rating) {
+    public Product giveRating(Long id, Double rating) throws AuthException {
         User user = getCurrentUser();
+        log.warn("Someone try to give rating product but he/she doesn't login!!!");
+        if (user == null) throw new AuthException("Someone try to give rating product but he/she doesn't login!!!");
         Product product = getById(id);
 
         log.info(user.getNameAndSurname() + " try to give rating. Product name : " + product.getName());
@@ -263,8 +297,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product toggleFavorite(Long id) {
+    public Product toggleFavorite(Long id) throws AuthException {
         User user = getCurrentUser();
+        log.warn("Someone try to add favorite product but he/she doesn't login!!!");
+        if (user == null) throw new AuthException("Someone try to add favorite product but he/she doesn't login!!!");
         Product product = getById(id);
 
         log.info(user.getNameAndSurname() + " pres favorite button. Product name : " + product.getName());
@@ -283,10 +319,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException {
+    public Product update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException, AuthException {
         Product oldProduct = ProductMapper.updateEntity(getById(id), request);
         User user = getCurrentUser();
-
+        log.warn("Someone try to update product but he/she doesn't login!!!");
+        if (user == null) throw new AuthException("Someone try to update product but he/she doesn't login!!!");
         log.info(user.getNameAndSurname() + " try to update product. Id : " + id);
 
         if (!(Role.ADMIN.equals(user.getRole()) || getById(id).getSellerId().equals(user.getId()))) {
@@ -307,8 +344,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id) throws AuthException {
         User user = getCurrentUser();
+        log.warn("Someone try to delete product but he/she doesn't login!!!");
+        if (user == null) throw new AuthException("Someone try to delete product but he/she doesn't login!!!");
         log.warn(user.getNameAndSurname() + " delete product. Id : " + id);
         if (Role.ADMIN.equals(user.getRole()) || getById(id).getSellerId().equals(user.getId())) {
             productRepository.deleteById(id);
@@ -319,7 +358,7 @@ public class ProductServiceImpl implements ProductService {
 
     private User getCurrentUser() {
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return userService.getByEmail(email);
+        return email == null ? null : userService.getByEmail(email);
     }
 
     private List<Product> getByComplexFilteringUseSpecification(ProductFilterRequest request) {
@@ -392,5 +431,62 @@ public class ProductServiceImpl implements ProductService {
                 }
             }
         }
+    }
+
+    private void addProductUserHistory(Product product) {
+        User user = getCurrentUser();
+        if (user != null) {
+            ProductUserHistory history = ProductUserHistory.builder()
+                    .userId(user.getId())
+                    .subCategoryId(product.getSubCategoryId())
+                    .build();
+            historyRepository.save(history);
+        }
+    }
+
+    private List<Product> getRecommendedProduct() {
+        User user = getCurrentUser();
+        if (user == null) return Collections.emptyList();
+
+        Set<Product> products = new LinkedHashSet<>();
+        List<Long> subCategoryIds = historyRepository
+                .findTopSubCategoryIdsByUserId(user.getId());
+
+        for (Long subCategoryId : subCategoryIds) {
+            products.addAll(productRepository
+                    .getBySubCategoryId(subCategoryId)
+                    .stream()
+                    .limit(recommendedProductMaxSize)
+                    .collect(Collectors.toSet()));
+        }
+
+        if (products.size() < recommendedProductMaxSize) {
+            List<Long> categoryIds = subCategoryService.getCategoryIdsBySubCategoryIds(subCategoryIds);
+
+            for (Long categoryId : categoryIds) {
+                for (SubCategory subCategory : subCategoryService.getByCategoryId(categoryId)) {
+                    products.addAll(productRepository.getBySubCategoryId(subCategory.getId()));
+                    if (products.size() >= recommendedProductMaxSize) break;
+                }
+                if (products.size() >= recommendedProductMaxSize) break;
+            }
+        }
+
+        return partialShuffle(products.stream().toList());
+    }
+
+
+    private List<Product> partialShuffle(List<Product> input) {
+        List<Product> result = new ArrayList<>(input);
+        Random random = new Random();
+
+        for (int i = 0; i < result.size(); i++) {
+            if (random.nextDouble() < shuffleProbability) {
+                int swapWith = i + random.nextInt(Math.min(maxSwapDistance.intValue(), result.size() - i));
+                Collections.swap(result, i, swapWith);
+            }
+        }
+
+        return result;
     }
 }

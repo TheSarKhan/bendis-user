@@ -8,5 +8,6 @@ import java.util.List;
 
 public record ProductResponseForGetAll(List<Product> products,
                                        List<Category> categories,
-                                       List<SubCategory> subCategories) {
+                                       List<SubCategory> subCategories,
+                                       List<Product> recommendedProducts) {
 }

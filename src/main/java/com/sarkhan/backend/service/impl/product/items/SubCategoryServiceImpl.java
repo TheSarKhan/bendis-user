@@ -84,4 +84,9 @@ public class SubCategoryServiceImpl implements SubCategoryService {
         repository.deleteById(id);
     }
 
+    @Override
+    public List<Long> getCategoryIdsBySubCategoryIds(List<Long> subCategoryIds){
+        return repository.getCategoryIdsBySubCategoryIds(subCategoryIds);
+    }
+
 }
