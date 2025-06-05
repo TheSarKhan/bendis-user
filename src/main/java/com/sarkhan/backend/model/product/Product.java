@@ -75,6 +75,8 @@ public class Product {
 
     @Column(name = "update_at")
     LocalDateTime updateAt;
+    @Column(name = "sales_count")
+    Integer salesCount;
 
     @PrePersist
     public void init() {
