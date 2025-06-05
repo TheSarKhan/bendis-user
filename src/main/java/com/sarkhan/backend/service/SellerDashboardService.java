@@ -1,6 +1,6 @@
 package com.sarkhan.backend.service;
 
-import com.sarkhan.backend.model.enums.OrderStatus;
+import com.sarkhan.backend.model.order.OrderStatus;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.model.product.Product;
 

@@ -68,7 +68,7 @@ public class Product {
     List<Color> colors;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    Map<String, String> specifications;
+    Map<String, List<String>> specifications;
 
     @Column(name = "create_at")
     LocalDateTime createAt;
@@ -85,9 +85,26 @@ public class Product {
     }
 
     public void generateSlug() {
-        this.slug = this.name.toLowerCase()
-                .replace(" ", "-")
-                .replaceAll("[^a-z0-9-]", "");
+        this.slug = this.name
+                .toLowerCase()
+                .replace("ç", "ch")
+                .replace("ş", "sh")
+                .replace("ğ", "gh")
+                .replace("ü", "u")
+                .replace("ö", "o")
+                .replace("ı", "i")
+                .replace("ə", "e")
+                .replace("İ", "i")
+                .replace("Ç", "ch")
+                .replace("Ş", "sh")
+                .replace("Ğ", "gh")
+                .replace("Ü", "u")
+                .replace("Ö", "o")
+                .replace("Ə", "e")
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-{2,}", "-")
+                .replaceAll("^-|-$", "");
     }
-}
 
+}

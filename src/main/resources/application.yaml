@@ -60,15 +60,23 @@ spring:
       url: jdbc:postgresql://localhost:5454/Cart
       username: root
       password: root
+    sixth:
+        #url: jdbc:postgresql://cart_service:5432/Order
+        url: jdbc:postgresql://localhost:5455/Order
+        username: root
+        password: root
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
   data:
     redis:
       #host: redis
       host: localhost
       port: 6380
    #   password: redispass  # Buraya Docker Compose'daki şifreyi gir
+  flyway:
+    enabled: false
+
 
 cloudinary:
   cloud:

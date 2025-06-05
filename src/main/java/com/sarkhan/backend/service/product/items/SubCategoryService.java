@@ -1,11 +1,12 @@
 package com.sarkhan.backend.service.product.items;
 
+import com.sarkhan.backend.dto.product.items.SubCategoryRequest;
 import com.sarkhan.backend.model.product.items.SubCategory;
 
 import java.util.List;
 
 public interface SubCategoryService {
-    SubCategory add(String name, Long categoryId, List<String> specification);
+    SubCategory add(SubCategoryRequest request);
 
     List<SubCategory> getAll();
 
@@ -17,7 +18,7 @@ public interface SubCategoryService {
 
     List<SubCategory> getByCategoryId(Long categoryId);
 
-    SubCategory update(Long id, String name, Long categoryId, List<String> specification);
+    SubCategory update(Long id, SubCategoryRequest request);
 
     void delete(Long id);
 }

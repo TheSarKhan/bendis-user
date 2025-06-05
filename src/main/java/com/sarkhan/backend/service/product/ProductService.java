@@ -2,6 +2,8 @@ package com.sarkhan.backend.service.product;
 
 import com.sarkhan.backend.dto.product.ProductFilterRequest;
 import com.sarkhan.backend.dto.product.ProductRequest;
+import com.sarkhan.backend.dto.product.ProductResponseForGetAll;
+import com.sarkhan.backend.dto.product.ProductResponseForSelectedSubCategory;
 import com.sarkhan.backend.model.product.Product;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,23 +13,23 @@ import java.util.List;
 public interface ProductService {
     Product add(ProductRequest request, List<MultipartFile> images) throws IOException;
 
-    List<Product> getAll();
+    ProductResponseForGetAll getAll();
 
     Product getById(Long id);
 
     Product getBySlug(String slug);
 
-    List<Product> searchByName(String name);
+    ProductResponseForGetAll searchByName(String name);
 
-    List<Product> getBySubCategoryId(Long subCategoryId);
+    ProductResponseForSelectedSubCategory getBySubCategoryId(Long subCategoryId);
 
-    List<Product> getBySellerId(Long sellerId);
+    ProductResponseForGetAll getBySellerId(Long sellerId);
 
-    List<Product> getByComplexFiltering(ProductFilterRequest request);
+    ProductResponseForSelectedSubCategory getByComplexFiltering(ProductFilterRequest request);
 
-    Product giveRating(Long productId, Double rating);
+    Product giveRating(Long id, Double rating);
 
-    Product toggleFavorite(Long productId);
+    Product toggleFavorite(Long id);
 
     Product update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException;
 
