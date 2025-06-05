@@ -22,7 +22,7 @@ public class TestController {
     public String test(@RequestHeader("Authorization") String token) {
         token=token.substring(7);
         Optional<User>user=userRepository.findByEmail(jwtService.extractEmail(token));
-        user.get().getNameAndSurname();
+        user.get().getFullName();
         return "test";
     }
 }

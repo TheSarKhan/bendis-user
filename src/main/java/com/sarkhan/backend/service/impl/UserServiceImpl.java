@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
             }
             user.get().setCountryCode(userProfileRequest.getCountryCode());
             user.get().setPhoneNumber(userProfileRequest.getPhoneNumber());
-            user.get().setNameAndSurname(userProfileRequest.getNameAndSurname());
+            user.get().setFullName(userProfileRequest.getNameAndSurname());
             userRepository.save(user.get());
         }
 

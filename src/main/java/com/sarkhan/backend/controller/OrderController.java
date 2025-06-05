@@ -2,7 +2,7 @@ package com.sarkhan.backend.controller;
 
 import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.exception.DataNotFoundException;
-import com.sarkhan.backend.model.enums.OrderStatus;
+import com.sarkhan.backend.model.order.OrderStatus;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.service.OrderService;
 import lombok.RequiredArgsConstructor;

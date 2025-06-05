@@ -60,9 +60,14 @@ spring:
       url: jdbc:postgresql://localhost:5454/Cart
       username: root
       password: root
+    sixth:
+        #url: jdbc:postgresql://cart_service:5432/Order
+        url: jdbc:postgresql://localhost:5455/Order
+        username: root
+        password: root
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: create-drop
   data:
     redis:
       #host: redis

@@ -28,10 +28,7 @@ import java.util.Map;
 )
 
 public class CartDbConfig {
-    @Bean
-    public EntityManagerFactoryBuilder entityManagerFactoryBuilder() {
-        return new EntityManagerFactoryBuilder(new HibernateJpaVendorAdapter(), new HashMap<>(), null);
-    }
+
     @Value("${spring.datasource.fifth.url}")
     private String fifthDbUrl;
 
