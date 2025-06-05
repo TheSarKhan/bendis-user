@@ -34,7 +34,7 @@ public class ProductServiceImpl implements ProductService {
     public Product add(ProductRequest request, List<MultipartFile> images) throws IOException {
         User user = getCurrentUser();
 
-        log.info(user.getNameAndSurname() + " try to create product");
+        log.info(user.getFullName() + " try to create product");
 
         Product product = ProductMapper.toEntity(request, user);
 
@@ -99,11 +99,11 @@ public class ProductServiceImpl implements ProductService {
         User user = getCurrentUser();
         Product product = getById(productId);
 
-        log.info(user.getNameAndSurname() + " try to give rating. Product name : " + product.getName());
+        log.info(user.getFullName() + " try to give rating. Product name : " + product.getName());
 
         Map<Long, Double> ratings = product.getRatings();
         if (ratings.containsKey(user.getId())) {
-            log.warn(user.getNameAndSurname() + " try to give additional rating.");
+            log.warn(user.getFullName() + " try to give additional rating.");
             return product;
         }
         Double oldRating = product.getRating();
@@ -120,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
         User user = getCurrentUser();
         Product product = getById(productId);
 
-        log.info(user.getNameAndSurname() + " pres favorite button. Product name : " + product.getName());
+        log.info(user.getFullName() + " pres favorite button. Product name : " + product.getName());
 
         Set<Long> favorites = product.getFavorites();
         if (favorites.contains(user.getId())) {
@@ -159,7 +159,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void delete(Long id) {
         User user = getCurrentUser();
-        log.warn(user.getNameAndSurname() + " delete product. Id : " + id);
+        log.warn(user.getFullName() + " delete product. Id : " + id);
         productRepository.deleteById(id);
     }
 
