@@ -89,4 +89,8 @@ public class SubCategoryServiceImpl implements SubCategoryService {
         return repository.getCategoryIdsBySubCategoryIds(subCategoryIds);
     }
 
+    @Override
+    public List<SubCategory> getByCategoryIds(List<Long> categoryIds) {
+        return repository.getByCategoryIds(categoryIds);
+    }
 }

@@ -23,4 +23,6 @@ public interface SubCategoryService {
     void delete(Long id);
 
     List<Long> getCategoryIdsBySubCategoryIds(List<Long> subCategoryIds);
+
+    List<SubCategory> getByCategoryIds(List<Long> categoryIds);
 }

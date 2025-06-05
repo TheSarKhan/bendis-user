@@ -1,13 +1,11 @@
 package com.sarkhan.backend.service.impl.product;
 
-import com.sarkhan.backend.dto.cloudinary.CloudinaryUploadResponse;
 import com.sarkhan.backend.dto.product.*;
 import com.sarkhan.backend.mapper.ProductMapper;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.Category;
 import com.sarkhan.backend.model.product.items.Color;
-import com.sarkhan.backend.model.product.items.ProductUserHistory;
 import com.sarkhan.backend.model.product.items.SubCategory;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.product.ProductRepository;
@@ -17,15 +15,12 @@ import com.sarkhan.backend.service.UserService;
 import com.sarkhan.backend.service.product.ProductService;
 import com.sarkhan.backend.service.product.items.CategoryService;
 import com.sarkhan.backend.service.product.items.SubCategoryService;
-import com.sarkhan.backend.specification.ProductSpecification;
 import jakarta.security.auth.message.AuthException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,7 +28,14 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.stream.Collectors;
+
+import static com.sarkhan.backend.util.AsyncUtil.*;
+import static com.sarkhan.backend.util.ProductFilterUtil.getByComplexFilteringUseSpecification;
+import static com.sarkhan.backend.util.ProductImageUtil.deleteAllImages;
+import static com.sarkhan.backend.util.ProductImageUtil.uploadImages;
+import static com.sarkhan.backend.util.RecommendationUtil.getRecommendedProduct;
+import static com.sarkhan.backend.util.UserUtil.addProductUserHistory;
+import static com.sarkhan.backend.util.UserUtil.getCurrentUser;
 
 @Slf4j
 @Service
@@ -53,10 +55,10 @@ public class ProductServiceImpl implements ProductService {
     private final Executor executor;
 
     @Value("${product.recommend.maxProduct}")
-    Long recommendedProductMaxSize;
+    int recommendedProductMaxSize;
 
     @Value("${product.recommend.maxSwapDistance}")
-    Long maxSwapDistance;
+    int maxSwapDistance;
 
     @Value("${product.recommend.shuffleProbability}")
     double shuffleProbability;
@@ -79,16 +81,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Async
-    public CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images) throws IOException, AuthException {
-        User user = getCurrentUser();
-        log.warn("Someone try to add product but he/she doesn't login!!!");
-        if (user == null) throw new AuthException("Someone try to add product but he/she doesn't login!!!");
+    public CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images)
+            throws IOException, AuthException {
+        User user = getCurrentUser(userService, log);
         log.info(user.getNameAndSurname() + " try to create product");
 
         Product product = ProductMapper.toEntity(request, user);
-
-        List<Color> colors = uploadImages(request, images);
-
+        List<Color> colors = uploadImages(request, images, cloudinaryService, log);
         product.setColors(colors);
 
         log.info("Product create successfully.");
@@ -102,19 +101,17 @@ public class ProductServiceImpl implements ProductService {
                 productRepository.findAll(),
                 categoryService.getAll(),
                 subCategoryService.getAll(),
-                getRecommendedProduct());
+                getRecommendedProduct(historyRepository, productRepository,
+                        subCategoryService, userService,
+                        log, recommendedProductMaxSize,
+                        shuffleProbability, maxSwapDistance));
     }
 
     @Override
     public Product getById(Long id) {
         log.info("Someone try to get a product. Id : " + id);
-
-        Product product = productRepository.findById(id).orElseThrow(() -> {
-            log.info("Cannot find product by " + id + " id.");
-            return new NoSuchElementException("Cannot find product by " + id + " id.");
-        });
-
-        addProductUserHistory(product);
+        Product product = getByIdSupport(id);
+        addProductUserHistory(product, userService, historyRepository, log);
         return product;
     }
 
@@ -127,75 +124,47 @@ public class ProductServiceImpl implements ProductService {
             return new NoSuchElementException("Cannot find product by " + slug + " slug.");
         });
 
-        addProductUserHistory(product);
+        addProductUserHistory(product, userService, historyRepository, log);
         return product;
     }
 
     @Override
     @Async
     public CompletableFuture<ProductResponseForSearchByName> searchByName(String name) {
-        log.info("Someone try to get products. Name : " + name);
+        log.info("Someone try to get products. Name : {}", name);
 
-        CompletableFuture<List<Product>> productsFuture = CompletableFuture.supplyAsync(
-                () -> productRepository.findAll(ProductSpecification.searchTitle(name)), executor);
+        var productsFuture = getProductsByName(name, productRepository, executor);
+        var categoriesFuture = getCategoriesByName(name, categoryService, executor);
 
-        CompletableFuture<List<Category>> categoriesFuture = CompletableFuture.supplyAsync(
-                () -> categoryService.searchByName(name), executor);
+        var subCategoriesFuture = getSubCategoriesByCategories(categoriesFuture, subCategoryService, executor);
+        var searchedSubCategoriesFuture = getSubCategoriesByName(name, subCategoryService, executor);
 
-        CompletableFuture<List<Category>> allCategoriesFuture =
-                CompletableFuture.supplyAsync(categoryService::getAll, executor);
+        var combinedSubCategoriesFuture = combineSubCategories(
+                subCategoriesFuture, searchedSubCategoriesFuture);
 
-        CompletableFuture<List<SubCategory>> allSubCategoriesFuture =
-                CompletableFuture.supplyAsync(subCategoryService::getAll, executor);
+        var subCategoryProductsFuture = getProductsBySubCategories(combinedSubCategoriesFuture,
+                productRepository, executor);
 
-        CompletableFuture<Set<SubCategory>> subCategoriesFuture = categoriesFuture.thenCompose(categories -> {
-            List<CompletableFuture<List<SubCategory>>> futures = categories.stream()
-                    .map(category -> CompletableFuture.supplyAsync(
-                            () -> subCategoryService.getByCategoryId(category.getId()), executor))
-                    .toList();
+        var allCategoriesAndSubCategories = categoryAndSubCategoryGetAll(categoryService,
+                subCategoryService, executor);
 
-            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .thenApply(unused -> futures.stream()
-                            .flatMap(future -> future.join().stream())
-                            .collect(Collectors.toSet()));
-        });
-
-        CompletableFuture<Set<SubCategory>> searchedSubCategoriesFuture = CompletableFuture.supplyAsync(
-                () -> new HashSet<>(subCategoryService.searchByName(name)), executor);
-
-        CompletableFuture<Set<SubCategory>> combinedSubCategoriesFuture = subCategoriesFuture.thenCombine(
-                searchedSubCategoriesFuture,
-                (set1, set2) -> {
-                    set1.addAll(set2);
-                    return set1;
-                });
-
-        CompletableFuture<List<Product>> subCategoryProductsFuture = combinedSubCategoriesFuture.thenCompose(subCategories -> {
-            List<CompletableFuture<List<Product>>> futures = subCategories.stream()
-                    .map(subCategory -> CompletableFuture.supplyAsync(
-                            () -> productRepository.getBySubCategoryId(subCategory.getId()), executor))
-                    .toList();
-
-            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .thenApply(unused -> futures.stream()
-                            .flatMap(future -> future.join().stream())
-                            .collect(Collectors.toList()));
-        });
-
-        return CompletableFuture.allOf(productsFuture, subCategoryProductsFuture, allCategoriesFuture, allSubCategoriesFuture)
+        return CompletableFuture.allOf(productsFuture, subCategoryProductsFuture, allCategoriesAndSubCategories)
                 .thenApply(unused -> {
-                    Set<Product> products = new HashSet<>();
                     try {
+                        Set<Product> products = new HashSet<>();
                         products.addAll(productsFuture.get());
                         products.addAll(subCategoryProductsFuture.get());
+
+                        var allData = allCategoriesAndSubCategories.get();
 
                         return new ProductResponseForSearchByName(
                                 name,
                                 products.stream().toList(),
-                                allCategoriesFuture.get(),
-                                allSubCategoriesFuture.get());
+                                allData.categories(),
+                                allData.subCategories()
+                        );
                     } catch (Exception e) {
-                        throw new RuntimeException(e);
+                        throw new RuntimeException("Failed to build response", e);
                     }
                 });
     }
@@ -225,7 +194,8 @@ public class ProductServiceImpl implements ProductService {
                                 categoriesFuture.get(),
                                 subCategoriesFuture.get(),
                                 specsFuture.get(),
-                                new ProductFilterRequest(subCategoryId, null, null, null, null, null));
+                                new ProductFilterRequest(subCategoryId, null,
+                                        null, null, null, null));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -247,7 +217,7 @@ public class ProductServiceImpl implements ProductService {
     public CompletableFuture<ProductResponseForSelectedSubCategory> getByComplexFiltering(ProductFilterRequest request) {
         log.info("Someone try to get product with complex params.");
         CompletableFuture<List<Product>> productsFuture = CompletableFuture.supplyAsync(() ->
-                getByComplexFilteringUseSpecification(request));
+                getByComplexFilteringUseSpecification(request, productRepository));
 
         CompletableFuture<List<Category>> categoriesFuture =
                 CompletableFuture.supplyAsync(categoryService::getAll, executor);
@@ -275,10 +245,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product giveRating(Long id, Double rating) throws AuthException {
-        User user = getCurrentUser();
+        User user = getCurrentUser(userService, log);
         log.warn("Someone try to give rating product but he/she doesn't login!!!");
         if (user == null) throw new AuthException("Someone try to give rating product but he/she doesn't login!!!");
-        Product product = getById(id);
+        Product product = getByIdSupport(id);
 
         log.info(user.getNameAndSurname() + " try to give rating. Product name : " + product.getName());
 
@@ -298,10 +268,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product toggleFavorite(Long id) throws AuthException {
-        User user = getCurrentUser();
-        log.warn("Someone try to add favorite product but he/she doesn't login!!!");
-        if (user == null) throw new AuthException("Someone try to add favorite product but he/she doesn't login!!!");
-        Product product = getById(id);
+        User user = getCurrentUser(userService, log);
+        Product product = getByIdSupport(id);
 
         log.info(user.getNameAndSurname() + " pres favorite button. Product name : " + product.getName());
 
@@ -319,23 +287,24 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException, AuthException {
-        Product oldProduct = ProductMapper.updateEntity(getById(id), request);
-        User user = getCurrentUser();
+    public Product update(Long id, ProductRequest request, List<MultipartFile> newImages)
+            throws IOException, AuthException {
+        Product oldProduct = ProductMapper.updateEntity(getByIdSupport(id), request);
+        User user = getCurrentUser(userService, log);
         log.warn("Someone try to update product but he/she doesn't login!!!");
         if (user == null) throw new AuthException("Someone try to update product but he/she doesn't login!!!");
         log.info(user.getNameAndSurname() + " try to update product. Id : " + id);
 
-        if (!(Role.ADMIN.equals(user.getRole()) || getById(id).getSellerId().equals(user.getId()))) {
+        if (!(Role.ADMIN.equals(user.getRole()) || getByIdSupport(id).getSellerId().equals(user.getId()))) {
             log.warn("User is not authorized to update this product");
             throw new AccessDeniedException("You are not authorized to update this product");
         }
 
         Product product = ProductMapper.updateEntity(oldProduct, request);
 
-        deleteAllImages(product);
+        deleteAllImages(product, cloudinaryService);
 
-        List<Color> colors = uploadImages(request, newImages);
+        List<Color> colors = uploadImages(request, newImages, cloudinaryService, log);
 
         product.setColors(colors);
 
@@ -345,148 +314,21 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void delete(Long id) throws AuthException {
-        User user = getCurrentUser();
+        User user = getCurrentUser(userService, log);
         log.warn("Someone try to delete product but he/she doesn't login!!!");
         if (user == null) throw new AuthException("Someone try to delete product but he/she doesn't login!!!");
         log.warn(user.getNameAndSurname() + " delete product. Id : " + id);
-        if (Role.ADMIN.equals(user.getRole()) || getById(id).getSellerId().equals(user.getId())) {
+        if (Role.ADMIN.equals(user.getRole()) || getByIdSupport(id).getSellerId().equals(user.getId())) {
             productRepository.deleteById(id);
         } else {
             log.warn(user.getNameAndSurname() + " cannot delete this product.");
         }
     }
 
-    private User getCurrentUser() {
-        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return email == null ? null : userService.getByEmail(email);
-    }
-
-    private List<Product> getByComplexFilteringUseSpecification(ProductFilterRequest request) {
-        Specification<Product> spec = Specification.where(null);
-
-        if (request.subCategoryId() != null) {
-            spec = spec.and(ProductSpecification.hasSubCategoryId(request.subCategoryId()));
-        }
-
-        if (request.specifications() != null && !(request.specifications().isEmpty())) {
-            spec = spec.and(ProductSpecification.hasSpecifications(request.specifications()));
-        }
-
-        if (request.gender() != null) {
-            spec = spec.and(ProductSpecification.hasGender(request.gender()));
-        }
-
-        if (request.rating() != null) {
-            spec = spec.and(ProductSpecification.graterThanRating(request.rating()));
-        }
-
-        if (request.minPrice() != null || request.maxPrice() != null) {
-            spec = spec.and(ProductSpecification.betweenPrice(
-                    request.minPrice() == null ? 0 : request.minPrice(),
-                    request.maxPrice() == null ? Double.MAX_VALUE : request.maxPrice()
-            ));
-        }
-
-        return productRepository.findAll(spec);
-    }
-
-    private List<Color> uploadImages(ProductRequest request, List<MultipartFile> images) throws IOException {
-        List<CloudinaryUploadResponse> colorPhotos = cloudinaryService.uploadFiles(images, "color");
-
-        List<Color> colors = new ArrayList<>();
-        int photoIndex = 0;
-
-        for (Color color : request.colors()) {
-            int count = color.getPhotoCount();
-
-            if (photoIndex + count > colorPhotos.size()) {
-                log.warn("There isn't enough photo: " + color.getColor() +
-                         " need " + count +
-                         " photo. There are " + (colorPhotos.size() - photoIndex) +
-                         " photos.");
-                break;
-            }
-
-            List<String> photoUrls = colorPhotos.subList(photoIndex, photoIndex + count).stream()
-                    .map(CloudinaryUploadResponse::getUrl)
-                    .toList();
-
-            color.setImages(photoUrls);
-            colors.add(color);
-
-            log.info("Color added : " + color.getColor());
-
-            photoIndex += count;
-        }
-        return colors;
-    }
-
-    private void deleteAllImages(Product product) throws IOException {
-        if (product.getColors() != null) {
-            for (Color color : product.getColors()) {
-                if (color.getImages() != null) {
-                    for (String imageUrl : color.getImages()) {
-                        cloudinaryService.deleteFile(imageUrl);
-                    }
-                }
-            }
-        }
-    }
-
-    private void addProductUserHistory(Product product) {
-        User user = getCurrentUser();
-        if (user != null) {
-            ProductUserHistory history = ProductUserHistory.builder()
-                    .userId(user.getId())
-                    .subCategoryId(product.getSubCategoryId())
-                    .build();
-            historyRepository.save(history);
-        }
-    }
-
-    private List<Product> getRecommendedProduct() {
-        User user = getCurrentUser();
-        if (user == null) return Collections.emptyList();
-
-        Set<Product> products = new LinkedHashSet<>();
-        List<Long> subCategoryIds = historyRepository
-                .findTopSubCategoryIdsByUserId(user.getId());
-
-        for (Long subCategoryId : subCategoryIds) {
-            products.addAll(productRepository
-                    .getBySubCategoryId(subCategoryId)
-                    .stream()
-                    .limit(recommendedProductMaxSize)
-                    .collect(Collectors.toSet()));
-        }
-
-        if (products.size() < recommendedProductMaxSize) {
-            List<Long> categoryIds = subCategoryService.getCategoryIdsBySubCategoryIds(subCategoryIds);
-
-            for (Long categoryId : categoryIds) {
-                for (SubCategory subCategory : subCategoryService.getByCategoryId(categoryId)) {
-                    products.addAll(productRepository.getBySubCategoryId(subCategory.getId()));
-                    if (products.size() >= recommendedProductMaxSize) break;
-                }
-                if (products.size() >= recommendedProductMaxSize) break;
-            }
-        }
-
-        return partialShuffle(products.stream().toList());
-    }
-
-
-    private List<Product> partialShuffle(List<Product> input) {
-        List<Product> result = new ArrayList<>(input);
-        Random random = new Random();
-
-        for (int i = 0; i < result.size(); i++) {
-            if (random.nextDouble() < shuffleProbability) {
-                int swapWith = i + random.nextInt(Math.min(maxSwapDistance.intValue(), result.size() - i));
-                Collections.swap(result, i, swapWith);
-            }
-        }
-
-        return result;
+    private Product getByIdSupport(Long id) {
+        return productRepository.findById(id).orElseThrow(() -> {
+            log.info("Cannot find product by " + id + " id.");
+            return new NoSuchElementException("Cannot find product by " + id + " id.");
+        });
     }
 }
