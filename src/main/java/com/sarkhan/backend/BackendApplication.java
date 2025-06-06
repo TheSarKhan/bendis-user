@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"com.sarkhan.backend.mapper.seller", "com.sarkhan.backend"})
-@EnableJpaRepositories(basePackages = "com.sarkhan.backend.repository")
+@EnableJpaRepositories(basePackages = "com.sarkhan.backend.repository.seller")
 @EntityScan(basePackages = "com.sarkhan.backend.model")
 public class BackendApplication {
     public static void main(String[] args) {

@@ -40,7 +40,7 @@ public class OrderDbConfig {
     private String sixthDbDdlAuto;
 
     @Bean(name = "sixthDataSource")
-    public DataSource thirdDataSource() {
+    public DataSource sixthDataSource() {
         HikariDataSource dataSource = DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .url(sixthDbUrl)
