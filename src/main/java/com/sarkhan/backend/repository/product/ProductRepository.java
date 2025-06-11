@@ -17,4 +17,18 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     List<Product> getBySubCategoryId(Long subCategoryId);
 
     List<Product> getBySellerId(Long sellerId);
+
+    @Query("from Product where discountedPrice is not null order by updateAt desc limit 20")
+    List<Product> getDiscountedProducts();
+
+    @Query("from Product order by favoriteCount desc limit 20")
+    List<Product> getMostFavoriteProducts();
+
+    @Query("""
+           select p from Product p
+           join UserFavoriteProduct f
+           on p.id = f.productId
+           where f.userId = :userId
+           """)
+    List<Product> getAllFavorite(Long userId);
 }

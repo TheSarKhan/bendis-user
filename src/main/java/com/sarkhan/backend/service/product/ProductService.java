@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 public interface ProductService {
     CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images) throws IOException, AuthException;
 
-    ProductResponseForGetAll getAll();
+    ProductResponseForHomePage getAll();
 
     Product getById(Long id);
 
@@ -25,6 +25,8 @@ public interface ProductService {
     ProductResponseForGetBySellerId getBySellerId(Long sellerId);
 
     CompletableFuture<ProductResponseForSelectedSubCategory> getByComplexFiltering(ProductFilterRequest request);
+
+    List<Product> getAllFavorite() throws AuthException;
 
     Product giveRating(Long id, Double rating) throws AuthException;
 

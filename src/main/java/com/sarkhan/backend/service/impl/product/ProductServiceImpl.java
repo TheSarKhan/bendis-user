@@ -7,9 +7,11 @@ import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.Category;
 import com.sarkhan.backend.model.product.items.Color;
 import com.sarkhan.backend.model.product.items.SubCategory;
+import com.sarkhan.backend.model.product.items.UserFavoriteProduct;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.product.ProductRepository;
 import com.sarkhan.backend.repository.product.items.ProductUserHistoryRepository;
+import com.sarkhan.backend.repository.product.items.UserFavoriteProductRepository;
 import com.sarkhan.backend.service.CloudinaryService;
 import com.sarkhan.backend.service.UserService;
 import com.sarkhan.backend.service.product.ProductService;
@@ -52,6 +54,8 @@ public class ProductServiceImpl implements ProductService {
 
     private final UserService userService;
 
+    private final UserFavoriteProductRepository favoriteRepository;
+
     private final Executor executor;
 
     @Value("${product.recommend.maxProduct}")
@@ -68,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
                               CloudinaryService cloudinaryService,
                               CategoryService categoryService,
                               SubCategoryService subCategoryService,
-                              UserService userService,
+                              UserService userService, UserFavoriteProductRepository favoriteRepository,
                               @Qualifier("virtualExecutor") Executor executor) {
         this.productRepository = productRepository;
         this.historyRepository = historyRepository;
@@ -76,6 +80,7 @@ public class ProductServiceImpl implements ProductService {
         this.categoryService = categoryService;
         this.subCategoryService = subCategoryService;
         this.userService = userService;
+        this.favoriteRepository = favoriteRepository;
         this.executor = executor;
     }
 
@@ -95,10 +100,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseForGetAll getAll() {
+    public ProductResponseForHomePage getAll() {
         log.info("Someone try to get all products.");
-        return new ProductResponseForGetAll(
-                productRepository.findAll(),
+        return new ProductResponseForHomePage(
+                ,
                 categoryService.getAll(),
                 subCategoryService.getAll(),
                 getRecommendedProduct(historyRepository, productRepository,
@@ -244,6 +249,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<Product> getAllFavorite() throws AuthException {
+        log.info("Someone try to get all favorite product.");
+        return productRepository.getAllFavorite(getCurrentUser(userService,log).getId());
+    }
+
+    @Override
     public Product giveRating(Long id, Double rating) throws AuthException {
         User user = getCurrentUser(userService, log);
         log.warn("Someone try to give rating product but he/she doesn't login!!!");
@@ -273,17 +284,21 @@ public class ProductServiceImpl implements ProductService {
 
         log.info(user.getNameAndSurname() + " pres favorite button. Product name : " + product.getName());
 
-        Set<Long> favorites = product.getFavorites();
-        if (favorites.contains(user.getId())) {
+        Long userId = user.getId();
+        Optional<UserFavoriteProduct> favorite = favoriteRepository.
+                getByProductIdAndUserId(product.getId(), userId);
+
+        if (favorite.isPresent()) {
             log.info("User remove favorite.");
-            favorites.remove(user.getId());
+            product.setFavoriteCount(product.getFavoriteCount()-1);
+            favoriteRepository.delete(favorite.get());
         } else {
             log.info("User add favorite.");
-            favorites.add(user.getId());
+            product.setFavoriteCount(product.getFavoriteCount()+1);
+            favoriteRepository.save(UserFavoriteProduct.builder().
+                    userId(userId).productId(product.getId()).build());
         }
-        product.setFavorites(favorites);
-
-        return productRepository.save(product);
+        return product;
     }
 
     @Override

@@ -9,13 +9,16 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories")
+@Table(name = "user_favorite_products")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Category {
+public class UserFavoriteProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
-    @Column(nullable = false, unique = true)
-    String name;
+    @Column(name = "user_id")
+    Long userId;
+
+    @Column(name = "product_id")
+    Long productId;
 }

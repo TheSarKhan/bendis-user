@@ -4,7 +4,6 @@ import com.sarkhan.backend.dto.product.*;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +40,7 @@ public class ProductController {
             summary = "Get all products",
             description = "Retrieves a list of all products in the system."
     )
-    public ResponseEntity<ProductResponseForGetAll> getAll() {
+    public ResponseEntity<ProductResponseForHomePage> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
@@ -97,6 +96,15 @@ public class ProductController {
     )
     public ResponseEntity<ProductResponseForSelectedSubCategory> getByComplexFilter(@ModelAttribute ProductFilterRequest request) throws ExecutionException, InterruptedException {
         return ResponseEntity.ok(service.getByComplexFiltering(request).get());
+    }
+
+    @GetMapping("/favorite")
+    @Operation(
+            summary = "Get favorite products",
+            description = "Retrieves the list of all products marked as favorite by the currently authenticated user."
+    )
+    public ResponseEntity<List<Product>> getAllFavorite(@RequestHeader("Authorization") String authHeader) throws AuthException {
+        return ResponseEntity.ok(service.getAllFavorite());
     }
 
     @PatchMapping("/{id}/rating/{rating}")

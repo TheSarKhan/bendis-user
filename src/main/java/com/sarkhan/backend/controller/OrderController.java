@@ -15,7 +15,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody OrderRequest orderRequest, @RequestHeader("Authorization") String token) {
-        token=token.substring(7);
- return ResponseEntity.status(201).body( orderService.createOrder(orderRequest,token));
+        token = token.substring(7);
+        return ResponseEntity.status(201).body(orderService.createOrder(orderRequest, token));
     }
 }

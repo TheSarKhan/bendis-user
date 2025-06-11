@@ -12,13 +12,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Data
+@Entity
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Entity(name = "products")
+@Table(name = "products")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Product {
     @Id
@@ -59,7 +59,7 @@ public class Product {
     List<Long> comments;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    Set<Long> favorites;
+    Long favoriteCount;
 
     @JdbcTypeCode(SqlTypes.JSON)
     List<Long> pluses;

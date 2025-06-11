@@ -5,10 +5,11 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Entity
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-@Entity(name = "product_user_histories")
+@Table(name = "product_user_histories")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductUserHistory {
     @Id

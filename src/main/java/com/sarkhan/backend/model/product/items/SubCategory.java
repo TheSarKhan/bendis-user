@@ -9,10 +9,11 @@ import org.hibernate.type.SqlTypes;
 import java.util.List;
 
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "sub_categories")
+@Table(name = "sub_categories")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SubCategory {
     @Id
