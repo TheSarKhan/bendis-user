@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterRequest {
-     String nameAndSurname;
+     String fullName;
      String email;
      String password;
 }

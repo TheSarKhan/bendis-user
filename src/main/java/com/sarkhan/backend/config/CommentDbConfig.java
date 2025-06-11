@@ -25,7 +25,7 @@ import java.util.Map;
         entityManagerFactoryRef = "fourEntityManagerFactory", // Düzəliş
         transactionManagerRef = "fourTransactionManager"      // Düzəliş
 )
-public class CommentConfig {
+public class CommentDbConfig {
 
     @Value("${spring.datasource.four.url}")
     private String fourDbUrl;
@@ -40,7 +40,7 @@ public class CommentConfig {
     private String fourDbDdlAuto;
 
     @Bean(name = "fourDataSource")
-    public DataSource thirdDataSource() {
+    public DataSource fourDataSource() {
         HikariDataSource dataSource = DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .url(fourDbUrl)

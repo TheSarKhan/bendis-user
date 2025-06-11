@@ -18,7 +18,7 @@ public class UserDbInitializer {
     @PostConstruct
     public void init() {
         User admin = User.builder()
-                .nameAndSurname("Admin")
+                .fullName("Admin")
                 .email("admin1234@gmail.com")
                 .password("Admin123")
                 .role(Role.ADMIN)

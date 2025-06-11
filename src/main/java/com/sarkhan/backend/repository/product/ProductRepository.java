@@ -18,6 +18,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> getBySellerId(Long sellerId);
 
+    List<Product> findTop5BySellerIdOrderBySalesCountDesc(Long sellerId);
+
     @Query("from Product where discountedPrice is not null order by updateAt desc limit 20")
     List<Product> getDiscountedProducts();
 
