@@ -6,6 +6,6 @@ import com.sarkhan.backend.model.product.Product;
 import java.util.List;
 
 public interface ProductCustomRepository {
-    List<Product> getByComplexFiltering(ProductFilterRequest request);
+    List<?> getByComplexFiltering(ProductFilterRequest request);
 
 }
