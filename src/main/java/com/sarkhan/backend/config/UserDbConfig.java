@@ -23,7 +23,7 @@ import java.util.Map;
 @EnableTransactionManagement
 @EnableJpaRepositories(
         basePackages = "com.sarkhan.backend.repository.user",
-        entityManagerFactoryRef = "firstEntityManagerFactory",
+        entityManagerFactoryRef = "entityManagerFactory",
         transactionManagerRef = "firstTransactionManager"
 )
 public class UserDbConfig {
@@ -54,8 +54,8 @@ public class UserDbConfig {
     }
 
     @Primary
-    @Bean(name = "firstEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean firstEntityManagerFactory(
+    @Bean(name = "entityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             EntityManagerFactoryBuilder builder,
             @Qualifier("firstDataSource") DataSource dataSource) {
         return builder
@@ -69,7 +69,7 @@ public class UserDbConfig {
     @Primary
     @Bean(name = "firstTransactionManager")
     public PlatformTransactionManager firstTransactionManager(
-            @Qualifier("firstEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
+            @Qualifier("entityManagerFactory") EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
     }
 

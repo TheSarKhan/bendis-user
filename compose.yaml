@@ -116,7 +116,25 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
+  order_service:
+    restart: always
+    container_name: order
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: Order
+    ports:
+      - '5455:5432'
+    volumes:
+      - OrderData:/var/lib/postgresql/data
+    networks:
+      - bendis
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "root" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 volumes:
   UserData: { }
   ProductData: { }
@@ -124,7 +142,7 @@ volumes:
   CommentData: { }
   redis_data: { }
   CartData: { }
-
+  OrderData: { }
 networks:
   bendis:
     driver: bridge

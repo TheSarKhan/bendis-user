@@ -42,7 +42,7 @@ public class PaymentServiceImpl implements PaymentService {
         body.setAmount(orderRequest.getTotalPrice());
         body.setCurrencyType("AZN");
         body.setDescription("Ödəniş");
-        body.setFullName(user.getNameAndSurname());
+        body.setFullName(user.getFullName());
         body.setEmail(email);
         body.setPhoneNumber(user.getCountryCode() + user.getPhoneNumber());
         body.setApproveURL(payriffConfig.getApproveUrl());
