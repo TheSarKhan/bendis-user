@@ -12,9 +12,11 @@ import java.util.concurrent.CompletableFuture;
 public interface ProductService {
     CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images) throws IOException, AuthException;
 
-    ProductResponseForHomePage getAll();
+    List<Product> getAll();
 
-    Product getById(Long id);
+    ProductResponseForHomePage getForHomePage();
+
+    Product getByIdAndAddHistory(Long id);
 
     Product getBySlug(String slug);
 

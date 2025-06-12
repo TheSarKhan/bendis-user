@@ -28,16 +28,15 @@ public class Product {
     @Column(nullable = false)
     String name;
 
-    @Column(name = "original_price", nullable = false)
+    @Column(nullable = false)
     BigDecimal originalPrice;
 
-    @Column(name = "discount_price")
     BigDecimal discountedPrice;
 
-    @Column(name = "sub_category_id", nullable = false)
+    @Column(nullable = false)
     Long subCategoryId;
 
-    @Column(name = "seller_id", nullable = false)
+    @Column(nullable = false)
     Long sellerId;
 
     String brand;
@@ -49,6 +48,8 @@ public class Product {
     String description;
 
     String slug;
+
+    Integer salesCount;
 
     Double rating;
 
@@ -70,17 +71,15 @@ public class Product {
     @JdbcTypeCode(SqlTypes.JSON)
     Map<String, List<String>> specifications;
 
-    @Column(name = "create_at")
     LocalDateTime createAt;
 
-    @Column(name = "update_at")
     LocalDateTime updateAt;
-    @Column(name = "sales_count")
-    Integer salesCount;
 
     @PrePersist
     public void init() {
         createAt = LocalDateTime.now();
+        rating = 0.0;
+        salesCount = 0;
         generateSlug();
     }
 

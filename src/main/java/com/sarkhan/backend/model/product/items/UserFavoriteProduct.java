@@ -16,9 +16,7 @@ public class UserFavoriteProduct {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
-    @Column(name = "user_id")
     Long userId;
 
-    @Column(name = "product_id")
     Long productId;
 }

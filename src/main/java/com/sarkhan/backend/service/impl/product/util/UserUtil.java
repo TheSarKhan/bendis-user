@@ -1,4 +1,4 @@
-package com.sarkhan.backend.util;
+package com.sarkhan.backend.service.impl.product.util;
 
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.ProductUserHistory;
@@ -13,8 +13,10 @@ public class UserUtil {
 
     public static User getCurrentUser(UserService userService, Logger log) throws AuthException {
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        log.warn("Someone try to add product but he/she doesn't login!!!");
-        if (email == null) throw new AuthException("Someone try to add product but he/she doesn't login!!!");
+        if (email == null) {
+            log.warn("User doesn't login!!!");
+            throw new AuthException("User doesn't login!!!");
+        }
         return userService.getByEmail(email);
     }
 

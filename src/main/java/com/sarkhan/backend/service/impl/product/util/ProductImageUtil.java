@@ -1,4 +1,4 @@
-package com.sarkhan.backend.util;
+package com.sarkhan.backend.service.impl.product.util;
 
 import com.sarkhan.backend.dto.cloudinary.CloudinaryUploadResponse;
 import com.sarkhan.backend.dto.product.ProductRequest;
@@ -14,7 +14,7 @@ import java.util.List;
 
 public class ProductImageUtil {
 
-    public static List<Color> uploadImages(ProductRequest request, List<MultipartFile> images, CloudinaryService cloudinaryService, Logger log) throws IOException, IOException {
+    public static List<Color> uploadImages(ProductRequest request, List<MultipartFile> images, CloudinaryService cloudinaryService, Logger log) throws IOException {
         List<CloudinaryUploadResponse> colorPhotos = cloudinaryService.uploadFiles(images, "color");
 
         List<Color> colors = new ArrayList<>();

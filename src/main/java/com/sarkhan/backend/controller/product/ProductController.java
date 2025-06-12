@@ -40,7 +40,7 @@ public class ProductController {
             summary = "Get all products",
             description = "Retrieves a list of all products in the system."
     )
-    public ResponseEntity<ProductResponseForHomePage> getAll() {
+    public ResponseEntity<List<Product>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
@@ -50,7 +50,7 @@ public class ProductController {
             description = "Fetches a single product by its unique identifier (ID)."
     )
     public ResponseEntity<Product> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getById(id));
+        return ResponseEntity.ok(service.getByIdAndAddHistory(id));
     }
 
     @GetMapping("/slug/{slug}")

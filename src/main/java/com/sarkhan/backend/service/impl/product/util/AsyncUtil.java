@@ -1,4 +1,4 @@
-package com.sarkhan.backend.util;
+package com.sarkhan.backend.service.impl.product.util;
 
 import com.sarkhan.backend.dto.product.items.CategoryAndSubCategoryGetAll;
 import com.sarkhan.backend.model.product.Product;

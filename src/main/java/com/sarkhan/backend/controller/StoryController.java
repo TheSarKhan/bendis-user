@@ -50,7 +50,7 @@ public class StoryController {
     }
 
     @GetMapping("/get-like/story-id/{story-id}")
-    public Optional<Long> getLike(@PathVariable("story-id") String storyId) {
+    public Long getLike(@PathVariable("story-id") String storyId) {
         return storyService.getLike(storyId);
     }
 

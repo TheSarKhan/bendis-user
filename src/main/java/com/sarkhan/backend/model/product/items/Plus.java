@@ -21,6 +21,5 @@ public class Plus {
 
     String description;
 
-    @Column(name = "icon_url")
     String iconUrl;
 }

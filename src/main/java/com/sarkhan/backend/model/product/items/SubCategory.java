@@ -23,7 +23,6 @@ public class SubCategory {
     @Column(nullable = false, unique = true)
     String name;
 
-    @Column(name = "category_id")
     Long categoryId;
 
     @JdbcTypeCode(SqlTypes.JSON)

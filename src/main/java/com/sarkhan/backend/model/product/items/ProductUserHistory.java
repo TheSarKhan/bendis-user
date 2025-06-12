@@ -16,9 +16,7 @@ public class ProductUserHistory {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
-    @Column(name = "user_id")
     Long userId;
 
-    @Column(name = "sub_category_id")
     Long subCategoryId;
 }

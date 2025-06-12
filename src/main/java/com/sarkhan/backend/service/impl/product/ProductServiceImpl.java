@@ -31,13 +31,13 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static com.sarkhan.backend.util.AsyncUtil.*;
-import static com.sarkhan.backend.util.ProductFilterUtil.getByComplexFilteringUseSpecification;
-import static com.sarkhan.backend.util.ProductImageUtil.deleteAllImages;
-import static com.sarkhan.backend.util.ProductImageUtil.uploadImages;
-import static com.sarkhan.backend.util.RecommendationUtil.getRecommendedProduct;
-import static com.sarkhan.backend.util.UserUtil.addProductUserHistory;
-import static com.sarkhan.backend.util.UserUtil.getCurrentUser;
+import static com.sarkhan.backend.service.impl.product.util.AsyncUtil.*;
+import static com.sarkhan.backend.service.impl.product.util.ProductFilterUtil.getByComplexFilteringUseSpecification;
+import static com.sarkhan.backend.service.impl.product.util.ProductImageUtil.deleteAllImages;
+import static com.sarkhan.backend.service.impl.product.util.ProductImageUtil.uploadImages;
+import static com.sarkhan.backend.service.impl.product.util.RecommendationUtil.getRecommendedProduct;
+import static com.sarkhan.backend.service.impl.product.util.UserUtil.addProductUserHistory;
+import static com.sarkhan.backend.service.impl.product.util.UserUtil.getCurrentUser;
 
 @Slf4j
 @Service
@@ -89,7 +89,7 @@ public class ProductServiceImpl implements ProductService {
     public CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images)
             throws IOException, AuthException {
         User user = getCurrentUser(userService, log);
-        log.info(user.getNameAndSurname() + " try to create product");
+        log.info(user.getFullName() + " try to create product");
 
         Product product = ProductMapper.toEntity(request, user);
         List<Color> colors = uploadImages(request, images, cloudinaryService, log);
@@ -100,7 +100,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseForHomePage getAll() {
+    public List<Product> getAll(){
+        return productRepository.findAll();
+    }
+
+    @Override
+    public ProductResponseForHomePage getForHomePage() {
         log.info("Someone try to get all products.");
         return new ProductResponseForHomePage(
                 ,
@@ -113,9 +118,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getById(Long id) {
+    public Product getByIdAndAddHistory(Long id) {
         log.info("Someone try to get a product. Id : " + id);
-        Product product = getByIdSupport(id);
+        Product product = getById(id);
         addProductUserHistory(product, userService, historyRepository, log);
         return product;
     }
@@ -259,13 +264,13 @@ public class ProductServiceImpl implements ProductService {
         User user = getCurrentUser(userService, log);
         log.warn("Someone try to give rating product but he/she doesn't login!!!");
         if (user == null) throw new AuthException("Someone try to give rating product but he/she doesn't login!!!");
-        Product product = getByIdSupport(id);
+        Product product = getById(id);
 
-        log.info(user.getNameAndSurname() + " try to give rating. Product name : " + product.getName());
+        log.info(user.getFullName() + " try to give rating. Product name : " + product.getName());
 
         Map<Long, Double> ratings = product.getRatings();
         if (ratings.containsKey(user.getId())) {
-            log.warn(user.getNameAndSurname() + " try to give additional rating.");
+            log.warn(user.getFullName() + " try to give additional rating.");
             return product;
         }
         Double oldRating = product.getRating();
@@ -280,9 +285,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product toggleFavorite(Long id) throws AuthException {
         User user = getCurrentUser(userService, log);
-        Product product = getByIdSupport(id);
+        Product product = getById(id);
 
-        log.info(user.getNameAndSurname() + " pres favorite button. Product name : " + product.getName());
+        log.info(user.getFullName() + " pres favorite button. Product name : " + product.getName());
 
         Long userId = user.getId();
         Optional<UserFavoriteProduct> favorite = favoriteRepository.
@@ -304,13 +309,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product update(Long id, ProductRequest request, List<MultipartFile> newImages)
             throws IOException, AuthException {
-        Product oldProduct = ProductMapper.updateEntity(getByIdSupport(id), request);
+        Product oldProduct = ProductMapper.updateEntity(getById(id), request);
         User user = getCurrentUser(userService, log);
         log.warn("Someone try to update product but he/she doesn't login!!!");
         if (user == null) throw new AuthException("Someone try to update product but he/she doesn't login!!!");
-        log.info(user.getNameAndSurname() + " try to update product. Id : " + id);
+        log.info(user.getFullName() + " try to update product. Id : " + id);
 
-        if (!(Role.ADMIN.equals(user.getRole()) || getByIdSupport(id).getSellerId().equals(user.getId()))) {
+        if (!(Role.ADMIN.equals(user.getRole()) || getById(id).getSellerId().equals(user.getId()))) {
             log.warn("User is not authorized to update this product");
             throw new AccessDeniedException("You are not authorized to update this product");
         }
@@ -332,15 +337,15 @@ public class ProductServiceImpl implements ProductService {
         User user = getCurrentUser(userService, log);
         log.warn("Someone try to delete product but he/she doesn't login!!!");
         if (user == null) throw new AuthException("Someone try to delete product but he/she doesn't login!!!");
-        log.warn(user.getNameAndSurname() + " delete product. Id : " + id);
-        if (Role.ADMIN.equals(user.getRole()) || getByIdSupport(id).getSellerId().equals(user.getId())) {
+        log.warn(user.getFullName() + " delete product. Id : " + id);
+        if (Role.ADMIN.equals(user.getRole()) || getById(id).getSellerId().equals(user.getId())) {
             productRepository.deleteById(id);
         } else {
-            log.warn(user.getNameAndSurname() + " cannot delete this product.");
+            log.warn(user.getFullName() + " cannot delete this product.");
         }
     }
 
-    private Product getByIdSupport(Long id) {
+    public Product getById(Long id) {
         return productRepository.findById(id).orElseThrow(() -> {
             log.info("Cannot find product by " + id + " id.");
             return new NoSuchElementException("Cannot find product by " + id + " id.");

@@ -1,4 +1,4 @@
-package com.sarkhan.backend.util;
+package com.sarkhan.backend.service.impl.product.util;
 
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.SubCategory;
@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.sarkhan.backend.util.UserUtil.getCurrentUser;
+import static com.sarkhan.backend.service.impl.product.util.UserUtil.getCurrentUser;
 
 public class RecommendationUtil {
 
