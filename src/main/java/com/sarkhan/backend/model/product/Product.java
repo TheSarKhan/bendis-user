@@ -1,5 +1,6 @@
 package com.sarkhan.backend.model.product;
 
+import com.sarkhan.backend.model.cart.CartItem;
 import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.product.items.Color;
 import jakarta.persistence.*;
@@ -48,6 +49,9 @@ public class Product {
     @Column(nullable = false)
     String description;
 
+    //add
+    Integer quantity;
+
     String slug;
 
     Double rating;
@@ -77,6 +81,8 @@ public class Product {
     LocalDateTime updateAt;
     @Column(name = "sales_count")
     Integer salesCount;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    List<CartItem> cartItems;
 
     @PrePersist
     public void init() {
