@@ -44,6 +44,52 @@ public class ProductController {
         return ResponseEntity.ok(service.getAll());
     }
 
+    @GetMapping("/famous")
+    @Operation(
+            summary = "Get all famous products",
+            description = "Fetches all products marked as famous. Typically includes trending or highly recognized items."
+    )
+    public ResponseEntity<ProductResponseSimple> getAllFamousProducts() {
+        return ResponseEntity.ok(service.getAllFamousProducts());
+    }
+
+    @GetMapping("/discounted")
+    @Operation(
+            summary = "Get all discounted products",
+            description = "Fetches all products that currently have active discounts."
+    )
+    public ResponseEntity<ProductResponseSimple> getAllDiscountedProducts() {
+        return ResponseEntity.ok(service.getAllDiscountedProducts());
+    }
+
+    @GetMapping("/most-favorite")
+    @Operation(
+            summary = "Get all most favorite products",
+            description = "Fetches products that are mostly add favorite by users."
+    )
+    public ResponseEntity<ProductResponseSimple> getAllMostFavoriteProducts() {
+        return ResponseEntity.ok(service.getAllMostFavoriteProducts());
+    }
+
+    @GetMapping("/flush")
+    @Operation(
+            summary = "Get all flush products",
+            description = "Fetches all products that has limited-stock."
+    )
+    public ResponseEntity<ProductResponseSimple> getAllFlushProducts() {
+        return ResponseEntity.ok(service.getAllFlushProducts());
+    }
+
+    @GetMapping("/recommended")
+    @Operation(
+            summary = "Get all recommended products",
+            description = "Fetches products recommended to the user based on preferences or system logic."
+    )
+    public ResponseEntity<ProductResponseSimple> getAllRecommendedProduct() {
+        return ResponseEntity.ok(service.getAllRecommendedProduct());
+    }
+
+
     @GetMapping("/{id}")
     @Operation(
             summary = "Get product by ID",
