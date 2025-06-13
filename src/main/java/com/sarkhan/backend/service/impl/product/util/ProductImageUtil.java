@@ -24,15 +24,15 @@ public class ProductImageUtil {
             int count = colorAndSize.getPhotoCount();
 
             if (photoIndex + count > colorPhotos.size()) {
-                log.warn("There isn't enough photo: " + colorAndSize.getColorAndSize() + " need " + count + " photo. There are " + (colorPhotos.size() - photoIndex) + " photos.");
+                log.warn("There isn't enough photo: " + colorAndSize.getColor().name() + " need " + count + " photo. There are " + (colorPhotos.size() - photoIndex) + " photos.");
                 break;
             }
 
             List<String> photoUrls = colorPhotos.subList(photoIndex, photoIndex + count).stream().map(CloudinaryUploadResponse::getUrl).toList();
 
-            colorAndSize.setImages(photoUrls);
+            colorAndSize.setImageUrls(photoUrls);
             colorAndSizes.add(colorAndSize);
-            log.info("Color added : " + colorAndSize.getColorAndSize());
+            log.info("Color added : " + colorAndSize.getColor().name());
             photoIndex += count;
         }
         return colorAndSizes;
@@ -41,8 +41,8 @@ public class ProductImageUtil {
     public static void deleteAllImages(Product product, CloudinaryService cloudinaryService) throws IOException {
         if (product.getColorAndSizes() != null) {
             for (ColorAndSize colorAndSize : product.getColorAndSizes()) {
-                if (colorAndSize.getImages() != null) {
-                    for (String imageUrl : colorAndSize.getImages()) {
+                if (colorAndSize.getImageUrls() != null) {
+                    for (String imageUrl : colorAndSize.getImageUrls()) {
                         cloudinaryService.deleteFile(imageUrl);
                     }
                 }
