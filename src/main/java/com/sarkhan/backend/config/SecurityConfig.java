@@ -96,7 +96,7 @@ public class SecurityConfig {
                                 "/api/v1/stories/**", "/api/v1/stories/like/story-id",
                                 "/api/v1/auth/google-login", "/login", "/api/v1/product",
                                 "/api/v1/auth/email/consultation", "/api/v1/auth/email/appeal",
-                                "/api/v1/auth/**", "/api/v1/auth/refresh"
+                                "/api/v1/auth/**", "/api/v1/auth/refresh", "/api/v1/home"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
