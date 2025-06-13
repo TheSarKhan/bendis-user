@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface StoryRepository extends JpaRepository<Story, Long> {
-    @Query("from Story where createdAt >= :yesterday order by viewCount, likeCount")
+    @Query("from Story where createdAt >= :yesterday order by likeCount")
     List<Story> getForHomePage(LocalDateTime yesterday);
 
     List<Story> getBySellerId(Long sellerId);
