@@ -20,6 +20,4 @@ public interface SellerDashboardService {
     List<Map<String, Object>> getMonthlyOrders(Long sellerId);
 
     List<Product> findTop5BySellerIdOrderBySalesCountDesc(Long sellerId);
-
-
 }

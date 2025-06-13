@@ -90,3 +90,4 @@ product:
     maxProduct: 50
     maxSwapDistance: 3
     shuffleProbability: 0.5
+  home-page-count: 30

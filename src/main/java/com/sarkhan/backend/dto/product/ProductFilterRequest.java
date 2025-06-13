@@ -10,6 +10,5 @@ public record ProductFilterRequest(Long subCategoryId,
                                    Double minPrice,
                                    Double maxPrice,
                                    Gender gender,
-                                   Map<String, List<String>> specifications
-                                   ) {
+                                   Map<String, List<String>> specifications) {
 }

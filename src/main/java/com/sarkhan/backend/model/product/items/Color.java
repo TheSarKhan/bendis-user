@@ -16,9 +16,9 @@ public class Color {
 
     int photoCount;
 
-    Double stock;
+    Long stock;
 
     List<String> images;
 
-    Map<String, Double> sizeStockMap;
+    Map<String, Long> sizeStockMap;
 }

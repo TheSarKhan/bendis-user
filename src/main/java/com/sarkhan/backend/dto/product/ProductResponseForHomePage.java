@@ -9,6 +9,7 @@ import java.util.List;
 public record ProductResponseForHomePage(List<Product> famousProducts,
                                          List<Product> discountedProducts,
                                          List<Product> mostFavoriteProducts,
+                                         List<Product> flashProducts,
                                          List<Product> recommendedProducts,
                                          List<Category> categories,
                                          List<SubCategory> subCategories) {

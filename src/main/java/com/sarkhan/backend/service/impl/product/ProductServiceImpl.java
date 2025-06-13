@@ -21,6 +21,8 @@ import jakarta.security.auth.message.AuthException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ import static com.sarkhan.backend.service.impl.product.util.ProductFilterUtil.ge
 import static com.sarkhan.backend.service.impl.product.util.ProductImageUtil.deleteAllImages;
 import static com.sarkhan.backend.service.impl.product.util.ProductImageUtil.uploadImages;
 import static com.sarkhan.backend.service.impl.product.util.RecommendationUtil.getRecommendedProduct;
+import static com.sarkhan.backend.service.impl.product.util.RecommendationUtil.partialShuffle;
 import static com.sarkhan.backend.service.impl.product.util.UserUtil.addProductUserHistory;
 import static com.sarkhan.backend.service.impl.product.util.UserUtil.getCurrentUser;
 
@@ -66,6 +69,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Value("${product.recommend.shuffleProbability}")
     double shuffleProbability;
+
+    @Value("${product.home-page-count}")
+    int homePageCount;
 
     public ProductServiceImpl(ProductRepository productRepository,
                               ProductUserHistoryRepository historyRepository,
@@ -100,21 +106,70 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> getAll(){
+    public List<Product> getAll() {
+        log.info("Someone try to get all products.");
         return productRepository.findAll();
     }
 
     @Override
     public ProductResponseForHomePage getForHomePage() {
-        log.info("Someone try to get all products.");
+        log.info("Someone try to get products for home page.");
+
+        Pageable pageable = PageRequest.of(1, homePageCount + 20);
+
         return new ProductResponseForHomePage(
-                ,
+                shuffleAndDecreaseSize(productRepository.getFamousProducts(pageable)),
+                shuffleAndDecreaseSize(productRepository.getDiscountedProducts(pageable)),
+                shuffleAndDecreaseSize(productRepository.getMostFavoriteProducts(pageable)),
+                shuffleAndDecreaseSize(productRepository.getFlushProducts(pageable)),
+                recommendedProduct(),
                 categoryService.getAll(),
-                subCategoryService.getAll(),
-                getRecommendedProduct(historyRepository, productRepository,
-                        subCategoryService, userService,
-                        log, recommendedProductMaxSize,
-                        shuffleProbability, maxSwapDistance));
+                subCategoryService.getAll());
+    }
+
+    @Override
+    public ProductResponseSimple getAllFamousProducts() {
+        log.info("Someone try to get all famous products.");
+        return new ProductResponseSimple(
+                productRepository.getFamousProducts(),
+                categoryService.getAll(),
+                subCategoryService.getAll());
+    }
+
+    @Override
+    public ProductResponseSimple getAllDiscountedProducts() {
+        log.info("Someone try to get all discounted products.");
+        return new ProductResponseSimple(
+                productRepository.getDiscountedProducts(),
+                categoryService.getAll(),
+                subCategoryService.getAll());
+    }
+
+    @Override
+    public ProductResponseSimple getAllMostFavoriteProducts() {
+        log.info("Someone try to get all most favorite products.");
+        return new ProductResponseSimple(
+                productRepository.getMostFavoriteProducts(),
+                categoryService.getAll(),
+                subCategoryService.getAll());
+    }
+
+    @Override
+    public ProductResponseSimple getAllFlushProducts() {
+        log.info("Someone try to get all flush products.");
+        return new ProductResponseSimple(
+                productRepository.getFlushProducts(),
+                categoryService.getAll(),
+                subCategoryService.getAll());
+    }
+
+    @Override
+    public ProductResponseSimple getAllRecommendedProduct() {
+        log.info("Someone try to get all recommended products.");
+        return new ProductResponseSimple(
+                recommendedProduct(),
+                categoryService.getAll(),
+                subCategoryService.getAll());
     }
 
     @Override
@@ -256,7 +311,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> getAllFavorite() throws AuthException {
         log.info("Someone try to get all favorite product.");
-        return productRepository.getAllFavorite(getCurrentUser(userService,log).getId());
+        return productRepository.getAllFavorite(getCurrentUser(userService, log).getId());
     }
 
     @Override
@@ -295,11 +350,11 @@ public class ProductServiceImpl implements ProductService {
 
         if (favorite.isPresent()) {
             log.info("User remove favorite.");
-            product.setFavoriteCount(product.getFavoriteCount()-1);
+            product.setFavoriteCount(product.getFavoriteCount() - 1);
             favoriteRepository.delete(favorite.get());
         } else {
             log.info("User add favorite.");
-            product.setFavoriteCount(product.getFavoriteCount()+1);
+            product.setFavoriteCount(product.getFavoriteCount() + 1);
             favoriteRepository.save(UserFavoriteProduct.builder().
                     userId(userId).productId(product.getId()).build());
         }
@@ -311,8 +366,10 @@ public class ProductServiceImpl implements ProductService {
             throws IOException, AuthException {
         Product oldProduct = ProductMapper.updateEntity(getById(id), request);
         User user = getCurrentUser(userService, log);
-        log.warn("Someone try to update product but he/she doesn't login!!!");
-        if (user == null) throw new AuthException("Someone try to update product but he/she doesn't login!!!");
+        if (user == null) {
+            log.warn("Someone try to update product but he/she doesn't login!!!");
+            throw new AuthException("Someone try to update product but he/she doesn't login!!!");
+        }
         log.info(user.getFullName() + " try to update product. Id : " + id);
 
         if (!(Role.ADMIN.equals(user.getRole()) || getById(id).getSellerId().equals(user.getId()))) {
@@ -350,5 +407,19 @@ public class ProductServiceImpl implements ProductService {
             log.info("Cannot find product by " + id + " id.");
             return new NoSuchElementException("Cannot find product by " + id + " id.");
         });
+    }
+
+    private List<Product> shuffleAndDecreaseSize(List<Product> products) {
+        return partialShuffle(products, shuffleProbability, recommendedProductMaxSize).
+                stream().
+                limit(homePageCount).
+                toList();
+    }
+
+    private List<Product> recommendedProduct(){
+        return getRecommendedProduct(historyRepository, productRepository,
+                subCategoryService, userService,
+                log, recommendedProductMaxSize,
+                shuffleProbability, maxSwapDistance);
     }
 }

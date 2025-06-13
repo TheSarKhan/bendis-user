@@ -9,6 +9,8 @@ import com.sarkhan.backend.service.UserService;
 import com.sarkhan.backend.service.product.items.SubCategoryService;
 import jakarta.security.auth.message.AuthException;
 import org.slf4j.Logger;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 import static com.sarkhan.backend.service.impl.product.util.UserUtil.getCurrentUser;
 
 public class RecommendationUtil {
+    static Random random = new Random();
 
     public static List<Product> getRecommendedProduct(
             ProductUserHistoryRepository historyRepository,
@@ -31,17 +34,23 @@ public class RecommendationUtil {
         try {
             user = getCurrentUser(userService, log);
         } catch (AuthException ignored) {
-            return Collections.emptyList();
+            return productRepository.
+                    findAll(PageRequest.of(0,
+                            recommendedProductMaxSize,
+                            Sort.by("createAt"))).
+                    toList();
         }
 
         Set<Product> products = new LinkedHashSet<>();
         List<Long> subCategoryIds = historyRepository.findTopSubCategoryIdsByUserId(user.getId());
 
         for (Long subCategoryId : subCategoryIds) {
-            products.addAll(productRepository.getBySubCategoryId(subCategoryId)
-                    .stream()
-                    .limit(recommendedProductMaxSize)
-                    .collect(Collectors.toSet()));
+            if (random.nextDouble() < 0.8) {
+                products.addAll(productRepository.getBySubCategoryId(subCategoryId)
+                        .stream()
+                        .limit(recommendedProductMaxSize)
+                        .collect(Collectors.toSet()));
+            }
         }
 
         if (products.size() < recommendedProductMaxSize) {
@@ -58,9 +67,8 @@ public class RecommendationUtil {
         return partialShuffle(products.stream().toList(), shuffleProbability, maxSwapDistance);
     }
 
-    private static List<Product> partialShuffle(List<Product> input, double shuffleProbability, int maxSwapDistance) {
+    public static List<Product> partialShuffle(List<Product> input, double shuffleProbability, int maxSwapDistance) {
         List<Product> result = new ArrayList<>(input);
-        Random random = new Random();
 
         for (int i = 0; i < result.size(); i++) {
             if (random.nextDouble() < shuffleProbability) {

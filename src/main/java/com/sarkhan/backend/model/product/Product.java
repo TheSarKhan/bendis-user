@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Data
 @Entity
@@ -51,6 +52,8 @@ public class Product {
 
     Integer salesCount;
 
+    Long totalStock;
+
     Double rating;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -69,7 +72,7 @@ public class Product {
     List<Color> colors;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    Map<String, List<String>> specifications;
+    Map<String, String> specifications;
 
     LocalDateTime createAt;
 
@@ -80,6 +83,16 @@ public class Product {
         createAt = LocalDateTime.now();
         rating = 0.0;
         salesCount = 0;
+        totalStock = colors.stream().
+                mapToLong(color -> {
+                    if (color.getSizeStockMap() == null) return color.getStock();
+                    return color.getSizeStockMap().
+                            values().
+                            stream().
+                            mapToLong(Long::longValue).
+                            sum();
+                })
+                .sum();
         generateSlug();
     }
 

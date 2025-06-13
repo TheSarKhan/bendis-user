@@ -33,7 +33,7 @@ public class ProductMapper {
         product.setGender(request.gender());
         product.setDescription(request.description());
         product.setPluses(request.pluses());
-        product.setSpecifications(request.specifications());
+        product.setSpecificationsAndStocks(request.specifications());
         product.setUpdateAt(LocalDateTime.now());
 
         product.generateSlug();

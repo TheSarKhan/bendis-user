@@ -16,6 +16,16 @@ public interface ProductService {
 
     ProductResponseForHomePage getForHomePage();
 
+    ProductResponseSimple getAllFamousProducts();
+
+    ProductResponseSimple getAllDiscountedProducts();
+
+    ProductResponseSimple getAllMostFavoriteProducts();
+
+    ProductResponseSimple getAllFlushProducts();
+
+    ProductResponseSimple getAllRecommendedProduct();
+
     Product getByIdAndAddHistory(Long id);
 
     Product getBySlug(String slug);

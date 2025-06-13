@@ -1,6 +1,7 @@
 package com.sarkhan.backend.repository.product;
 
 import com.sarkhan.backend.model.product.Product;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -20,11 +21,29 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     List<Product> findTop5BySellerIdOrderBySalesCountDesc(Long sellerId);
 
-    @Query("from Product where discountedPrice is not null order by updateAt desc limit 20")
+    @Query("from Product order by salesCount")
+    List<Product> getFamousProducts(Pageable pageable);
+
+    @Query("from Product where discountedPrice is not null order by originalPrice - discountedPrice desc")
+    List<Product> getDiscountedProducts(Pageable pageable);
+
+    @Query("from Product order by favoriteCount desc")
+    List<Product> getMostFavoriteProducts(Pageable pageable);
+
+    @Query("from Product order by totalStock")
+    List<Product> getFlushProducts(Pageable pageable);
+
+    @Query("from Product order by salesCount")
+    List<Product> getFamousProducts();
+
+    @Query("from Product where discountedPrice is not null order by originalPrice - discountedPrice desc")
     List<Product> getDiscountedProducts();
 
-    @Query("from Product order by favoriteCount desc limit 20")
+    @Query("from Product order by favoriteCount desc")
     List<Product> getMostFavoriteProducts();
+
+    @Query("from Product order by totalStock")
+    List<Product> getFlushProducts();
 
     @Query("""
            select p from Product p
