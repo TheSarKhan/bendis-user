@@ -11,9 +11,9 @@ import java.util.List;
 
 public interface StoryService {
     StoryResponseDTO create(Long sellerId,
+                            String description,
                             MultipartFile mainContent,
-                            MultipartFile logo,
-                            String description) throws IOException, DataNotFoundException;
+                            MultipartFile logo) throws IOException, DataNotFoundException;
 
     List<Story> getAll();
 
@@ -25,10 +25,9 @@ public interface StoryService {
 
     StoryResponseDTO update(Long sellerId,
                             Long id,
+                            String description,
                             MultipartFile mainContent,
-                            MultipartFile logo,
-                            String description) throws IOException, AuthException;
+                            MultipartFile logo) throws IOException, AuthException;
 
-    void delete(Long sellerId,
-                Long id) throws AuthException;
+    void delete(Long sellerId, Long id) throws AuthException;
 }

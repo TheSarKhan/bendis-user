@@ -21,5 +21,5 @@ public record ProductRequest(@NotBlank String name,
                              String description,
                              List<Long> pluses,
                              @JdbcTypeCode(SqlTypes.JSON)
-                             Map<String, List<String>> specifications) {
+                             Map<String, String> specifications) {
 }

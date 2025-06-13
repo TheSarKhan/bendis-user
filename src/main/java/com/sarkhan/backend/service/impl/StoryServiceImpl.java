@@ -44,9 +44,9 @@ public class StoryServiceImpl implements StoryService, LikeService {
 
     @Override
     public StoryResponseDTO create(Long sellerId,
+                                   String description,
                                    MultipartFile mainContent,
-                                   MultipartFile logo,
-                                   String description) throws IOException {
+                                   MultipartFile logo) throws IOException {
         log.info("Some seller try to create story.");
 
         String mainContentUrl = cloudinaryService.uploadFile(mainContent, "story").getUrl();
@@ -87,63 +87,23 @@ public class StoryServiceImpl implements StoryService, LikeService {
         try {
             Long userId = getCurrentUser().getId();
             List<Long> view = story.getView();
-            if (!view.contains(userId)){
+            if (!view.contains(userId)) {
                 view.add(userId);
                 story.setView(view);
                 story = storyRepository.save(story);
             }
-        } catch (AuthException ignored){}
+        } catch (AuthException ignored) {
+        }
         return new StoryResponseDTO(story,
                 getSellerById(story.getSellerId()));
     }
 
     @Override
-    public StoryResponseDTO update(Long sellerId,
-                                   Long id,
-                                   MultipartFile mainContent,
-                                   MultipartFile logo,
-                                   String description) throws IOException, AuthException {
-        log.info("Someone try to update story.");
-
-        Story story = getById(id);
-
-        if ((sellerId == null || !sellerId.equals(story.getSellerId()) &&
-                                 !Role.ADMIN.equals(getCurrentUser().getRole()))) {
-            log.warn("This user doesn't have access update story methode.");
-            return new StoryResponseDTO(story, getSellerById(story.getSellerId()));
-        }
-
-        cloudinaryService.deleteFile(story.getMainContentUrl());
-        cloudinaryService.deleteFile(story.getLogoUrl());
-
-        String mainContentUrl = cloudinaryService.uploadFile(mainContent, "story").getUrl();
-        String logoUrl = cloudinaryService.uploadFile(logo, "story").getUrl();
-
-        story.setMainContentUrl(mainContentUrl);
-        story.setLogoUrl(logoUrl);
-        story.setDescription(description);
-
-        return new StoryResponseDTO(storyRepository.save(story),
-                getSellerById(story.getSellerId()));
-    }
-
-    @Override
-    public void delete(Long sellerId, Long id) throws AuthException {
-        log.info("Someone try to delete story.");
-
-        if ((sellerId == null || !sellerId.equals(getById(id).getSellerId()) &&
-                                 !Role.ADMIN.equals(getCurrentUser().getRole()))) {
-            log.warn("This user doesn't have access delete story methode.");
-            return;
-        }
-        storyRepository.deleteById(id);
-    }
-
-    @Override
-    public StoryResponseDTO toggleLikeOrDislike(Long storyId, LikeType likeType) throws AuthException {
+    public StoryResponseDTO toggleLikeOrDislike(Long storyId, String likeText) throws AuthException {
         Long userId = getCurrentUser().getId();
         Optional<Like> likeOptional = likeRepository.getByStoryIdAndUserId(storyId, userId);
         Story story = getById(storyId);
+        LikeType likeType = LikeType.valueOf(likeText.toUpperCase());
 
         if (likeOptional.isPresent()) {
             Like like = likeOptional.get();
@@ -179,6 +139,48 @@ public class StoryServiceImpl implements StoryService, LikeService {
 
         return new StoryResponseDTO(storyRepository.save(story),
                 getSellerById(story.getSellerId()));
+    }
+
+    @Override
+    public StoryResponseDTO update(Long sellerId,
+                                   Long id,
+                                   String description,
+                                   MultipartFile mainContent,
+                                   MultipartFile logo) throws IOException, AuthException {
+        log.info("Someone try to update story.");
+
+        Story story = getById(id);
+
+        if ((sellerId == null || !sellerId.equals(story.getSellerId()) &&
+                                 !Role.ADMIN.equals(getCurrentUser().getRole()))) {
+            log.warn("This user doesn't have access update story methode.");
+            return new StoryResponseDTO(story, getSellerById(story.getSellerId()));
+        }
+
+        cloudinaryService.deleteFile(story.getMainContentUrl());
+        cloudinaryService.deleteFile(story.getLogoUrl());
+
+        String mainContentUrl = cloudinaryService.uploadFile(mainContent, "story").getUrl();
+        String logoUrl = cloudinaryService.uploadFile(logo, "story").getUrl();
+
+        story.setMainContentUrl(mainContentUrl);
+        story.setLogoUrl(logoUrl);
+        story.setDescription(description);
+
+        return new StoryResponseDTO(storyRepository.save(story),
+                getSellerById(story.getSellerId()));
+    }
+
+    @Override
+    public void delete(Long sellerId, Long id) throws AuthException {
+        log.info("Someone try to delete story.");
+
+        if ((sellerId == null || !sellerId.equals(getById(id).getSellerId()) &&
+                                 !Role.ADMIN.equals(getCurrentUser().getRole()))) {
+            log.warn("This user doesn't have access delete story methode.");
+            return;
+        }
+        storyRepository.deleteById(id);
     }
 
     public Story getById(Long id) {

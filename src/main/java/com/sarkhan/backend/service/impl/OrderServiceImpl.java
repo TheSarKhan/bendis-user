@@ -42,7 +42,7 @@ public class OrderServiceImpl implements OrderService {
 
             List<ColorAndSize> colorAndSizeVariants = product.getColorAndSizes();
             Optional<ColorAndSize> matchedColor = colorAndSizeVariants.stream()
-                    .filter(c -> c.getColorAndSize().equalsIgnoreCase(item.getColor()))
+                    .filter(c -> c.getColor().name().equalsIgnoreCase(item.getColor()))
                     .findFirst();
 
             if (matchedColor.isPresent()) {
