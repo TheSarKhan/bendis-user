@@ -7,7 +7,7 @@ import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.model.order.OrderStatus;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.model.product.Product;
-import com.sarkhan.backend.model.product.items.Color;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
 import com.sarkhan.backend.model.user.Seller;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.payment.service.PaymentService;
@@ -40,21 +40,21 @@ public class OrderServiceImpl implements OrderService {
             Product product = productRepository.findById(item.getProductId())
                     .orElseThrow(() -> new RuntimeException("Ürün bulunamadı: ID = " + item.getProductId()));
 
-            List<Color> colorVariants = product.getColors();
-            Optional<Color> matchedColor = colorVariants.stream()
-                    .filter(c -> c.getColor().equalsIgnoreCase(item.getColor()))
+            List<ColorAndSize> colorAndSizeVariants = product.getColorAndSizes();
+            Optional<ColorAndSize> matchedColor = colorAndSizeVariants.stream()
+                    .filter(c -> c.getColorAndSize().equalsIgnoreCase(item.getColor()))
                     .findFirst();
 
             if (matchedColor.isPresent()) {
-                Color colorVariant = matchedColor.get();
-                if (item.getQuantity() <= colorVariant.getStock()) {
-                    colorVariant.setStock(colorVariant.getStock() - item.getQuantity());
+                ColorAndSize colorAndSizeVariant = matchedColor.get();
+                if (item.getQuantity() <= colorAndSizeVariant.getStock()) {
+                    colorAndSizeVariant.setStock(colorAndSizeVariant.getStock() - item.getQuantity());
                     productRepository.save(product);
                     System.out.println("Payment Service ise dusdu");
                     return paymentService.createInvoice(orderRequest, token);
                 } else {
                     System.err.println("Yetersiz stok: " + item.getColor() + " için istenen = "
-                            + item.getQuantity() + ", mevcut = " + colorVariant.getStock());
+                                       + item.getQuantity() + ", mevcut = " + colorAndSizeVariant.getStock());
                 }
             } else {
                 System.err.println("Renk bulunamadı: " + item.getColor() + " (Ürün ID: " + item.getProductId() + ")");

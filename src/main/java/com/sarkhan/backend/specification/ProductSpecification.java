@@ -1,7 +1,9 @@
 package com.sarkhan.backend.specification;
 
+import com.sarkhan.backend.model.enums.Color;
 import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.product.Product;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,6 +23,70 @@ public class ProductSpecification {
             query.orderBy(criteriaBuilder.desc(function));
             return criteriaBuilder.greaterThanOrEqualTo(function, 0.3);
         };
+    }
+
+    public static Specification<Product> hasColorAndSize(List<Color> colors, List<String> sizes) {
+        return (root, query, cb) -> {
+            if (sizes == null || sizes.isEmpty()) {
+                return cb.or(colors.stream()
+                        .map(color -> cb.equal(
+                                cb.function(
+                                        "jsonb_path_exists",
+                                        Boolean.class,
+                                        root.get("colorAndSizes"),
+                                        cb.literal("$[*] ? (@.color == \"" + color.name() + "\")")
+                                ),
+                                true
+                        ))
+                        .toArray(Predicate[]::new)
+                );
+            }
+
+            if (colors == null || colors.isEmpty()) {
+                return cb.or(sizes.stream()
+                        .map(size -> cb.equal(
+                                cb.function(
+                                        "jsonb_path_exists",
+                                        Boolean.class,
+                                        root.get("colorAndSizes"),
+                                        cb.literal("$[*] ? (exists(@.sizeStockMap.\"" + size + "\"))")
+                                ),
+                                true
+                        ))
+                        .toArray(Predicate[]::new)
+                );
+            }
+
+            String jsonPath = buildCombinedJsonPath(colors, sizes);
+            return cb.equal(
+                    cb.function(
+                            "jsonb_path_exists",
+                            Boolean.class,
+                            root.get("colorAndSizes"),
+                            cb.literal(jsonPath)
+                    ),
+                    true
+            );
+        };
+    }
+
+    private static String buildCombinedJsonPath(List<Color> colors, List<String> sizes) {
+        StringBuilder path = new StringBuilder("$[*] ? (");
+
+        path.append("(@.color == \"").append(colors.getFirst().name()).append("\"");
+        for (int i = 1; i < colors.size(); i++) {
+            path.append(" || @.color == \"").append(colors.get(i).name()).append("\"");
+        }
+        path.append(")");
+
+
+        path.append(" && (exists(@.sizeStockMap.\"").append(sizes.getFirst()).append("\")");
+        for (int i = 1; i < sizes.size(); i++) {
+            path.append(" || exists(@.sizeStockMap.\"").append(sizes.get(i)).append("\")");
+        }
+        path.append("))");
+
+        return path.toString();
     }
 
     public static Specification<Product> hasSubCategoryId(Long subCategoryId) {

@@ -5,7 +5,7 @@ import com.sarkhan.backend.mapper.ProductMapper;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.Category;
-import com.sarkhan.backend.model.product.items.Color;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
 import com.sarkhan.backend.model.product.items.SubCategory;
 import com.sarkhan.backend.model.product.items.UserFavoriteProduct;
 import com.sarkhan.backend.model.user.User;
@@ -98,8 +98,8 @@ public class ProductServiceImpl implements ProductService {
         log.info(user.getFullName() + " try to create product");
 
         Product product = ProductMapper.toEntity(request, user);
-        List<Color> colors = uploadImages(request, images, cloudinaryService, log);
-        product.setColors(colors);
+        List<ColorAndSize> colorAndSizes = uploadImages(request, images, cloudinaryService, log);
+        product.setColorAndSizes(colorAndSizes);
 
         log.info("Product create successfully.");
         return CompletableFuture.completedFuture(productRepository.save(product));
@@ -259,8 +259,9 @@ public class ProductServiceImpl implements ProductService {
                                 categoriesFuture.get(),
                                 subCategoriesFuture.get(),
                                 specsFuture.get(),
-                                new ProductFilterRequest(subCategoryId, null,
-                                        null, null, null, null));
+                                new ProductFilterRequest(subCategoryId, null, null,
+                                        null, null, null, null,
+                                        null));
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -381,9 +382,9 @@ public class ProductServiceImpl implements ProductService {
 
         deleteAllImages(product, cloudinaryService);
 
-        List<Color> colors = uploadImages(request, newImages, cloudinaryService, log);
+        List<ColorAndSize> colorAndSizes = uploadImages(request, newImages, cloudinaryService, log);
 
-        product.setColors(colors);
+        product.setColorAndSizes(colorAndSizes);
 
         log.info("Product update successfully.");
         return productRepository.save(product);
@@ -416,7 +417,7 @@ public class ProductServiceImpl implements ProductService {
                 toList();
     }
 
-    private List<Product> recommendedProduct(){
+    private List<Product> recommendedProduct() {
         return getRecommendedProduct(historyRepository, productRepository,
                 subCategoryService, userService,
                 log, recommendedProductMaxSize,

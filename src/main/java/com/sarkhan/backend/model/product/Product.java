@@ -1,7 +1,7 @@
 package com.sarkhan.backend.model.product;
 
 import com.sarkhan.backend.model.enums.Gender;
-import com.sarkhan.backend.model.product.items.Color;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,7 +12,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Data
 @Entity
@@ -69,7 +68,7 @@ public class Product {
     List<Long> pluses;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    List<Color> colors;
+    List<ColorAndSize> colorAndSizes;
 
     @JdbcTypeCode(SqlTypes.JSON)
     Map<String, String> specifications;
@@ -83,7 +82,7 @@ public class Product {
         createAt = LocalDateTime.now();
         rating = 0.0;
         salesCount = 0;
-        totalStock = colors.stream().
+        totalStock = colorAndSizes.stream().
                 mapToLong(color -> {
                     if (color.getSizeStockMap() == null) return color.getStock();
                     return color.getSizeStockMap().

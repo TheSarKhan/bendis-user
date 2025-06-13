@@ -13,6 +13,11 @@ public class ProductFilterUtil {
     public static List<Product> getByComplexFilteringUseSpecification(ProductFilterRequest request, ProductRepository productRepository) {
         Specification<Product> spec = Specification.where(null);
 
+        if (!((request.colors() == null || request.colors().isEmpty()) &&
+              (request.sizes() == null || request.sizes().isEmpty()))){
+            spec = spec.and(ProductSpecification.hasColorAndSize(request.colors(), request.sizes()));
+        }
+
         if (request.subCategoryId() != null) {
             spec = spec.and(ProductSpecification.hasSubCategoryId(request.subCategoryId()));
         }
