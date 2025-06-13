@@ -76,7 +76,7 @@ public class ProductController {
             summary = "Get products by sub-category",
             description = "Returns all products that belong to a given sub-category ID."
     )
-    public ResponseEntity<ProductResponseForSelectedSubCategory> getBySubCategoryId(@PathVariable Long subCategoryId) throws ExecutionException, InterruptedException {
+    public ResponseEntity<ProductResponseForSelectedSubCategoryAndComplexFilter> getBySubCategoryId(@PathVariable Long subCategoryId) throws ExecutionException, InterruptedException {
         return ResponseEntity.ok(service.getBySubCategoryId(subCategoryId).get());
     }
 
@@ -94,7 +94,7 @@ public class ProductController {
             summary = "Filter products with complex criteria",
             description = "Applies multiple filtering criteria (e.g., price range, category, rating) to retrieve matching products."
     )
-    public ResponseEntity<ProductResponseForSelectedSubCategory> getByComplexFilter(@ModelAttribute ProductFilterRequest request) throws ExecutionException, InterruptedException {
+    public ResponseEntity<ProductResponseForSelectedSubCategoryAndComplexFilter> getByComplexFilter(@ModelAttribute ProductFilterRequest request) throws ExecutionException, InterruptedException {
         return ResponseEntity.ok(service.getByComplexFiltering(request).get());
     }
 

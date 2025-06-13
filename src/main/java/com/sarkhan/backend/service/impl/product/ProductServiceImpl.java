@@ -2,6 +2,7 @@ package com.sarkhan.backend.service.impl.product;
 
 import com.sarkhan.backend.dto.product.*;
 import com.sarkhan.backend.mapper.ProductMapper;
+import com.sarkhan.backend.model.enums.Color;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.Category;
@@ -236,7 +237,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Async
-    public CompletableFuture<ProductResponseForSelectedSubCategory> getBySubCategoryId(Long subCategoryId) {
+    public CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getBySubCategoryId(Long subCategoryId) {
         log.info("Someone try to get products. SubCategory id : " + subCategoryId);
 
         CompletableFuture<List<Product>> productsFuture = CompletableFuture.supplyAsync(
@@ -251,14 +252,24 @@ public class ProductServiceImpl implements ProductService {
         CompletableFuture<List<String>> specsFuture = CompletableFuture.supplyAsync(
                 () -> subCategoryService.getById(subCategoryId).getSpecifications(), executor);
 
-        return CompletableFuture.allOf(productsFuture, categoriesFuture, subCategoriesFuture, specsFuture)
+        CompletableFuture<List<String>> colorFuture = CompletableFuture.supplyAsync(
+                () -> productRepository.getDistinctColorsBySubCategoryId(subCategoryId), executor);
+
+        CompletableFuture<List<String>> sizeFuture = CompletableFuture.supplyAsync(
+                () -> productRepository.getDistinctSizesBySubCategoryId(subCategoryId), executor);
+
+        return CompletableFuture.allOf(productsFuture, categoriesFuture, subCategoriesFuture, specsFuture, colorFuture, sizeFuture)
                 .thenApply(v -> {
                     try {
-                        return new ProductResponseForSelectedSubCategory(
+                        return new ProductResponseForSelectedSubCategoryAndComplexFilter(
                                 productsFuture.get(),
                                 categoriesFuture.get(),
                                 subCategoriesFuture.get(),
                                 specsFuture.get(),
+                                colorFuture.get().stream()
+                                        .map(Color::valueOf)
+                                        .toList(),
+                                sizeFuture.get(),
                                 new ProductFilterRequest(subCategoryId, null, null,
                                         null, null, null, null,
                                         null));
@@ -280,7 +291,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Async
-    public CompletableFuture<ProductResponseForSelectedSubCategory> getByComplexFiltering(ProductFilterRequest request) {
+    public CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getByComplexFiltering(ProductFilterRequest request) {
         log.info("Someone try to get product with complex params.");
         CompletableFuture<List<Product>> productsFuture = CompletableFuture.supplyAsync(() ->
                 getByComplexFilteringUseSpecification(request, productRepository));
@@ -294,14 +305,24 @@ public class ProductServiceImpl implements ProductService {
         CompletableFuture<List<String>> specsFuture = CompletableFuture.supplyAsync(() ->
                 subCategoryService.getById(request.subCategoryId()).getSpecifications(), executor);
 
-        return CompletableFuture.allOf(productsFuture, categoriesFuture, subCategoriesFuture, specsFuture)
+        CompletableFuture<List<String>> colorFuture = CompletableFuture.supplyAsync(
+                () -> productRepository.getDistinctColorsBySubCategoryId(request.subCategoryId()), executor);
+
+        CompletableFuture<List<String>> sizeFuture = CompletableFuture.supplyAsync(
+                () -> productRepository.getDistinctSizesBySubCategoryId(request.subCategoryId()), executor);
+
+        return CompletableFuture.allOf(productsFuture, categoriesFuture, subCategoriesFuture, specsFuture, colorFuture, sizeFuture)
                 .thenApply(unused -> {
                     try {
-                        return new ProductResponseForSelectedSubCategory(
+                        return new ProductResponseForSelectedSubCategoryAndComplexFilter(
                                 productsFuture.get(),
                                 categoriesFuture.get(),
                                 subCategoriesFuture.get(),
                                 specsFuture.get(),
+                                colorFuture.get().stream()
+                                        .map(Color::valueOf)
+                                        .toList(),
+                                sizeFuture.get(),
                                 request);
                     } catch (Exception e) {
                         throw new RuntimeException(e);

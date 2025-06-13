@@ -32,11 +32,11 @@ public interface ProductService {
 
     CompletableFuture<ProductResponseForSearchByName> searchByName(String name);
 
-    CompletableFuture<ProductResponseForSelectedSubCategory> getBySubCategoryId(Long subCategoryId);
+    CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getBySubCategoryId(Long subCategoryId);
 
     ProductResponseForGetBySellerId getBySellerId(Long sellerId);
 
-    CompletableFuture<ProductResponseForSelectedSubCategory> getByComplexFiltering(ProductFilterRequest request);
+    CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getByComplexFiltering(ProductFilterRequest request);
 
     List<Product> getAllFavorite() throws AuthException;
 
