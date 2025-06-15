@@ -1,5 +1,6 @@
 package com.sarkhan.backend.dto.product;
 
+import com.sarkhan.backend.dto.product.items.ColorAndSizeRequest;
 import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.product.items.ColorAndSize;
 import jakarta.validation.constraints.Min;
@@ -16,7 +17,7 @@ public record ProductRequest(@NotBlank String name,
                              @Min(0) BigDecimal discountedPrice,
                              Long subCategoryId,
                              @JdbcTypeCode(SqlTypes.JSON)
-                             List<ColorAndSize> colorAndSizes,
+                             List<ColorAndSizeRequest> colorAndSizeRequests,
                              Gender gender,
                              String description,
                              List<Long> pluses,

@@ -11,9 +11,8 @@ import java.util.Optional;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-
     Optional<Category> findByName(String name);
 
-    @Query(value = "SELECT * FROM categories WHERE name % :name", nativeQuery = true)
-    List<Category> searchByName(@Param("name") String Name);
+    @Query(value = "select * from categories where name % :name", nativeQuery = true)
+    List<Category> searchByName(String Name);
 }
