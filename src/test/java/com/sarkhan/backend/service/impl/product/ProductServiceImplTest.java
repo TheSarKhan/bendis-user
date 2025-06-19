@@ -3,9 +3,8 @@ package com.sarkhan.backend.service.impl.product;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.repository.product.ProductRepository;
 import com.sarkhan.backend.repository.product.items.ProductUserHistoryRepository;
-import com.sarkhan.backend.repository.product.items.UserFavoriteProductRepository;
-import com.sarkhan.backend.service.CloudinaryService;
 import com.sarkhan.backend.service.UserService;
+import com.sarkhan.backend.service.impl.product.util.RecommendationUtil;
 import com.sarkhan.backend.service.impl.product.util.UserUtil;
 import com.sarkhan.backend.service.product.items.CategoryService;
 import com.sarkhan.backend.service.product.items.SubCategoryService;
@@ -16,36 +15,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.Executor;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
-
     @Mock
     private ProductRepository productRepository;
-    @Mock
-    private ProductUserHistoryRepository historyRepository;
-    @Mock
-    private CloudinaryService cloudinaryService;
+
     @Mock
     private CategoryService categoryService;
+
     @Mock
     private SubCategoryService subCategoryService;
-    @Mock
-    private UserService userService;
-    @Mock
-    private UserFavoriteProductRepository favoriteRepository;
-    @Mock
-    private Executor executor;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -80,9 +71,18 @@ class ProductServiceImplTest {
         when(productRepository.getFlushProducts(any(PageRequest.class))).thenReturn(List.of(sampleProduct));
         when(categoryService.getAll()).thenReturn(List.of());
         when(subCategoryService.getAll()).thenReturn(List.of());
-        try (MockedStatic<UserUtil> mockedStatic = mockStatic(UserUtil.class)) {
-            mockedStatic.when(() -> UserUtil.getCurrentUser(any(), any()))
-                    .thenThrow(new AuthException("User doesn't login!!!"));
+        try (MockedStatic<RecommendationUtil> recommendationStatic =
+                     mockStatic(RecommendationUtil.class)) {
+            recommendationStatic.when(() -> RecommendationUtil.getRecommendedProduct(
+                    Mockito.any(ProductUserHistoryRepository.class),
+                    Mockito.any(ProductRepository.class),
+                    Mockito.any(SubCategoryService.class),
+                    Mockito.any(UserService.class),
+                    Mockito.any(Logger.class),
+                    Mockito.anyInt(),
+                    Mockito.anyDouble(),
+                    Mockito.anyInt()
+            )).thenReturn(null);
 
             assertNotNull(productService.getForHomePage());
         }

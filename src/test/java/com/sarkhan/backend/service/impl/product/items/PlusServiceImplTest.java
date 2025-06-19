@@ -86,7 +86,7 @@ class PlusServiceImplTest {
     void testGetById_whenNotFound() {
         when(plusRepository.findById(2L)).thenReturn(Optional.empty());
 
-        Exception ex = assertThrows(NoSuchElementException.class, () -> plusService.getById(1L));
+        Exception ex = assertThrows(NoSuchElementException.class, () -> plusService.getById(2L));
         assertTrue(ex.getMessage().contains("Cannot find any plus with 2 id."));
         verify(plusRepository).findById(2L);
     }
