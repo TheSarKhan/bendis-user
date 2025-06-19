@@ -24,6 +24,7 @@ public class CartItemRequestDTO {
     private Integer quantity;
 
     private String color;
+    private String size;
 
     private BigDecimal totalPrice;
 }

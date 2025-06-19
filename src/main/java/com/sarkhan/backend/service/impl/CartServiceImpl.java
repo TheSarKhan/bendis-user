@@ -5,9 +5,11 @@ import com.sarkhan.backend.dto.cart.CartItemResponseDTO;
 import com.sarkhan.backend.dto.cart.UserCartDTO;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
+import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.cart.CartItem;
 import com.sarkhan.backend.model.product.Product;
+import com.sarkhan.backend.model.product.items.Color;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.cart.CartItemRepository;
 import com.sarkhan.backend.repository.cart.CartRepository;
@@ -30,6 +32,7 @@ public class CartServiceImpl implements CartService {
     private final ProductRepository productRepository;
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
+    private final JwtService jwtService;
 
     @Override
     public void addToCart(Long userId, CartItemRequestDTO cartItemRequestDTO) throws NotEnoughQuantityException {
@@ -48,33 +51,49 @@ public class CartServiceImpl implements CartService {
                     log.error("Product can not found");
                     return new ResourceNotFoundException("Product can not found");
                 });
+        Color color = product.getColors().stream()
+                .filter(c -> c.getColor().equalsIgnoreCase(cartItemRequestDTO.getColor()))
+                .findFirst().orElseThrow(() -> {
+                    log.error("Color can not found" + cartItemRequestDTO.getColor());
+                    return new ResourceNotFoundException("Product can not found");
+                });
+        if (cartItemRequestDTO.getSize() != null && !cartItemRequestDTO.getSize().isBlank()) {
+            Double stock = color.getSizeStockMap().get(cartItemRequestDTO.getSize());
+            if (stock == null || stock < cartItemRequestDTO.getQuantity()) {
+                throw new NotEnoughQuantityException("Not enough quantity for this product " + cartItemRequestDTO.getQuantity());
+            }
+            color.getSizeStockMap().put(cartItemRequestDTO.getSize(),
+                    stock - cartItemRequestDTO.getQuantity());
+        } else {
+            if (color.getStock() < cartItemRequestDTO.getQuantity()) {
+                throw new NotEnoughQuantityException("Not enough quantity for this product " + cartItemRequestDTO.getQuantity());
+            }
+            color.setStock(color.getStock() - cartItemRequestDTO.getQuantity());
+        }
+
         CartItem existingItem = cartItemRepository.findByCartAndProductIdAndColor(
                 cart, cartItemRequestDTO.getProductId(), cartItemRequestDTO.getColor()
         ).orElse(null);
 
-        if (product.getQuantity()<cartItemRequestDTO.getQuantity()) {
-            log.error("Not enough quantity");
-            throw new NotEnoughQuantityException("Not enough quantity");
-        }
-        if (existingItem!=null) {
+        int quantity = cartItemRequestDTO.getQuantity();
+        BigDecimal totalPrice = product.getDiscountedPrice().multiply(BigDecimal.valueOf(quantity));
+        if (existingItem != null) {
             int newQuantity = existingItem.getQuantity() + cartItemRequestDTO.getQuantity();
             existingItem.setQuantity(newQuantity);
             BigDecimal newPrice = product.getDiscountedPrice().multiply(BigDecimal.valueOf(newQuantity));
             existingItem.setTotalPrice(newPrice);
             cartItemRepository.save(existingItem);
-        }else {
+        } else {
             CartItem newItem = CartItem.builder()
                     .cart(cart)
                     .productId(product.getId())
                     .color(cartItemRequestDTO.getColor())
                     .quantity(cartItemRequestDTO.getQuantity())
-                    .totalPrice(existingItem.getTotalPrice())
+                    .totalPrice(totalPrice)
                     .build();
 
             cartItemRepository.save(newItem);
         }
-        int quantity = product.getQuantity() - cartItemRequestDTO.getQuantity();
-        product.setQuantity(quantity);
         productRepository.save(product);
 
     }
@@ -133,6 +152,13 @@ public class CartServiceImpl implements CartService {
         cartItem.setTotalPrice(newTotal);
 
         cartItemRepository.save(cartItem);
+    }
+
+    @Override
+    public Long extractUserIdFromToken(String authHeader) {
+        String token = authHeader.substring(7);
+        String email = jwtService.extractEmail(token);
+        return userRepository.findByEmail(email).orElseThrow().getId();
     }
 
     @Override
