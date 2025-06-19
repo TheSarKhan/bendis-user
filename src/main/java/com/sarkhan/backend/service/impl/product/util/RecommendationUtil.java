@@ -35,7 +35,7 @@ public class RecommendationUtil {
             user = getCurrentUser(userService, log);
         } catch (AuthException ignored) {
             return productRepository.
-                    findAll(PageRequest.of(0,
+                    findAll(PageRequest.of(1,
                             recommendedProductMaxSize,
                             Sort.by("createAt"))).
                     toList();

@@ -2,6 +2,7 @@ package com.sarkhan.backend.service.impl.product.util;
 
 import com.sarkhan.backend.dto.cloudinary.CloudinaryUploadResponse;
 import com.sarkhan.backend.dto.product.ProductRequest;
+import com.sarkhan.backend.dto.product.items.ColorAndSizeRequest;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.ColorAndSize;
 import com.sarkhan.backend.service.CloudinaryService;
@@ -20,19 +21,24 @@ public class ProductImageUtil {
         List<ColorAndSize> colorAndSizes = new ArrayList<>();
         int photoIndex = 0;
 
-        for (ColorAndSize colorAndSize : request.colorAndSizes()) {
-            int count = colorAndSize.getPhotoCount();
+        for (ColorAndSizeRequest colorAndSize : request.colorAndSizeRequests()) {
+            int count = colorAndSize.photoCount();
 
             if (photoIndex + count > colorPhotos.size()) {
-                log.warn("There isn't enough photo: " + colorAndSize.getColor().name() + " need " + count + " photo. There are " + (colorPhotos.size() - photoIndex) + " photos.");
+                log.warn("There isn't enough photo: " + colorAndSize.color().name() + " need " + count + " photo. There are " + (colorPhotos.size() - photoIndex) + " photos.");
                 break;
             }
 
             List<String> photoUrls = colorPhotos.subList(photoIndex, photoIndex + count).stream().map(CloudinaryUploadResponse::getUrl).toList();
 
-            colorAndSize.setImageUrls(photoUrls);
-            colorAndSizes.add(colorAndSize);
-            log.info("Color added : " + colorAndSize.getColor().name());
+            colorAndSizes.add(ColorAndSize.builder().
+                    color(colorAndSize.color()).
+                    photoCount(colorAndSize.photoCount()).
+                    stock(colorAndSize.stock()).
+                    imageUrls(photoUrls).
+                    sizeStockMap(colorAndSize.sizeStockMap()).
+                    build());
+            log.info("Color added : " + colorAndSize.color().name());
             photoIndex += count;
         }
         return colorAndSizes;

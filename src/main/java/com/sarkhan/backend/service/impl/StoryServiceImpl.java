@@ -43,7 +43,7 @@ public class StoryServiceImpl implements StoryService, LikeService {
     private final LikeRepository likeRepository;
 
     @Override
-    public StoryResponseDTO create(Long sellerId,
+    public StoryResponseDTO add(Long sellerId,
                                    String description,
                                    MultipartFile mainContent,
                                    MultipartFile logo) throws IOException {

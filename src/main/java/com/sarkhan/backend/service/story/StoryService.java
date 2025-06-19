@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface StoryService {
-    StoryResponseDTO create(Long sellerId,
+    StoryResponseDTO add(Long sellerId,
                             String description,
                             MultipartFile mainContent,
                             MultipartFile logo) throws IOException, DataNotFoundException;

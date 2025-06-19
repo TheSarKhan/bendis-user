@@ -23,7 +23,7 @@ public class StoryController {
                                                         @RequestParam String description,
                                                         MultipartFile mainContent,
                                                         MultipartFile logo) throws IOException {
-        return ResponseEntity.ok(service.create(sellerId, description, mainContent, logo));
+        return ResponseEntity.ok(service.add(sellerId, description, mainContent, logo));
     }
 
     @GetMapping
