@@ -21,6 +21,7 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     Order order;
     Long productId;
+    Long sellerId;
     Integer quantity;
     String color;
     BigDecimal totalPrice;

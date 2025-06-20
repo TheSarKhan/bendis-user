@@ -9,7 +9,7 @@ import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.cart.CartItem;
 import com.sarkhan.backend.model.product.Product;
-import com.sarkhan.backend.model.product.items.Color;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.cart.CartItemRepository;
 import com.sarkhan.backend.repository.cart.CartRepository;
@@ -33,6 +33,7 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final JwtService jwtService;
+
     @Override
     public void addToCart(Long userId, CartItemRequestDTO cartItemRequestDTO) throws NotEnoughQuantityException {
         User user = userRepository.findById(userId).orElseThrow(() -> {
@@ -50,19 +51,19 @@ public class CartServiceImpl implements CartService {
                     log.error("Product can not found");
                     return new ResourceNotFoundException("Product can not found");
                 });
-        Color color = product.getColors().stream()
-                .filter(c -> c.getColor().equalsIgnoreCase(cartItemRequestDTO.getColor()))
+        ColorAndSize color = product.getColorAndSizes().stream()
+                .filter(c -> c.getColor().name().equalsIgnoreCase(cartItemRequestDTO.getColor()))
                 .findFirst().orElseThrow(() -> {
                     log.error("Color can not found" + cartItemRequestDTO.getColor());
                     return new ResourceNotFoundException("Product can not found");
                 });
         if (cartItemRequestDTO.getSize() != null && !cartItemRequestDTO.getSize().isBlank()) {
-            Double stock = color.getSizeStockMap().get(cartItemRequestDTO.getSize());
+            Long stock = color.getSizeStockMap().get(cartItemRequestDTO.getSize());
             if (stock == null || stock < cartItemRequestDTO.getQuantity()) {
                 throw new NotEnoughQuantityException("Not enough quantity for this product " + cartItemRequestDTO.getQuantity());
             }
             color.getSizeStockMap().put(cartItemRequestDTO.getSize(),
-                    stock - cartItemRequestDTO.getQuantity());
+                    (long) (stock - cartItemRequestDTO.getQuantity()));
         } else {
             if (color.getStock() < cartItemRequestDTO.getQuantity()) {
                 throw new NotEnoughQuantityException("Not enough quantity for this product " + cartItemRequestDTO.getQuantity());
@@ -77,7 +78,7 @@ public class CartServiceImpl implements CartService {
         int quantity = cartItemRequestDTO.getQuantity();
         BigDecimal totalPrice = product.getDiscountedPrice().multiply(BigDecimal.valueOf(quantity));
 
-        if (existingItem!=null) {
+        if (existingItem != null) {
             int newQuantity = existingItem.getQuantity() + cartItemRequestDTO.getQuantity();
             existingItem.setQuantity(newQuantity);
             BigDecimal newPrice = product.getDiscountedPrice().multiply(BigDecimal.valueOf(newQuantity));
@@ -90,7 +91,7 @@ public class CartServiceImpl implements CartService {
                     .color(cartItemRequestDTO.getColor())
                     .quantity(cartItemRequestDTO.getQuantity())
                     .totalPrice(totalPrice)
-                    .totalPrice(existingItem.getTotalPrice())
+                    .totalPrice(totalPrice)
                     .build();
 
             cartItemRepository.save(newItem);

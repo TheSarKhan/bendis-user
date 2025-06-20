@@ -1,7 +1,8 @@
 package com.sarkhan.backend.dto.product;
 
+import com.sarkhan.backend.dto.product.items.ColorAndSizeRequest;
 import com.sarkhan.backend.model.enums.Gender;
-import com.sarkhan.backend.model.product.items.Color;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -16,10 +17,10 @@ public record ProductRequest(@NotBlank String name,
                              @Min(0) BigDecimal discountedPrice,
                              Long subCategoryId,
                              @JdbcTypeCode(SqlTypes.JSON)
-                             List<Color> colors,
+                             List<ColorAndSizeRequest> colorAndSizeRequests,
                              Gender gender,
                              String description,
                              List<Long> pluses,
                              @JdbcTypeCode(SqlTypes.JSON)
-                             Map<String, List<String>> specifications) {
+                             Map<String, String> specifications) {
 }

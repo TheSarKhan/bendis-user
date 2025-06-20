@@ -1,24 +1,25 @@
 package com.sarkhan.backend.model.product.items;
 
+import com.sarkhan.backend.model.enums.Color;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.util.List;
 import java.util.Map;
 
 @Data
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Color {
-    String color;
+public class ColorAndSize {
+    Color color;
 
-    int photoCount;
+    Integer photoCount;
 
-    Double stock;
+    Long stock;
 
-    List<String> images;
+    List<String> imageUrls;
 
-    Map<String, Double> sizeStockMap;
+    Map<String, Long> sizeStockMap;
 }

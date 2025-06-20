@@ -1,9 +1,9 @@
 package com.sarkhan.backend.service.impl;
 
-import com.sarkhan.backend.model.order.OrderStatus;
-import com.sarkhan.backend.model.order.Order;
+import com.sarkhan.backend.model.enums.OrderStatus;
+import com.sarkhan.backend.model.order.OrderItem;
 import com.sarkhan.backend.model.product.Product;
-import com.sarkhan.backend.repository.order.OrderRepository;
+import com.sarkhan.backend.repository.order.OrderItemRepository;
 import com.sarkhan.backend.repository.product.ProductRepository;
 import com.sarkhan.backend.service.SellerDashboardService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class SellerDashboardServiceImpl implements SellerDashboardService {
-    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderRepository;
     private final ProductRepository productRepository;
 
     @Override
@@ -33,11 +33,11 @@ public class SellerDashboardServiceImpl implements SellerDashboardService {
 
     @Override
     public Integer getCanceledSales(Long sellerId, OrderStatus orderStatus) {
-        return orderRepository.getCanceledSales(sellerId, OrderStatus.CANCELED);
+        return null;
     }
 
     @Override
-    public List<Order> findTop10BySellerIdOrderByOrderDateDesc(Long sellerId) {
+    public List<OrderItem> findTop10BySellerIdOrderByOrderDateDesc(Long sellerId) {
         return orderRepository.findTop10BySellerIdOrderByOrderDateDesc(sellerId);
     }
 

@@ -15,7 +15,6 @@ import java.util.NoSuchElementException;
 @Service
 @RequiredArgsConstructor
 public class SubCategoryServiceImpl implements SubCategoryService {
-
     private final SubCategoryRepository repository;
 
     @Override
@@ -38,18 +37,18 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     @Override
     public SubCategory getById(Long id) {
         log.info("Someone try to get a sub category. Id : " + id);
-        return repository.findById(id).orElseThrow(()->{
-            log.warn("Cannot find subCategory with "+id+" id .");
-            return new NoSuchElementException("Cannot find subCategory with "+id+" id .");
+        return repository.findById(id).orElseThrow(() -> {
+            log.warn("Cannot find subCategory with " + id + " id .");
+            return new NoSuchElementException("Cannot find subCategory with " + id + " id .");
         });
     }
 
     @Override
     public SubCategory getByName(String name) {
         log.info("Someone try to get a sub category. Name : " + name);
-        return repository.findByName(name).orElseThrow(()->{
-            log.warn("Cannot find subCategory with "+name+" name .");
-            return new NoSuchElementException("Cannot find subCategory with "+name+" name .");
+        return repository.findByName(name).orElseThrow(() -> {
+            log.warn("Cannot find subCategory with " + name + " name .");
+            return new NoSuchElementException("Cannot find subCategory with " + name + " name .");
         });
     }
 
@@ -84,4 +83,13 @@ public class SubCategoryServiceImpl implements SubCategoryService {
         repository.deleteById(id);
     }
 
+    @Override
+    public List<Long> getCategoryIdsBySubCategoryIds(List<Long> subCategoryIds) {
+        return repository.getCategoryIdsBySubCategoryIds(subCategoryIds);
+    }
+
+    @Override
+    public List<SubCategory> getByCategoryIds(List<Long> categoryIds) {
+        return repository.getByCategoryIds(categoryIds);
+    }
 }

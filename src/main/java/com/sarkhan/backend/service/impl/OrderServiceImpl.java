@@ -12,7 +12,7 @@ import com.sarkhan.backend.model.enums.OrderStatus;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.model.order.OrderItem;
 import com.sarkhan.backend.model.product.Product;
-import com.sarkhan.backend.model.product.items.Color;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.payment.service.PaymentService;
 import com.sarkhan.backend.repository.address.AddressRepository;
@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,24 +80,36 @@ public class OrderServiceImpl implements OrderService {
                 return new ResourceNotFoundException("Product can not found: ID = " + item.getProductId());
             });
 
-            List<Color> colorVariants = product.getColors();
-            Color colorVariant = colorVariants.stream()
-                    .filter(c -> c.getColor().equalsIgnoreCase(item.getColor()))
+            List<ColorAndSize> colorAndSizes = product.getColorAndSizes();
+            ColorAndSize colorAndSize = colorAndSizes.stream()
+                    .filter(c -> c.getColor().name().equalsIgnoreCase(item.getColor()))
                     .findFirst().orElseThrow(() -> {
                         log.error("Color can not found");
                         return new ResourceNotFoundException("Color can not found: ID = " + item.getColor());
                     });
-
-            if (item.getQuantity() > colorVariant.getStock()) {
-                log.error("Not enough quantity:" + item.getQuantity());
-                throw new NotEnoughQuantityException("Not enough quantity");
+            if (item.getSize() != null && !item.getSize().isBlank()) {
+                Long sizeStock = colorAndSize.getSizeStockMap().get(item.getSize());
+                if (sizeStock == null) {
+                    log.error("Size not found: " + item.getSize());
+                    throw new ResourceNotFoundException("Size not found: " + item.getSize());
+                }
+                if (item.getQuantity() > sizeStock) {
+                    log.error("Not enough quantity:" + item.getQuantity());
+                    throw new NotEnoughQuantityException("Not enough quantity");
+                }
+                colorAndSize.getSizeStockMap().put(item.getSize(), sizeStock - item.getQuantity());
+            } else {
+                if (item.getQuantity() > colorAndSize.getStock()) {
+                    log.error("Not enough quantity: " + item.getQuantity());
+                    throw new NotEnoughQuantityException("Not enough quantity");
+                }
+                colorAndSize.setStock(colorAndSize.getStock() - item.getQuantity());
             }
-            colorVariant.setStock(colorVariant.getStock() - item.getQuantity());
             product.setSalesCount(product.getSalesCount() == null ?
                     item.getQuantity() : product.getSalesCount() + item.getQuantity());
             productRepository.save(product);
         }
-        double sum = cart.getCartItems().stream().mapToDouble(i -> i.getTotalPrice().doubleValue()).sum();
+        BigDecimal sum = cart.getCartItems().stream().map(CartItem::getTotalPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         Order order = Order.builder()
                 .address(address)
@@ -124,5 +137,4 @@ public class OrderServiceImpl implements OrderService {
 
         return paymentService.createInvoice(orderRequest, token);
     }
-
 }

@@ -85,3 +85,9 @@ cloudinary:
     key: 668583881613156
     secret: 7jymaVAgMxu5Pc50toz0YvwJ2ro
 
+product:
+  recommend:
+    maxProduct: 50
+    maxSwapDistance: 3
+    shuffleProbability: 0.5
+  home-page-count: 30

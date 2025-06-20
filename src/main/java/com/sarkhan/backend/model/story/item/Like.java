@@ -1,5 +1,6 @@
-package com.sarkhan.backend.model.story;
+package com.sarkhan.backend.model.story.item;
 
+import com.sarkhan.backend.model.enums.LikeType;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,18 +13,16 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "likes")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Like {
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
-    @Column(nullable = false, name = "fk_story_id")
-    String fkStoryId;
+    @Column(nullable = false)
+    Long storyId;
 
-    @Column(nullable = false, name = "fk_user_id")
-    String fkUserId;
+    @Column(nullable = false)
+    Long userId;
 
-    @Column(name = "like_status")
-    String likeStatus;
-
+    @Column(nullable = false)
+    LikeType likeType;
 }

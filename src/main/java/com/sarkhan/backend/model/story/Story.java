@@ -1,29 +1,54 @@
 package com.sarkhan.backend.model.story;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
-@Entity
-@Table(name = "stories")
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "stories")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Story {
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
+    Long id;
+
+    Long sellerId;
 
     @Column(nullable = false)
-    private String storyImageUrl;
+    String mainContentUrl;
 
     @Column(nullable = false)
-    private String adImageUrl;
+    String logoUrl;
+
+    String description;
+
+    Long likeCount;
+
+    Long dislikeCount;
+
+    Long shareCount;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    List<Long> view;
 
     @Column(nullable = false)
-    private String createdAt;
+    LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    LocalDateTime updatedAt;
+
+    @PrePersist
+    private void init() {
+        createdAt = updatedAt = LocalDateTime.now();
+        likeCount = dislikeCount = shareCount = 0L;
+    }
 }

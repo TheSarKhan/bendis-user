@@ -6,7 +6,7 @@ import com.sarkhan.backend.model.product.items.SubCategory;
 
 import java.util.List;
 
-public record ProductResponseForGetAll(List<Product> products,
-                                       List<Category> categories,
-                                       List<SubCategory> subCategories) {
+public record ProductResponseForGetBySellerId(List<Product> products,
+                                              List<Category> categories,
+                                              List<SubCategory> subCategories) {
 }

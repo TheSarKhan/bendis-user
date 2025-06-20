@@ -1,7 +1,7 @@
 package com.sarkhan.backend.service;
 
-import com.sarkhan.backend.model.order.OrderStatus;
-import com.sarkhan.backend.model.order.Order;
+import com.sarkhan.backend.model.enums.OrderStatus;
+import com.sarkhan.backend.model.order.OrderItem;
 import com.sarkhan.backend.model.product.Product;
 
 import java.math.BigDecimal;
@@ -15,11 +15,9 @@ public interface SellerDashboardService {
 
     Integer getCanceledSales(Long sellerId, OrderStatus orderStatus);
 
-    List<Order> findTop10BySellerIdOrderByOrderDateDesc(Long sellerId);
+    List<OrderItem> findTop10BySellerIdOrderByOrderDateDesc(Long sellerId);
 
     List<Map<String, Object>> getMonthlyOrders(Long sellerId);
 
     List<Product> findTop5BySellerIdOrderBySalesCountDesc(Long sellerId);
-
-
 }
