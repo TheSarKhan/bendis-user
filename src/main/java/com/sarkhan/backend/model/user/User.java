@@ -12,8 +12,6 @@ import org.hibernate.type.SqlTypes;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.Set;
 
 @Data
 @Builder
@@ -27,7 +25,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long id;
-    String nameAndSurname;
+    String fullName;
     String googleId;
     String profileImg;
     String email;

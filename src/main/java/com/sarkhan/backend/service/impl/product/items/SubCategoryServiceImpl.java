@@ -1,5 +1,6 @@
 package com.sarkhan.backend.service.impl.product.items;
 
+import com.sarkhan.backend.dto.product.items.SubCategoryRequest;
 import com.sarkhan.backend.model.product.items.SubCategory;
 import com.sarkhan.backend.repository.product.items.SubCategoryRepository;
 import com.sarkhan.backend.service.product.items.SubCategoryService;
@@ -18,12 +19,12 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     private final SubCategoryRepository repository;
 
     @Override
-    public SubCategory add(String name, Long categoryId, List<String> specification) {
-        log.info("Someone try to create sub category. Name : " + name);
+    public SubCategory add(SubCategoryRequest request) {
+        log.info("Someone try to create sub category. Name : " + request.name());
         SubCategory subCategory = SubCategory.builder()
-                .name(name)
-                .categoryId(categoryId)
-                .specifications(specification)
+                .name(request.name())
+                .categoryId(request.categoryId())
+                .specifications(request.specification())
                 .build();
         return repository.save(subCategory);
     }
@@ -65,14 +66,14 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     }
 
     @Override
-    public SubCategory update(Long id, String name, Long categoryId, List<String> specification) {
+    public SubCategory update(Long id, SubCategoryRequest request) {
         SubCategory subCategory = getById(id);
 
         log.info("Someone try to update sub category. Old sub category : " + subCategory);
 
-        subCategory.setName(name);
-        subCategory.setCategoryId(categoryId);
-        subCategory.setSpecifications(specification);
+        subCategory.setName(request.name());
+        subCategory.setCategoryId(request.categoryId());
+        subCategory.setSpecifications(request.specification());
 
         return repository.save(subCategory);
     }

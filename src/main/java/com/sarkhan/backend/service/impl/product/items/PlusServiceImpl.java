@@ -57,8 +57,22 @@ public class PlusServiceImpl implements PlusService {
     }
 
     @Override
-    public Plus update(Long id, String header, String description, MultipartFile icon) {
-        return null;
+    public Plus update(Long id, String header, String description, MultipartFile icon) throws IOException {
+        Plus plus = getById(id);
+
+        log.info("Someone try to update plus. Plus : " + plus);
+
+        plus.setHeader(header);
+        plus.setDescription(description);
+
+        cloudinaryService.deleteFile(plus.getIconUrl());
+
+        CloudinaryUploadResponse cloudinaryUploadResponse = cloudinaryService.uploadFile(icon, "icon");
+
+        plus.setIconUrl(cloudinaryUploadResponse.getUrl());
+
+        log.info("Update successfully. new Plus : " + plus);
+        return plusRepository.save(plus);
     }
 
     @Override

@@ -15,7 +15,7 @@ public interface PlusService {
 
     Plus getByHeader(String header);
 
-    Plus update(Long id, String header, String description, MultipartFile icon);
+    Plus update(Long id, String header, String description, MultipartFile icon) throws IOException;
 
     void delete(Long id);
 }

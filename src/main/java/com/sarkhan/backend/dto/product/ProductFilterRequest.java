@@ -5,8 +5,7 @@ import com.sarkhan.backend.model.enums.Gender;
 import java.util.List;
 import java.util.Map;
 
-public record ProductFilterRequest(String name,
-                                   Long subCategoryId,
+public record ProductFilterRequest(Long subCategoryId,
                                    Double rating,
                                    Double minPrice,
                                    Double maxPrice,

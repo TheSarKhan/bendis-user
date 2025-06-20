@@ -33,7 +33,6 @@ public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final UserRepository userRepository;
     private final JwtService jwtService;
-
     @Override
     public void addToCart(Long userId, CartItemRequestDTO cartItemRequestDTO) throws NotEnoughQuantityException {
         User user = userRepository.findById(userId).orElseThrow(() -> {
@@ -77,7 +76,8 @@ public class CartServiceImpl implements CartService {
 
         int quantity = cartItemRequestDTO.getQuantity();
         BigDecimal totalPrice = product.getDiscountedPrice().multiply(BigDecimal.valueOf(quantity));
-        if (existingItem != null) {
+
+        if (existingItem!=null) {
             int newQuantity = existingItem.getQuantity() + cartItemRequestDTO.getQuantity();
             existingItem.setQuantity(newQuantity);
             BigDecimal newPrice = product.getDiscountedPrice().multiply(BigDecimal.valueOf(newQuantity));
@@ -90,6 +90,7 @@ public class CartServiceImpl implements CartService {
                     .color(cartItemRequestDTO.getColor())
                     .quantity(cartItemRequestDTO.getQuantity())
                     .totalPrice(totalPrice)
+                    .totalPrice(existingItem.getTotalPrice())
                     .build();
 
             cartItemRepository.save(newItem);

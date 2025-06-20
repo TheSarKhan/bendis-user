@@ -1,4 +1,4 @@
-package com.sarkhan.backend.mapper.product;
+package com.sarkhan.backend.mapper;
 
 import com.sarkhan.backend.dto.product.ProductRequest;
 import com.sarkhan.backend.model.product.Product;

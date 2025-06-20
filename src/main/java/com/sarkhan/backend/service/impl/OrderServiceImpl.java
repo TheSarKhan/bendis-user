@@ -70,6 +70,7 @@ public class OrderServiceImpl implements OrderService {
                 .user(user)
                 .build();
         addressRepository.save(address);
+
         List<CartItemRequestDTO> items = orderRequest.getItems();
 
         for (CartItemRequestDTO item : items) {
@@ -90,7 +91,6 @@ public class OrderServiceImpl implements OrderService {
                 log.error("Not enough quantity:" + item.getQuantity());
                 throw new NotEnoughQuantityException("Not enough quantity");
             }
-
             colorVariant.setStock(colorVariant.getStock() - item.getQuantity());
             product.setSalesCount(product.getSalesCount() == null ?
                     item.getQuantity() : product.getSalesCount() + item.getQuantity());
@@ -124,4 +124,5 @@ public class OrderServiceImpl implements OrderService {
 
         return paymentService.createInvoice(orderRequest, token);
     }
+
 }
