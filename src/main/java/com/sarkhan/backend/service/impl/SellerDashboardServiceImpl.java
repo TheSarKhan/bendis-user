@@ -33,7 +33,7 @@ public class SellerDashboardServiceImpl implements SellerDashboardService {
 
     @Override
     public Integer getCanceledSales(Long sellerId, OrderStatus orderStatus) {
-        return null;
+        return orderRepository.getCanceledSales(sellerId,orderStatus);
     }
 
     @Override
