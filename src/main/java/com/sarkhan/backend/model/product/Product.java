@@ -1,6 +1,5 @@
 package com.sarkhan.backend.model.product;
 
-import com.sarkhan.backend.model.cart.CartItem;
 import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.product.items.ColorAndSize;
 import jakarta.persistence.*;
@@ -80,9 +79,6 @@ public class Product {
     LocalDateTime createAt;
 
     LocalDateTime updateAt;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
-    List<CartItem> cartItems;
 
     @PrePersist
     public void init() {
