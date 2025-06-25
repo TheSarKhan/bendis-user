@@ -15,7 +15,7 @@ import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.ColorAndSize;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.payment.service.PaymentService;
-import com.sarkhan.backend.repository.address.AddressRepository;
+import com.sarkhan.backend.repository.order.AddressRepository;
 import com.sarkhan.backend.repository.cart.CartItemRepository;
 import com.sarkhan.backend.repository.cart.CartRepository;
 import com.sarkhan.backend.repository.order.OrderItemRepository;

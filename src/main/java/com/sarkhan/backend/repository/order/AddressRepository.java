@@ -1,4 +1,4 @@
-package com.sarkhan.backend.repository.address;
+package com.sarkhan.backend.repository.order;
 
 import com.sarkhan.backend.model.order.Address;
 import org.springframework.data.jpa.repository.JpaRepository;
