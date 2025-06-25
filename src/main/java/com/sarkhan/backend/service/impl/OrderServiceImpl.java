@@ -114,7 +114,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = Order.builder()
                 .address(address)
                 .totalPrice(sum)
-                .cart(cart)
+                .cartId(cart.getId())
                 .orderStatus(OrderStatus.PENDING)
                 .build();
 

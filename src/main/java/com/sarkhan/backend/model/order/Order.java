@@ -21,9 +21,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
-    @OneToOne
-    @JoinColumn(name = "cart_id")
-    private Cart cart;
+    private Long cartId;
     private BigDecimal totalPrice;
     @ManyToOne
     @JoinColumn(name = "address_id")
