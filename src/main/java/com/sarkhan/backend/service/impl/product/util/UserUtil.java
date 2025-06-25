@@ -13,7 +13,7 @@ public class UserUtil {
 
     public static User getCurrentUser(UserService userService, Logger log) throws AuthException {
         String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        if (email == null) {
+        if (email.equals("anonymousUser")) {
             log.warn("User doesn't login!!!");
             throw new AuthException("User doesn't login!!!");
         }
