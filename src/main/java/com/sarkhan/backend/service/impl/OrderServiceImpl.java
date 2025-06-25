@@ -5,7 +5,7 @@ import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
 import com.sarkhan.backend.jwt.JwtService;
-import com.sarkhan.backend.model.address.Address;
+import com.sarkhan.backend.model.order.Address;
 import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.cart.CartItem;
 import com.sarkhan.backend.model.enums.OrderStatus;
@@ -58,7 +58,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public String createOrder(OrderRequest orderRequest, String token) throws NotEnoughQuantityException {
         User user = extractUser(token);
-        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> {
+        Cart cart = cartRepository.findByUserId(user.getId()).orElseThrow(() -> {
             log.error("Cart can not found for this user:" + user.getId());
             return new ResourceNotFoundException("Cart can not found for this user");
         });

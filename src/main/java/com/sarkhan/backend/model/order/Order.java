@@ -1,6 +1,5 @@
 package com.sarkhan.backend.model.order;
 
-import com.sarkhan.backend.model.address.Address;
 import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.enums.OrderStatus;
 import jakarta.persistence.*;

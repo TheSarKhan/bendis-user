@@ -10,7 +10,6 @@ import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.cart.CartItem;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.ColorAndSize;
-import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.cart.CartItemRepository;
 import com.sarkhan.backend.repository.cart.CartRepository;
 import com.sarkhan.backend.repository.product.ProductRepository;
@@ -36,12 +35,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void addToCart(Long userId, CartItemRequestDTO cartItemRequestDTO) throws NotEnoughQuantityException {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            log.error("User can not found");
-            return new ResourceNotFoundException("User can not found");
-        });
 
-        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> {
+        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> {
             log.error("Cart can not found");
             return new ResourceNotFoundException("Cart can not found");
         });
@@ -63,7 +58,7 @@ public class CartServiceImpl implements CartService {
                 throw new NotEnoughQuantityException("Not enough quantity for this product " + cartItemRequestDTO.getQuantity());
             }
             color.getSizeStockMap().put(cartItemRequestDTO.getSize(),
-                    (long) (stock - cartItemRequestDTO.getQuantity()));
+                    stock - cartItemRequestDTO.getQuantity());
         } else {
             if (color.getStock() < cartItemRequestDTO.getQuantity()) {
                 throw new NotEnoughQuantityException("Not enough quantity for this product " + cartItemRequestDTO.getQuantity());
@@ -102,12 +97,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public UserCartDTO getUserCart(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            log.error("User can not found");
-            return new ResourceNotFoundException("User can not found");
-        });
-
-        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> {
+        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> {
             log.error("Cart can not found");
             return new ResourceNotFoundException("Cart can not found");
         });
@@ -127,12 +117,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void updateCartItem(Long userId, CartItemRequestDTO cartItemDTO) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            log.error("User can not found");
-            return new ResourceNotFoundException("User can not found");
-        });
 
-        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> {
+        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> {
             log.error("Cart can not found");
             return new ResourceNotFoundException("Cart can not found");
         });
@@ -165,12 +151,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public void removeCartItem(Long userId, Long productId, String color) {
-        User user = userRepository.findById(userId).orElseThrow(() -> {
-            log.error("User can not found");
-            return new ResourceNotFoundException("User can not found");
-        });
 
-        Cart cart = cartRepository.findByUser(user).orElseThrow(() -> {
+        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> {
             log.error("Cart can not found");
             return new ResourceNotFoundException("Cart can not found");
         });

@@ -1,4 +1,4 @@
-package com.sarkhan.backend.model.address;
+package com.sarkhan.backend.model.order;
 
 import com.sarkhan.backend.model.user.User;
 import jakarta.persistence.*;

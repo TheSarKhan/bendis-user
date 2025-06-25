@@ -20,9 +20,7 @@ public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @OneToOne
-    @JoinColumn(name = "user_id")
-    User user;
+    Long userId;
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
     List<CartItem> cartItems;
     LocalDate createdAt;
