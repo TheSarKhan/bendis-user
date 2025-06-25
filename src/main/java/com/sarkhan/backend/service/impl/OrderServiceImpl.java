@@ -68,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
                 .region(orderRequest.getAddressRequestDto().getRegion())
                 .street(orderRequest.getAddressRequestDto().getStreet())
                 .postalCode(orderRequest.getAddressRequestDto().getPostalCode())
-                .user(user)
+                .userId(user.getId())
                 .build();
         addressRepository.save(address);
 
