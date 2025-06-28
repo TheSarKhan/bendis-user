@@ -68,7 +68,7 @@ public class JwtService {
     }
     public String generateAccessToken(String email, Map<String, Object> claims) {
         if (claims == null) {
-            claims = new HashMap<>(); // Eğer null ise boş bir Map oluşturuyoruz
+            claims = new HashMap<>();
         }
 
         return Jwts.builder()

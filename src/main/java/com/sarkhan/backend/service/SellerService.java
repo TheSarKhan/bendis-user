@@ -13,7 +13,7 @@ public interface SellerService {
 
     List<SellerResponseDTO> getAll();
 
-    SellerResponseDTO getById(Long id) throws DataNotFoundException;
+    SellerResponseDTO getByToken(String token) throws DataNotFoundException;
 
     SellerResponseDTO update(UpdateSellerRequestDto updateSellerRequestDto, String token) throws DataNotFoundException;
 }

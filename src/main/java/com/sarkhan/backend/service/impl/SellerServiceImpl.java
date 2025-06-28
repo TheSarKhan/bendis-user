@@ -32,18 +32,20 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public SellerResponseDTO getById(Long id) throws DataNotFoundException {
-        return sellerMapper.sellerToSellerResponseDto(sellerRepository.findById(id).orElseThrow(() -> {
-            log.error("Seller not found");
+    public SellerResponseDTO getByToken(String token) throws DataNotFoundException {
+        String email = jwtService.extractEmail(token);
+        Seller seller = sellerRepository.findByBrandEmail(email).orElseThrow(() -> {
+            log.error("Seller not found {}",email);
             return new DataNotFoundException("Seller not found");
-        }));
+        });
+        return sellerMapper.sellerToSellerResponseDto(seller);
     }
 
     @Override
     public SellerResponseDTO createSeller(SellerRequestDTO sellerRequestDTO, String token) throws DataNotFoundException {
         String email = jwtService.extractEmail(token);
         User user = userRepository.findByEmail(email).orElseThrow(() -> {
-            log.error("User not found");
+            log.error("User not found {}",token);
             return new DataNotFoundException("User not found");
         });
         Seller seller = sellerMapper.sellerRequestDtoToSeller(sellerRequestDTO);

@@ -7,6 +7,7 @@ import com.sarkhan.backend.exception.DataNotFoundException;
 import com.sarkhan.backend.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,18 +23,24 @@ public class SellerController {
         return ResponseEntity.ok(sellerService.getAll());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<SellerResponseDTO> getById(@PathVariable Long id) throws DataNotFoundException {
-        return ResponseEntity.ok(sellerService.getById(id));
+    @GetMapping("/myInfo")
+    @PreAuthorize("hasRole('SELLER')")
+    public ResponseEntity<SellerResponseDTO> getMyInfo(@RequestHeader("Authorization") String token) throws DataNotFoundException {
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+        return ResponseEntity.ok(sellerService.getByToken(token));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<SellerResponseDTO> add(@RequestBody SellerRequestDTO sellerRequestDTO,
                                                  @RequestHeader("Authorization") String token) throws DataNotFoundException {
         return ResponseEntity.ok(sellerService.createSeller(sellerRequestDTO, token));
     }
 
     @PutMapping
+    @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     public ResponseEntity<SellerResponseDTO> update(@RequestBody UpdateSellerRequestDto updateSellerRequestDto,
                                                     @RequestHeader("Authorization") String token) throws DataNotFoundException {
         return ResponseEntity.ok(sellerService.update(updateSellerRequestDto, token));
