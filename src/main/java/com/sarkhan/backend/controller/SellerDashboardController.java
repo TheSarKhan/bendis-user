@@ -1,7 +1,7 @@
 package com.sarkhan.backend.controller;
 
-import com.sarkhan.backend.model.order.OrderStatus;
-import com.sarkhan.backend.model.order.Order;
+import com.sarkhan.backend.model.enums.OrderStatus;
+import com.sarkhan.backend.model.order.OrderItem;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.service.SellerDashboardService;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class SellerDashboardController {
     }
 
     @GetMapping("/recent-orders")
-    public ResponseEntity<List<Order>> recentOrders(@RequestParam Long sellerId) {
+    public ResponseEntity<List<OrderItem>> recentOrders(@RequestParam Long sellerId) {
         return ResponseEntity.ok(sellerDashboardService.findTop10BySellerIdOrderByOrderDateDesc(sellerId));
     }
 

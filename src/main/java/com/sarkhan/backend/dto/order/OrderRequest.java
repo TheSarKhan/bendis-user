@@ -1,5 +1,6 @@
 package com.sarkhan.backend.dto.order;
 
+import com.sarkhan.backend.dto.address.AddressRequestDto;
 import com.sarkhan.backend.dto.cart.CartItemRequestDTO;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -14,4 +15,5 @@ public class OrderRequest {
     private Long orderId;
     private List<CartItemRequestDTO> items;
     private Double totalPrice;
+    private AddressRequestDto addressRequestDto;
 }

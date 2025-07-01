@@ -30,24 +30,17 @@ public class JwtService {
                 .compact();
     }
 
-
-
-
-
     public boolean isTokenValid(String token, String username) {
         final String extractedUsername = extractEmail(token);
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
 
-
-
     public String extractEmail(String token) {
         JwtParser parser = Jwts.parser()
-                .setSigningKey(SECRET_KEY) // Burada SECRET_KEY'i ayarlıyoruz
-                .build(); // Builder'ı oluşturuyoruz
+                .setSigningKey(SECRET_KEY)
+                .build();
         return parser.parseClaimsJws(token).getBody().getSubject();
     }
-
     private boolean isTokenExpired(String token) {
         JwtParser parser = Jwts.parser()
                 .setSigningKey(SECRET_KEY)

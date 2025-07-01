@@ -13,6 +13,11 @@ public class GlobalExceptionHandler {
         ErrorResponse errorResponse = new ErrorResponse(dataNotFoundException.getMessage(), "There isn't any data like that");
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleNotEnoughQuantityException(NotEnoughQuantityException notEnoughQuantityException) {
+        ErrorResponse errorResponse = new ErrorResponse(notEnoughQuantityException.getMessage(), "Not enough quantity exception");
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception exception) {
