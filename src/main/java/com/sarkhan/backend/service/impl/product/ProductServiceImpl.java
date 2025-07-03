@@ -339,8 +339,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product giveRating(Long id, Double rating) throws AuthException {
         User user = getCurrentUser(userService, log);
-        log.warn("Someone try to give rating product but he/she doesn't login!!!");
-        if (user == null) throw new AuthException("Someone try to give rating product but he/she doesn't login!!!");
         Product product = getById(id);
 
         log.info(user.getFullName() + " try to give rating. Product name : " + product.getName());

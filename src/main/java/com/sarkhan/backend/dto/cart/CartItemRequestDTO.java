@@ -1,17 +1,30 @@
 package com.sarkhan.backend.dto.cart;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Data
 @Builder
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@AllArgsConstructor
+@NoArgsConstructor
 public class CartItemRequestDTO {
+
+    @NotNull
+    private Long cartId;
 
     @NotNull(message = "product id can not be null")
     private Long productId;
-    private String color;
+
     @NotNull(message = "quantity can not be null")
     private Integer quantity;
+
+    private String color;
+    private String size;
+
+    private BigDecimal totalPrice;
 }

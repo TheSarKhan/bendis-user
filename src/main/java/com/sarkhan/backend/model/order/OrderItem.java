@@ -1,4 +1,5 @@
-package com.sarkhan.backend.model.cart;
+package com.sarkhan.backend.model.order;
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -6,23 +7,22 @@ import lombok.experimental.FieldDefaults;
 import java.math.BigDecimal;
 
 @Entity
+@Table(name = "order_items")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "cart_items")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CartItem {
+public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @ManyToOne
-    @JoinColumn(name = "cart_id")
-    Cart cart;
-    @Column(name = "product_id")
+    @JoinColumn(name = "order_id")
+    Order order;
     Long productId;
+    Long sellerId;
     Integer quantity;
     String color;
     BigDecimal totalPrice;
-
 }

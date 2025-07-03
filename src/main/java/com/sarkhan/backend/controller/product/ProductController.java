@@ -91,7 +91,7 @@ public class ProductController {
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     @Operation(
             summary = "Get product by ID",
             description = "Fetches a single product by its unique identifier (ID)."
@@ -160,7 +160,8 @@ public class ProductController {
             summary = "Rate a product",
             description = "Allows a user to submit a rating for a product by its ID."
     )
-    public ResponseEntity<Product> giveRating(@PathVariable Long id,
+    public ResponseEntity<Product> giveRating(@RequestHeader("Authorization") String authHeader,
+                                              @PathVariable Long id,
                                               @PathVariable Double rating) throws AuthException {
         return ResponseEntity.ok(service.giveRating(id, rating));
     }
