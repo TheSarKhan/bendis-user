@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/category")
-@RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Category Controller", description = "Endpoints for managing categories")
 public class CategoryController {
     private final CategoryService service;
@@ -25,8 +26,7 @@ public class CategoryController {
             summary = "Add a new category",
             description = "Creates a new category with the given name."
     )
-    public ResponseEntity<Category> add(@RequestHeader("Authorization") String authHeader,
-                                        @RequestBody String name) {
+    public ResponseEntity<Category> add(@RequestBody String name) {
         return ResponseEntity.ok(service.add(name));
     }
 
@@ -35,7 +35,7 @@ public class CategoryController {
             summary = "Get all categories",
             description = "Returns a list of all available categories."
     )
-    public ResponseEntity<List<Category>> getAll(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<Category>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
@@ -44,8 +44,7 @@ public class CategoryController {
             summary = "Get category by ID",
             description = "Fetches a category by its unique identifier (ID)."
     )
-    public ResponseEntity<Category> getById(@RequestHeader("Authorization") String authHeader,
-                                            @PathVariable Long id) {
+    public ResponseEntity<Category> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
@@ -54,8 +53,7 @@ public class CategoryController {
             summary = "Get category by name",
             description = "Fetches a category by its name value."
     )
-    public ResponseEntity<Category> getByName(@RequestHeader("Authorization") String authHeader,
-                                              @PathVariable String name) {
+    public ResponseEntity<Category> getByName(@PathVariable String name) {
         return ResponseEntity.ok(service.getByName(name));
     }
 
@@ -64,8 +62,7 @@ public class CategoryController {
             summary = "Update a category",
             description = "Updates the name of the category with the specified ID."
     )
-    public ResponseEntity<Category> update(@RequestHeader("Authorization") String authHeader,
-                                           @PathVariable Long id,
+    public ResponseEntity<Category> update(@PathVariable Long id,
                                            @RequestBody String name) {
         return ResponseEntity.ok(service.update(id, name));
     }
@@ -75,8 +72,7 @@ public class CategoryController {
             summary = "Delete a category",
             description = "Deletes a category by its ID."
     )
-    public ResponseEntity<Void> delete(@RequestHeader("Authorization") String authHeader,
-                                       @PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

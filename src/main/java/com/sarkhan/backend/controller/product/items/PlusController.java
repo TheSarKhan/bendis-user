@@ -15,9 +15,10 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/plus")
-@RequiredArgsConstructor
+@SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Plus Controller", description = "Endpoints for managing Plus items (header, description, icon)")
 public class PlusController {
     private final PlusService service;
@@ -27,8 +28,7 @@ public class PlusController {
             summary = "Add a new Plus item",
             description = "Creates a new Plus item with a header, description, and icon file. Only ADMINs can perform this action."
     )
-    public ResponseEntity<Plus> add(@RequestHeader("Authorization") String authHeader,
-                                    @RequestPart String header,
+    public ResponseEntity<Plus> add(@RequestPart String header,
                                     @RequestPart String description,
                                     MultipartFile icon) throws IOException {
         return ResponseEntity.ok(service.add(header, description, icon));
@@ -39,7 +39,7 @@ public class PlusController {
             summary = "Get all Plus items",
             description = "Returns a list of all Plus items in the system."
     )
-    public ResponseEntity<List<Plus>> getAll(@RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<Plus>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
@@ -48,8 +48,7 @@ public class PlusController {
             summary = "Get Plus item by ID",
             description = "Fetches a Plus item using its unique ID."
     )
-    public ResponseEntity<Plus> getById(@RequestHeader("Authorization") String authHeader,
-                                        @PathVariable Long id) {
+    public ResponseEntity<Plus> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
@@ -58,8 +57,7 @@ public class PlusController {
             summary = "Get Plus item by header",
             description = "Fetches a Plus item using its unique header value."
     )
-    public ResponseEntity<Plus> getByHeader(@RequestHeader("Authorization") String authHeader,
-                                            @PathVariable String header) {
+    public ResponseEntity<Plus> getByHeader(@PathVariable String header) {
         return ResponseEntity.ok(service.getByHeader(header));
     }
 
@@ -68,8 +66,7 @@ public class PlusController {
             summary = "Update an existing Plus item",
             description = "Updates the header, description, and icon of an existing Plus item by ID. Only ADMINs can perform this action."
     )
-    public ResponseEntity<Plus> update(@RequestHeader("Authorization") String authHeader,
-                                       @PathVariable Long id,
+    public ResponseEntity<Plus> update(@PathVariable Long id,
                                        @RequestPart String header,
                                        @RequestPart String description,
                                        MultipartFile icon) throws IOException {
@@ -81,8 +78,7 @@ public class PlusController {
             summary = "Delete a Plus item",
             description = "Deletes a Plus item by its ID. Only ADMINs are allowed to perform this operation."
     )
-    public ResponseEntity<Void> delete(@RequestHeader("Authorization") String authHeader,
-                                       @PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

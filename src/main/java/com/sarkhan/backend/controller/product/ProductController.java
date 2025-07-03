@@ -4,6 +4,7 @@ import com.sarkhan.backend.dto.product.*;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +25,13 @@ public class ProductController {
     private final ProductService service;
 
     @PostMapping
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
             summary = "Create a new product",
             description = "Adds a new product along with its images. Only users with ADMIN or SELLER roles are allowed."
     )
-    public ResponseEntity<Product> add(@RequestHeader("Authorization") String authHeader,
-                                       @RequestPart ProductRequest productRequest,
+    public ResponseEntity<Product> add(@RequestPart ProductRequest productRequest,
                                        List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException, AuthException {
         return ResponseEntity.ok(service.add(productRequest, images).get());
     }
@@ -145,11 +146,12 @@ public class ProductController {
     }
 
     @GetMapping("/favorite")
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "Get favorite products",
             description = "Retrieves the list of all products marked as favorite by the currently authenticated user."
     )
-    public ResponseEntity<List<Product>> getAllFavorite(@RequestHeader("Authorization") String authHeader) throws AuthException {
+    public ResponseEntity<List<Product>> getAllFavorite() throws AuthException {
         return ResponseEntity.ok(service.getAllFavorite());
     }
 
@@ -164,36 +166,36 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "Toggle product favorite status",
             description = "Marks or unMarks the given product as a favorite for the current user."
     )
-    public ResponseEntity<Product> toggleFavorite(@RequestHeader("Authorization") String authHeader,
-                                                  @PathVariable Long id) throws AuthException {
+    public ResponseEntity<Product> toggleFavorite(@PathVariable Long id) throws AuthException {
         return ResponseEntity.ok(service.toggleFavorite(id));
     }
 
     @PutMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
             summary = "Update a product",
             description = "Updates the details and images of an existing product. Only users with ADMIN or SELLER roles are allowed."
     )
-    public ResponseEntity<Product> update(@RequestHeader("Authorization") String authHeader,
-                                          @PathVariable Long id,
+    public ResponseEntity<Product> update(@PathVariable Long id,
                                           @RequestPart ProductRequest productRequest,
                                           List<MultipartFile> images) throws IOException, AuthException {
         return ResponseEntity.ok(service.update(id, productRequest, images));
     }
 
     @DeleteMapping("/{id}")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
             summary = "Delete a product",
             description = "Deletes a product by its ID. Only users with ADMIN or SELLER roles are allowed to perform this operation."
     )
-    public ResponseEntity<Void> delete(@RequestHeader("Authorization") String authHeader,
-                                       @PathVariable Long id) throws AuthException {
+    public ResponseEntity<Void> delete(@PathVariable Long id) throws AuthException {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
