@@ -47,9 +47,6 @@ public class Product {
     @Column(nullable = false)
     String description;
 
-    //add
-    Integer quantity;
-
     String slug;
 
     Integer salesCount;

@@ -156,12 +156,12 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/rating/{rating}")
+    @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "Rate a product",
             description = "Allows a user to submit a rating for a product by its ID."
     )
-    public ResponseEntity<Product> giveRating(@RequestHeader("Authorization") String authHeader,
-                                              @PathVariable Long id,
+    public ResponseEntity<Product> giveRating(@PathVariable Long id,
                                               @PathVariable Double rating) throws AuthException {
         return ResponseEntity.ok(service.giveRating(id, rating));
     }
