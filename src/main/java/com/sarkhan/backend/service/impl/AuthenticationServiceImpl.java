@@ -38,7 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = new User();
         Set<Role> roles = new HashSet<>();
         roles.add(Role.USER);
-        user.setRoles(roles);
+        //user.setRoles(roles);
         user.setNameAndSurname(request.getNameAndSurname());
         user.setEmail(request.getEmail());
         user.setCreatedAt(now);

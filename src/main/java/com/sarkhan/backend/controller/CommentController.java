@@ -2,11 +2,17 @@ package com.sarkhan.backend.controller;
 
 import com.sarkhan.backend.dto.comment.CommentRequest;
 import com.sarkhan.backend.dto.comment.CommentResponse;
+import com.sarkhan.backend.dto.product.ProductResponse;
+import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.model.comment.Comment;
+import com.sarkhan.backend.model.user.User;
+import com.sarkhan.backend.repository.user.UserRepository;
 import com.sarkhan.backend.service.CommentService;
+import com.sarkhan.backend.service.product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,40 +23,95 @@ import java.util.List;
 public class CommentController {
 
     private final CommentService commentService;
+    private final UserRepository userRepository;
 
-    // Yeni şərh əlavə et
+    private final JwtService jwtService;
+    @GetMapping("/rated")
+    public ResponseEntity<List<ProductResponse>> getRatedProducts(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = extractToken(authHeader);
+        String userEmail = jwtService.extractEmail(token);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
+        Long userId = user.getId();
+
+        List<ProductResponse> products = commentService.getRatedProducts(userId);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/unrated")
+    public ResponseEntity<List<ProductResponse>> getUnratedProducts(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = extractToken(authHeader);
+        String userEmail = jwtService.extractEmail(token);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
+        Long userId = user.getId();
+
+        List<ProductResponse> products = commentService.getUnratedProducts(userId);
+        return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/ordered")
+    public ResponseEntity<List<ProductResponse>> getAllOrderedProducts(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = extractToken(authHeader);
+        String userEmail = jwtService.extractEmail(token);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userEmail));
+        Long userId = user.getId();
+
+        List<ProductResponse> products = commentService.getAllOrderedProducts(userId);
+        return ResponseEntity.ok(products);
+    }
+
     @PostMapping
-    public ResponseEntity<Comment> addComment(@RequestBody CommentRequest request) {
-        Comment createdComment = commentService.addComment(request);
-        return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
+    public ResponseEntity<CommentResponse> createComment(@RequestBody CommentRequest request,
+                                                         @RequestHeader("Authorization") String token) {
+        token = token.substring(7); // "Bearer " hissəsini sil
+        String email = jwtService.extractEmail(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        CommentResponse response = commentService.createComment(request, user.getId());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Şərhi sil
+
+    @PutMapping
+    public ResponseEntity<CommentResponse> updateComment(@RequestParam Long userId,
+                                                         @RequestParam Long productId,
+                                                         @RequestParam String text,
+                                                         @RequestParam int rating) {
+        CommentResponse response = commentService.updateComment(userId, productId, text, rating);
+        return ResponseEntity.ok(response);
+    }
+
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<String> deleteComment(@PathVariable Long commentId) {
-        commentService.deleteComment(commentId);
-        return new ResponseEntity<>("Comment deleted successfully", HttpStatus.OK);
+    public ResponseEntity<Void> deleteComment(@RequestParam Long userId,
+                                              @PathVariable Long commentId) {
+        commentService.deleteComment(userId, commentId);
+        return ResponseEntity.noContent().build();
     }
 
-    // Şərhi yenilə
-    @PutMapping("/{commentId}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Long commentId,
-                                                 @RequestBody CommentRequest request) {
-        Comment updatedComment = commentService.updateComment(commentId, request);
-        return new ResponseEntity<>(updatedComment, HttpStatus.OK);
-    }
-
-    // Product-a aid şərhləri göstər
     @GetMapping("/product/{productId}")
-    public ResponseEntity<List<CommentResponse>> getCommentsByProductId(@PathVariable String productId) {
-        List<CommentResponse> comments = commentService.getCommentsByProductId(productId);
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+    public ResponseEntity<List<CommentResponse>> getCommentsByProduct(@PathVariable Long productId) {
+        List<CommentResponse> responses = commentService.getCommentsByProductId(productId);
+        return ResponseEntity.ok(responses);
     }
 
-    // User-ə aid şərhləri göstər
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CommentResponse>> getCommentsByUserId(@PathVariable String userId) {
-        List<CommentResponse> comments = commentService.getCommentsByUserId(userId);
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+    public ResponseEntity<List<CommentResponse>> getCommentsByUser(@PathVariable Long userId) {
+        List<CommentResponse> responses = commentService.getCommentsByUserId(userId);
+        return ResponseEntity.ok(responses);
+    }
+    private String extractToken(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new IllegalArgumentException("Invalid Authorization header");
+        }
+        return authHeader.substring(7); // "Bearer " uzunluğundan sonra token başlayır
     }
 }

@@ -11,7 +11,6 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderRequest {
-    private Long orderId;
     private List<CartItemRequestDTO> items;
     private Double totalPrice;
 }

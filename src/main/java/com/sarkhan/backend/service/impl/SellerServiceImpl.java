@@ -35,7 +35,7 @@ public class SellerServiceImpl implements SellerService {
             seller.setFinCode(sellerRequest.getFinCode());
             seller.setBrandVOEN(sellerRequest.getBrandVOEN());
             seller.setBrandPhone(user.get().getPhoneNumber());
-            user.get().getRoles().add(Role.SELLER);
+           // user.get().getRoles().add(Role.SELLER);
             user.get().setSeller(seller);
             userRepository.save(user.get());
         }

@@ -15,7 +15,7 @@ public class ProductMapper {
                 .discountedPrice(request.discountedPrice())
                 .subCategoryId(request.subCategoryId())
                 .sellerId(user.getId())
-                .brand(user.getSeller().getBrandName())
+                .brand(user.getSeller() != null ? user.getSeller().getBrandName() : null) // burda null yoxlanılır
                 .gender(request.gender())
                 .description(request.description())
                 .pluses(request.pluses())
@@ -23,6 +23,7 @@ public class ProductMapper {
                 .specifications(request.specifications())
                 .build();
     }
+
 
     public static Product updateEntity(Product product, ProductRequest request) {
         product.setName(request.name());

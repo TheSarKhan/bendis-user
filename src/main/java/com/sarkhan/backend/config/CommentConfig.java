@@ -13,6 +13,8 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import javax.sql.DataSource; // ya da jakarta.sql.DataSource, amma bütün layihədə uyğun olmalı
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -22,8 +24,8 @@ import java.util.Map;
 @EnableTransactionManagement
 @EnableJpaRepositories(
         basePackages = "com.sarkhan.backend.repository.comment",
-        entityManagerFactoryRef = "fourEntityManagerFactory", // Düzəliş
-        transactionManagerRef = "fourTransactionManager"      // Düzəliş
+        entityManagerFactoryRef = "fourEntityManagerFactory",
+        transactionManagerRef = "fourTransactionManager"
 )
 public class CommentConfig {
 
@@ -40,7 +42,7 @@ public class CommentConfig {
     private String fourDbDdlAuto;
 
     @Bean(name = "fourDataSource")
-    public DataSource thirdDataSource() {
+    public DataSource fourDataSource() {
         HikariDataSource dataSource = DataSourceBuilder.create()
                 .type(HikariDataSource.class)
                 .url(fourDbUrl)
@@ -48,7 +50,7 @@ public class CommentConfig {
                 .password(fourDbPassword)
                 .build();
 
-        dataSource.setPoolName("CommentDbHikariPool"); // ✅ Buraya anlamlı pool adı veriyorsun
+        dataSource.setPoolName("CommentDbHikariPool");
         return dataSource;
     }
 
@@ -58,7 +60,7 @@ public class CommentConfig {
             @Qualifier("fourDataSource") DataSource fourDataSource) {
         return builder
                 .dataSource(fourDataSource)
-                .packages("com.sarkhan.backend.model.comment") // Düzəliş: kiçik hərflə
+                .packages("com.sarkhan.backend.model.comment")
                 .persistenceUnit("four")
                 .properties(hibernateProperties())
                 .build();

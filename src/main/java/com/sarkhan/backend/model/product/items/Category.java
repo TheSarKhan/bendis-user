@@ -17,4 +17,6 @@ public class Category {
 
     @Column(nullable = false, unique = true)
     String name;
+
+    Long parentId;
 }

@@ -11,15 +11,18 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-public record ProductRequest(@NotBlank String name,
-                             @Min(0) BigDecimal originalPrice,
-                             @Min(0) BigDecimal discountedPrice,
-                             Long subCategoryId,
-                             @JdbcTypeCode(SqlTypes.JSON)
-                             List<Color> colors,
-                             Gender gender,
-                             String description,
-                             List<Long> pluses,
-                             @JdbcTypeCode(SqlTypes.JSON)
-                             Map<String, String> specifications) {
-}
+public record ProductRequest(
+        @NotBlank String name,
+        @Min(0) BigDecimal originalPrice,
+        @Min(0) BigDecimal discountedPrice,
+        Long subCategoryId,
+        List<Color> colors,  // @JdbcTypeCode annotation silindi
+        Gender gender,
+        String description,
+        List<Long> pluses,  // @JdbcTypeCode annotation silindi
+        Map<String, String> specifications  // @JdbcTypeCode annotation silindi
+) {}
+//{
+//  eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbmczQGdtYWlsLmNvbSIsImlhdCI6MTc1MTYyODg3OCwiZXhwIjoxNzUxNjMyNDc4fQ.nff6bhqYlgCy7V49DGy5nvq2YyS4ixEw-N2p1kymQWA",
+//  "refreshToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHJpbmczQGdtYWlsLmNvbSIsImlhdCI6MTc1MTYyODg3NSwiZXhwIjoxNzUyMjMzNjc1fQ.tAv485qaCNBLf3tHKgKe8_b7pzIYxc8LJY9zNiaTEqo"
+//}

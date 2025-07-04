@@ -76,7 +76,7 @@ public class CustomOAuth2UserServiceImpl implements OAuth2UserService<OAuth2User
             newUser.setNameAndSurname(firstName + " " + lastName);
             newUser.setGoogleId(googleId);
             newUser.setProfileImg(imageUrl);
-            newUser.setRoles(Collections.singleton(Role.USER));
+            //newUser.setRoles(Collections.singleton(Role.USER));
             newUser.setCreatedAt(LocalDateTime.now());
             newUser.setUpdatedAt(LocalDateTime.now());
             newUser.setPassword(passwordEncoder.encode("default_password"));

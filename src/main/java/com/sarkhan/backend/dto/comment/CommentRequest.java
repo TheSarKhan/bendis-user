@@ -9,10 +9,14 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentRequest {
-    String userId;
-    String productId;
-    String content;
+
+    private Long productId;  // hansı məhsula comment yazılır
+    private String text;     // commentin mətn hissəsi
+    private int rating;      // qiymətləndirmə
+
+    // Getter və Setter-lər (ya Lombok @Data istifadə edə bilərsən)
 
 }
+
 
 
