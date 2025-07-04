@@ -19,7 +19,10 @@ public class ProductMapper {
                 .gender(request.gender())
                 .description(request.description())
                 .pluses(request.pluses())
-                .colors(request.colors())
+                .colorAndSizes(request.colorAndSizeRequests().
+                        stream().
+                        map(ColorAndSizeMapper::toEntity).
+                        toList())
                 .specifications(request.specifications())
                 .build();
     }
@@ -30,7 +33,10 @@ public class ProductMapper {
         product.setOriginalPrice(request.originalPrice());
         product.setDiscountedPrice(request.discountedPrice());
         product.setSubCategoryId(request.subCategoryId());
-        product.setColors(request.colors());
+        product.setColorAndSizes(request.colorAndSizeRequests().
+                stream().
+                map(ColorAndSizeMapper::toEntity).
+                toList());
         product.setGender(request.gender());
         product.setDescription(request.description());
         product.setPluses(request.pluses());

@@ -1,7 +1,7 @@
 package com.sarkhan.backend.model.product;
 
 import com.sarkhan.backend.model.enums.Gender;
-import com.sarkhan.backend.model.product.items.Color;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,13 +12,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Data
+@Entity
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Entity(name = "products")
+@Table(name = "products")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Product {
     @Id
@@ -28,16 +28,15 @@ public class Product {
     @Column(nullable = false)
     String name;
 
-    @Column(name = "original_price", nullable = false)
+    @Column(nullable = false)
     BigDecimal originalPrice;
 
-    @Column(name = "discount_price")
     BigDecimal discountedPrice;
 
-    @Column(name = "sub_category_id", nullable = false)
+    @Column(nullable = false)
     Long subCategoryId;
 
-    @Column(name = "seller_id", nullable = false)
+    @Column(nullable = false)
     Long sellerId;
 
     String brand;
@@ -50,6 +49,10 @@ public class Product {
 
     String slug;
 
+    Integer salesCount;
+
+    Long totalStock;
+
     Double rating;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -59,33 +62,60 @@ public class Product {
     List<Long> comments;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    Set<Long> favorites;
+    Long favoriteCount;
 
     @JdbcTypeCode(SqlTypes.JSON)
     List<Long> pluses;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    List<Color> colors;
+    List<ColorAndSize> colorAndSizes;
 
     @JdbcTypeCode(SqlTypes.JSON)
     Map<String, String> specifications;
 
-    @Column(name = "create_at")
     LocalDateTime createAt;
 
-    @Column(name = "update_at")
     LocalDateTime updateAt;
 
     @PrePersist
     public void init() {
         createAt = LocalDateTime.now();
+        rating = 0.0;
+        salesCount = 0;
+        totalStock = colorAndSizes.stream().
+                mapToLong(color -> {
+                    if (color.getSizeStockMap() == null) return color.getStock();
+                    return color.getSizeStockMap().
+                            values().
+                            stream().
+                            mapToLong(Long::longValue).
+                            sum();
+                })
+                .sum();
         generateSlug();
     }
 
     public void generateSlug() {
-        this.slug = this.name.toLowerCase()
-                .replace(" ", "-")
-                .replaceAll("[^a-z0-9-]", "");
+        this.slug = this.name
+                .toLowerCase()
+                .replace("ç", "ch")
+                .replace("ş", "sh")
+                .replace("ğ", "gh")
+                .replace("ü", "u")
+                .replace("ö", "o")
+                .replace("ı", "i")
+                .replace("ə", "e")
+                .replace("İ", "i")
+                .replace("Ç", "ch")
+                .replace("Ş", "sh")
+                .replace("Ğ", "gh")
+                .replace("Ü", "u")
+                .replace("Ö", "o")
+                .replace("Ə", "e")
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-{2,}", "-")
+                .replaceAll("^-|-$", "");
     }
-}
 
+}

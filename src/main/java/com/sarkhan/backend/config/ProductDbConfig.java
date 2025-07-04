@@ -21,7 +21,7 @@ import java.util.Map;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.sarkhan.backend.repository.product",  // Product repository paketi
+        basePackages = "com.sarkhan.backend.repository.product",
         entityManagerFactoryRef = "secondEntityManagerFactory",
         transactionManagerRef = "secondTransactionManager"
 )
@@ -58,7 +58,7 @@ public class ProductDbConfig {
             @Qualifier("secondDataSource") DataSource secondDataSource) {
         return builder
                 .dataSource(secondDataSource)
-                .packages("com.sarkhan.backend.model.product")  // Product model paketi
+                .packages("com.sarkhan.backend.model.product")
                 .persistenceUnit("second")
                 .properties(hibernateProperties())
                 .build();

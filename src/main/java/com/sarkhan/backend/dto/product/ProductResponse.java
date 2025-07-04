@@ -1,6 +1,6 @@
 package com.sarkhan.backend.dto.product;
 
-import com.sarkhan.backend.model.product.items.Color;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,7 +14,7 @@ public record ProductResponse(
         BigDecimal discountedPrice,
         Double rating,
         String slug,
-        List<Color> colors,
+        List<ColorAndSize> colors,
         Map<String, String> specifications,
 
         // Yeni sahələr (istifadəçiyə aid)

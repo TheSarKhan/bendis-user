@@ -1,96 +1,171 @@
 package com.sarkhan.backend.service.impl;
 
-import com.sarkhan.backend.dto.cloudinary.CloudinaryUploadResponse;
-import com.sarkhan.backend.model.story.Like;
+import com.sarkhan.backend.dto.story.StoryResponseDTO;
+import com.sarkhan.backend.model.enums.LikeType;
+import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.story.Story;
+import com.sarkhan.backend.model.story.item.Like;
+import com.sarkhan.backend.model.user.Seller;
+import com.sarkhan.backend.repository.seller.SellerRepository;
 import com.sarkhan.backend.repository.story.LikeRepository;
 import com.sarkhan.backend.repository.story.StoryRepository;
 import com.sarkhan.backend.service.CloudinaryService;
-import com.sarkhan.backend.service.LikeService;
-import com.sarkhan.backend.service.StoryService;
+import com.sarkhan.backend.service.UserService;
+import com.sarkhan.backend.service.impl.product.util.UserUtil;
+import com.sarkhan.backend.service.story.LikeService;
+import com.sarkhan.backend.service.story.StoryService;
+import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StoryServiceImpl implements StoryService, LikeService {
 
     private final CloudinaryService cloudinaryService;
 
+    private final UserService userService;
+
+    private final SellerRepository sellerRepository;
+
     private final StoryRepository storyRepository;
 
     private final LikeRepository likeRepository;
 
     @Override
-    public String addAndRemoveLike(String storyId, String userId) {
+    public StoryResponseDTO add(Long sellerId, String description, MultipartFile mainContent, MultipartFile logo) throws IOException {
+        log.info("Some seller try to create story.");
 
-        if (!likeRepository.existsByStoryIdAndUserId(storyId, userId)) {
-            Like like = Like.builder()
-                    .fkStoryId(storyId)
-                    .fkUserId(userId)
-                    .likeStatus("ACTIVE")
-                    .build();
+        String mainContentUrl = cloudinaryService.uploadFile(mainContent, "story").getUrl();
+        String logoUrl = cloudinaryService.uploadFile(logo, "story").getUrl();
 
-            likeRepository.save(like);
-
-        } else if (likeRepository.findLikeByStoryIdAndUserId(storyId, userId)
-                        .getLikeStatus().equals("ACTIVE")) {
-
-            Like like = likeRepository.findLikeByStoryIdAndUserId(storyId, userId);
-
-            like.setLikeStatus("INACTIVE");
-
-            likeRepository.save(like);
-
-        } else {
-            Like like = likeRepository.findLikeByStoryIdAndUserId(storyId, userId);
-
-            like.setLikeStatus("ACTIVE");
-            likeRepository.save(like);
-        }
-
-        return "Success";
+        return new StoryResponseDTO(storyRepository.save(Story.builder().sellerId(sellerId).mainContentUrl(mainContentUrl).logoUrl(logoUrl).description(description).build()), getSellerById(sellerId));
     }
 
     @Override
-    public Optional<Long> getLike(String storyId) {
-        return likeRepository.findLikeCountByStoryId(storyId,"ACTIVE").orElseThrow(()->
-                new RuntimeException("Like not found")).describeConstable();
-    }
-
-
-    @Override
-    public Story createStory(MultipartFile storyImage, MultipartFile adImage) throws IOException {
-
-        CloudinaryUploadResponse storyImageUrl = cloudinaryService.uploadFile(storyImage, "story_images");
-
-        CloudinaryUploadResponse adImageUrl = cloudinaryService.uploadFile(adImage, "product_ads");
-
-
-        Story story = new Story();
-        story.setStoryImageUrl(storyImageUrl.getUrl());
-        story.setAdImageUrl(adImageUrl.getUrl());
-        story.setCreatedAt(LocalDateTime.now().toString());
-
-
-        return storyRepository.save(story);
-    }
-
-    @Override
-    public List<Story> getAllStories() {
+    public List<Story> getAll() {
+        log.info("Someone try to get all stories.");
         return storyRepository.findAll();
     }
 
     @Override
-    public String getAdImageUrl(Long storyId) {
-        Story story = storyRepository.findById(storyId)
-                .orElseThrow(() -> new IllegalArgumentException("Story is not found: " + storyId));
-        return story.getAdImageUrl();
+    public List<Story> getForHomePage() {
+        log.info("GetForHomePage story methode start working.");
+        return storyRepository.getForHomePage(LocalDateTime.now().minusDays(1));
+    }
+
+    @Override
+    public List<Story> getBySellerId(Long sellerId) {
+        log.info("Someone try to get stories by seller id.");
+        return storyRepository.getBySellerId(sellerId);
+    }
+
+    @Override
+    public StoryResponseDTO getByIdAndAddView(Long id) {
+        log.info("Someone try to get stories by id.");
+        Story story = getById(id);
+        try {
+            Long userId = UserUtil.getCurrentUser(userService, log).getId();
+            List<Long> view = story.getView();
+            if (!view.contains(userId)) {
+                view.add(userId);
+                story.setView(view);
+                story = storyRepository.save(story);
+            }
+        } catch (AuthException ignored) {
+        }
+        return new StoryResponseDTO(story, getSellerById(story.getSellerId()));
+    }
+
+    @Override
+    public StoryResponseDTO toggleLikeOrDislike(Long storyId, String likeText) throws AuthException {
+        Long userId = UserUtil.getCurrentUser(userService, log).getId();
+        Optional<Like> likeOptional = likeRepository.getByStoryIdAndUserId(storyId, userId);
+        Story story = getById(storyId);
+        LikeType likeType = LikeType.valueOf(likeText.toUpperCase());
+
+        if (likeOptional.isPresent()) {
+            Like like = likeOptional.get();
+
+            if (likeType.equals(like.getLikeType())) {
+                if (LikeType.LIKE.equals(likeType)) story.setLikeCount(story.getLikeCount() - 1);
+                else story.setDislikeCount(story.getDislikeCount() - 1);
+            } else {
+                if (LikeType.LIKE.equals(likeType)) {
+                    story.setLikeCount(story.getLikeCount() + 1);
+                    story.setDislikeCount(story.getDislikeCount() - 1);
+                } else {
+                    story.setLikeCount(story.getLikeCount() - 1);
+                    story.setDislikeCount(story.getDislikeCount() + 1);
+                }
+
+                likeRepository.save(Like.builder().likeType(LikeType.LIKE.equals(likeType) ? LikeType.DISLIKE : LikeType.LIKE).storyId(like.getStoryId()).userId(like.getUserId()).build());
+            }
+            likeRepository.delete(like);
+        } else {
+            if (LikeType.LIKE.equals(likeType)) story.setLikeCount(story.getLikeCount() + 1);
+            else story.setDislikeCount(story.getDislikeCount() + 1);
+            likeRepository.save(Like.builder().likeType(likeType).storyId(storyId).userId(userId).build());
+        }
+
+        return new StoryResponseDTO(storyRepository.save(story), getSellerById(story.getSellerId()));
+    }
+
+    @Override
+    public StoryResponseDTO update(Long sellerId, Long id, String description, MultipartFile mainContent, MultipartFile logo) throws IOException, AuthException {
+        log.info("Someone try to update story.");
+
+        Story story = getById(id);
+
+        if ((sellerId == null || !sellerId.equals(story.getSellerId()) && !Role.ADMIN.equals(UserUtil.getCurrentUser(userService, log).getRole()))) {
+            log.warn("This user doesn't have access update story methode.");
+            return new StoryResponseDTO(story, getSellerById(story.getSellerId()));
+        }
+
+        cloudinaryService.deleteFile(story.getMainContentUrl());
+        cloudinaryService.deleteFile(story.getLogoUrl());
+
+        String mainContentUrl = cloudinaryService.uploadFile(mainContent, "story").getUrl();
+        String logoUrl = cloudinaryService.uploadFile(logo, "story").getUrl();
+
+        story.setMainContentUrl(mainContentUrl);
+        story.setLogoUrl(logoUrl);
+        story.setDescription(description);
+
+        return new StoryResponseDTO(storyRepository.save(story), getSellerById(story.getSellerId()));
+    }
+
+    @Override
+    public void delete(Long sellerId, Long id) throws AuthException {
+        log.info("Someone try to delete story.");
+
+        if ((sellerId == null || !sellerId.equals(getById(id).getSellerId()) && !Role.ADMIN.equals(UserUtil.getCurrentUser(userService, log).getRole()))) {
+            log.warn("This user doesn't have access delete story methode.");
+            return;
+        }
+        storyRepository.deleteById(id);
+    }
+
+    public Story getById(Long id) {
+        return storyRepository.findById(id).orElseThrow(() -> {
+            log.info("Cannot find story by " + id + " id.");
+            return new NoSuchElementException("Cannot find story by " + id + " id.");
+        });
+    }
+
+    private Seller getSellerById(Long sellerId) {
+        return sellerRepository.findById(sellerId).orElseThrow(() -> {
+            log.info("Cannot find seller.");
+            return new NoSuchElementException("Cannot find seller.");
+        });
     }
 }

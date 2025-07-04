@@ -5,10 +5,11 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "categories")
+@Table(name = "categories")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Category {
     @Id

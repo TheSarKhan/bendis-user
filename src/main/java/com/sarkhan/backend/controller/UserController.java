@@ -1,8 +1,10 @@
 package com.sarkhan.backend.controller;
 
-import com.sarkhan.backend.dto.authorization.SellerRequest;
 import com.sarkhan.backend.dto.authorization.TokenResponse;
 import com.sarkhan.backend.dto.authorization.UserProfileRequest;
+import com.sarkhan.backend.dto.seller.SellerRequestDTO;
+import com.sarkhan.backend.dto.seller.SellerResponseDTO;
+import com.sarkhan.backend.exception.DataNotFoundException;
 import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.redis.RedisService;
@@ -22,12 +24,14 @@ public class UserController {
     private final JwtService jwtService;
     private final RedisService redisService;
 
+    ////-----
+
     @PostMapping("/create/seller")
-    public ResponseEntity<?> createBrand(@RequestBody SellerRequest sellerRequest,
-                                         @RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> createBrand(@RequestBody SellerRequestDTO sellerRequest,
+                                         @RequestHeader("Authorization") String token) throws DataNotFoundException {
         token = token.substring(7);
-        User user = sellerService.createSeller(sellerRequest, token);
-        return ResponseEntity.status(201).body(user);
+        SellerResponseDTO seller = sellerService.createSeller(sellerRequest, token);
+        return ResponseEntity.status(201).body(seller);
     }
 
     @PostMapping("/change/user/profile")

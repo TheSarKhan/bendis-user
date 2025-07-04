@@ -1,6 +1,5 @@
 package com.sarkhan.backend.config;
 
-
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,60 +21,59 @@ import java.util.Map;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackages = "com.sarkhan.backend.repository.order",  // Order repositoriyaların paketi
-        entityManagerFactoryRef = "orderEntityManagerFactory",
-        transactionManagerRef = "orderTransactionManager"
+        basePackages = "com.sarkhan.backend.repository.order",
+        entityManagerFactoryRef = "sixthEntityManagerFactory", // Düzəliş
+        transactionManagerRef = "sixthTransactionManager"      // Düzəliş
 )
 public class OrderDbConfig {
 
     @Value("${spring.datasource.sixth.url}")
-    private String orderDbUrl;
+    private String sixthDbUrl;
 
     @Value("${spring.datasource.sixth.username}")
-    private String orderDbUsername;
+    private String sixthDbUsername;
 
     @Value("${spring.datasource.sixth.password}")
-    private String orderDbPassword;
-
+    private String sixthDbPassword;
 
     @Value("${spring.jpa.hibernate.ddl-auto}")
-    private String orderDbDdlAuto;
+    private String sixthDbDdlAuto;
 
-    @Bean(name = "orderDataSource")
-    public DataSource orderDataSource() {
+    @Bean(name = "sixthDataSource")
+    public DataSource sixthDataSource() {
         HikariDataSource dataSource = DataSourceBuilder.create()
                 .type(HikariDataSource.class)
-                .url(orderDbUrl)
-                .username(orderDbUsername)
-                .password(orderDbPassword)
+                .url(sixthDbUrl)
+                .username(sixthDbUsername)
+                .password(sixthDbPassword)
                 .build();
 
-        dataSource.setPoolName("OrderDbHikariPool");
+        dataSource.setPoolName("OrderDbHikariPool"); // ✅ Buraya anlamlı pool adı veriyorsun
         return dataSource;
     }
 
-    @Bean(name = "orderEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean orderEntityManagerFactory(
+    @Bean(name = "sixthEntityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean sixthEntityManagerFactory(
             EntityManagerFactoryBuilder builder,
-            @Qualifier("orderDataSource") DataSource dataSource) {
+            @Qualifier("sixthDataSource") DataSource sixthDataSource) {
         return builder
-                .dataSource(dataSource)
+                .dataSource(sixthDataSource)
                 .packages("com.sarkhan.backend.model.order")
-                .persistenceUnit("order")
+                // Düzəliş: kiçik hərflə
+                .persistenceUnit("sixth")
                 .properties(hibernateProperties())
                 .build();
     }
 
-    @Bean(name = "orderTransactionManager")
-    public PlatformTransactionManager orderTransactionManager(
-            @Qualifier("orderEntityManagerFactory") EntityManagerFactory entityManagerFactory) {
-        return new JpaTransactionManager(entityManagerFactory);
+    @Bean(name = "sixthTransactionManager")
+    public PlatformTransactionManager sixthTransactionManager(
+            @Qualifier("sixthEntityManagerFactory") EntityManagerFactory sixthEntityManagerFactory) {
+        return new JpaTransactionManager(sixthEntityManagerFactory);
     }
 
     private Map<String, Object> hibernateProperties() {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", orderDbDdlAuto);
+        properties.put("hibernate.hbm2ddl.auto", sixthDbDdlAuto);
         return properties;
     }
 }
-

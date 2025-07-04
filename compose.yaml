@@ -116,7 +116,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
   order_service:
     restart: always
     container_name: order
@@ -136,16 +135,14 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
 volumes:
-  UserData: {}
-  ProductData: {}
-  StoryData: {}
-  CommentData: {}
-  redis_data: {}
-  CartData: {}
-  OrderData: {}
-
+  UserData: { }
+  ProductData: { }
+  StoryData: { }
+  CommentData: { }
+  redis_data: { }
+  CartData: { }
+  OrderData: { }
 networks:
   bendis:
     driver: bridge

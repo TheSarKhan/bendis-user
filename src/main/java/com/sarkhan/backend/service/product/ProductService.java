@@ -1,35 +1,50 @@
 package com.sarkhan.backend.service.product;
 
-import com.sarkhan.backend.dto.product.ProductFilterRequest;
-import com.sarkhan.backend.dto.product.ProductRequest;
+import com.sarkhan.backend.dto.product.*;
 import com.sarkhan.backend.model.product.Product;
+import jakarta.security.auth.message.AuthException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface ProductService {
-    Product add(ProductRequest request, List<MultipartFile> images) throws IOException;
+    CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images) throws IOException, AuthException;
 
     List<Product> getAll();
 
-    Product getById(Long id);
+    ProductResponseForHomePage getForHomePage();
+
+    ProductResponseSimple getAllFamousProducts();
+
+    ProductResponseSimple getAllDiscountedProducts();
+
+    ProductResponseSimple getAllMostFavoriteProducts();
+
+    ProductResponseSimple getAllFlushProducts();
+
+    ProductResponseSimple getAllRecommendedProduct();
+
+    Product getByIdAndAddHistory(Long id);
 
     Product getBySlug(String slug);
 
-    List<Product> searchByName(String name);
+    CompletableFuture<ProductResponseForSearchByName> searchByName(String name);
 
-    List<Product> getBySubCategoryId(Long subCategoryId);
+    CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getBySubCategoryId(Long subCategoryId);
 
-    List<Product> getBySellerId(Long sellerId);
+    ProductResponseForGetBySellerId getBySellerId(Long sellerId);
 
-    List<Product> getByComplexFiltering(ProductFilterRequest request);
+    CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getByComplexFiltering(ProductFilterRequest request);
 
-    Product giveRating(Long productId, Double rating);
+    List<Product> getAllFavorite() throws AuthException;
 
-    Product toggleFavorite(Long productId);
+    Product giveRating(Long id, Double rating) throws AuthException;
 
-    Product update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException;
+    Product toggleFavorite(Long id) throws AuthException;
 
-    void delete(Long id);
+    Product update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException, AuthException;
+
+    void delete(Long id) throws AuthException;
 }

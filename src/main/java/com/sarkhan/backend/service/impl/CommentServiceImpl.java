@@ -16,6 +16,7 @@ import com.sarkhan.backend.repository.product.ProductRepository;
 import com.sarkhan.backend.repository.user.UserRepository;
 import com.sarkhan.backend.service.CommentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -139,10 +140,10 @@ public class CommentServiceImpl implements CommentService {
         Product product = productRepository.findById(commentRequest.getProductId())
                 .orElseThrow(() -> new NotFoundException("Product not found"));
 
-//        boolean hasOrdered = orderItemRepository.existsByUserIdAndProductId(userId, commentRequest.getProductId());
-//        if (!hasOrdered) {
-//            throw new UnauthorizedException("You can only comment on products you have ordered");
-//        }
+        boolean hasOrdered = orderItemRepository.existsByUserIdAndProductId(userId, commentRequest.getProductId());
+        if (!hasOrdered) {
+            throw new UnauthorizedException("You can only comment on products you have ordered");
+        }
 
         Comment comment = new Comment();
         comment.setText(commentRequest.getText());

@@ -1,26 +1,28 @@
 package com.sarkhan.backend.model.order;
 
-
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.math.BigDecimal;
 
 @Entity
+@Table(name = "order_items")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItem {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    // ORM əlaqə çıxarılır, yerinə yalnız orderId saxlanılır
-    private Long orderId;
-
-    // ORM əlaqə çıxarılır, yerinə yalnız productId saxlanılır
-    private Long productId;
-
-    private Long userId;
-
-    private Integer quantity;
+    Long id;
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    Order order;
+    Long productId;
+    Long sellerId;
+    Integer quantity;
+    String color;
+    BigDecimal totalPrice;
 }
-
-

@@ -113,14 +113,14 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     }
 
     @Override
-    public void deleteFile(String imageUrl) throws IOException {
-        log.warn("Remove image. Image url : " + imageUrl);
-        deleteImage(extractPublicIdFromUrl(imageUrl));
+    public void deleteFile(String url) throws IOException {
+        log.warn("Remove file. file url : " + url);
+        deleteImage(extractPublicIdFromUrl(url));
     }
 
-    private String extractPublicIdFromUrl(String imageUrl) {
+    private String extractPublicIdFromUrl(String url) {
         try {
-            String substring = imageUrl.substring(imageUrl.indexOf("/upload/") + 8);
+            String substring = url.substring(url.indexOf("/upload/") + 8);
 
             String[] parts = substring.split("/");
             String publicId = Arrays.stream(parts)
@@ -129,7 +129,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
             return publicId.replaceAll("\\.[a-zA-Z0-9]+$", "");
         } catch (Exception e) {
-            log.error("Error extracting publicId from URL:" + imageUrl, e);
+            log.error("Error extracting publicId from URL:" + url, e);
             return null;
         }
     }

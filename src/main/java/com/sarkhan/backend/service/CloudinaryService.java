@@ -13,5 +13,5 @@ public interface CloudinaryService {
     String updateImage(String publicId, MultipartFile newFile) throws IOException;
     List<CloudinaryUploadResponse> updateImages(List<String> publicIds, List<MultipartFile> newFiles) throws IOException;
     List<String> deleteImages(List<String> publicIds) throws IOException;
-    void deleteFile(String imageUrl) throws IOException;
+    void deleteFile(String url) throws IOException;
 }

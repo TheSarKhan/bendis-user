@@ -16,7 +16,7 @@ public class ProductMapper {
                 product.getDiscountedPrice(),
                 product.getRating(),
                 product.getSlug(),
-                product.getColors(),
+                product.getColorAndSizes(),
                 product.getSpecifications(),
                 comment != null ? comment.getText() : null,
                 comment != null ? comment.getRating() : null

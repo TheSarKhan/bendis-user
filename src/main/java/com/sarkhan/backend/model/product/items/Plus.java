@@ -5,10 +5,11 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "pluses")
+@Table(name = "pluses")
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Plus {
     @Id
@@ -20,6 +21,5 @@ public class Plus {
 
     String description;
 
-    @Column(name = "icon_url")
     String iconUrl;
 }
