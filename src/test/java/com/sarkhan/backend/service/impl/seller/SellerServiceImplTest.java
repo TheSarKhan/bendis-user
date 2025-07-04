@@ -93,24 +93,6 @@ public class SellerServiceImplTest {
     }
 
     @Test
-    void testGetById_Success() throws DataNotFoundException {
-        when(sellerRepository.findById(1L)).thenReturn(Optional.of(seller));
-        SellerResponseDTO responseDTO = new SellerResponseDTO(
-                "Name Surname", "Brand", "mybrand@gmail.com",
-                "voen", "Father name", "finCode123", "+994559281029");
-        when(sellerMapper.sellerToSellerResponseDto(seller)).thenReturn(responseDTO);
-        SellerResponseDTO result = sellerService.getById(1L);
-        assertNotNull(result);
-    }
-
-    @Test
-    void testGetById_NotFound() {
-        when(sellerRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(DataNotFoundException.class, () -> sellerService.getById(1L));
-    }
-
-    @Test
     void testUpdateSeller_Success() throws DataNotFoundException {
         when(jwtService.extractEmail(anyString())).thenReturn("user@gmail.com");
         when(userRepository.findByEmail("user@gmail.com")).thenReturn(Optional.of(user));

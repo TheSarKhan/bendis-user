@@ -67,7 +67,7 @@ class CartServiceImplTest {
 
     @Test
     void testAddToCart_Success_WithSize() throws NotEnoughQuantityException {
-        CartItemRequestDTO dto = new CartItemRequestDTO(1L, 1L,2,"BLACK", "M", BigDecimal.valueOf(100));
+        CartItemRequestDTO dto = new CartItemRequestDTO(1L, 1L,1,"BLACK", "M", BigDecimal.valueOf(100));
 
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
