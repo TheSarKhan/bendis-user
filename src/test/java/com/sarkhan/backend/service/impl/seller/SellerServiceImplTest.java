@@ -8,7 +8,7 @@ import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.mapper.seller.SellerMapper;
 import com.sarkhan.backend.model.user.Seller;
 import com.sarkhan.backend.model.user.User;
-import com.sarkhan.backend.repository.seller.SellerRepository;
+import com.sarkhan.backend.repository.user.SellerRepository;
 import com.sarkhan.backend.repository.user.UserRepository;
 import com.sarkhan.backend.service.impl.SellerServiceImpl;
 import org.junit.jupiter.api.AfterEach;
