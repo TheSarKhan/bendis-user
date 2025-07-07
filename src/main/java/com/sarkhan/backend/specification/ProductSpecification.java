@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 public class ProductSpecification {
-    public static Specification<Product> searchTitle(String title) {
+    public static Specification<Product> searchName(String name) {
         return (root, query, criteriaBuilder) -> {
             Expression<Double> function = criteriaBuilder.function(
                     "similarity", Double.class,
-                    root.get("title"), criteriaBuilder.literal(title));
+                    root.get("name"), criteriaBuilder.literal(name));
             query.orderBy(criteriaBuilder.desc(function));
             return criteriaBuilder.greaterThanOrEqualTo(function, 0.3);
         };

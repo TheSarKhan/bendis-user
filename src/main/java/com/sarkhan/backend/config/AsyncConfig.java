@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 @Configuration
 @EnableAsync
 public class AsyncConfig {
-    @Bean("virtualExecutor")
+    @Bean("taskExecutor")
     public Executor taskExecutor() {
         return Executors.newVirtualThreadPerTaskExecutor();
     }

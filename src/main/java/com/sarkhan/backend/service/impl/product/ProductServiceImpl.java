@@ -80,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
                               CategoryService categoryService,
                               SubCategoryService subCategoryService,
                               UserService userService, UserFavoriteProductRepository favoriteRepository,
-                              @Qualifier("virtualExecutor") Executor executor) {
+                              @Qualifier("taskExecutor") Executor executor) {
         this.productRepository = productRepository;
         this.historyRepository = historyRepository;
         this.cloudinaryService = cloudinaryService;
@@ -92,18 +92,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Async
-    public CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images)
+    public Product add(ProductRequest request, List<MultipartFile> images)
             throws IOException, AuthException {
+        log.info("Someone try to create product.");
         User user = getCurrentUser(userService, log);
         log.info(user.getFullName() + " try to create product");
 
         Product product = ProductMapper.toEntity(request, user);
+        log.info("1");
         List<ColorAndSize> colorAndSizes = uploadImages(request, images, cloudinaryService, log);
+        log.info("2");
         product.setColorAndSizes(colorAndSizes);
 
         log.info("Product create successfully.");
-        return CompletableFuture.completedFuture(productRepository.save(product));
+        return productRepository.save(product);
     }
 
     @Override
