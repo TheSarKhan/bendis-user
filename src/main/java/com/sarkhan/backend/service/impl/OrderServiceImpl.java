@@ -86,7 +86,7 @@ public class OrderServiceImpl implements OrderService {
                     .filter(c -> c.getColor().name().equalsIgnoreCase(item.getColor()))
                     .findFirst().orElseThrow(() -> {
                         log.error("Color can not found");
-                        return new ResourceNotFoundException("Color can not found: ID = " + item.getColor());
+                        return new ResourceNotFoundException("Color can not found:" + item.getColor());
                     });
             if (item.getSize() != null && !item.getSize().isBlank()) {
                 Long sizeStock = colorAndSize.getSizeStockMap().get(item.getSize());
@@ -106,20 +106,19 @@ public class OrderServiceImpl implements OrderService {
                 }
                 colorAndSize.setStock(colorAndSize.getStock() - item.getQuantity());
             }
-            product.setSalesCount(product.getSalesCount() == null ?
-                    item.getQuantity() : product.getSalesCount() + item.getQuantity());
+            product.setSalesCount(product.getSalesCount() + item.getQuantity());
             productRepository.save(product);
         }
         BigDecimal sum = cart.getCartItems().stream().map(CartItem::getTotalPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        Order order = Order.builder()
+        Order create = Order.builder()
                 .address(address)
                 .totalPrice(sum)
                 .cartId(cart.getId())
                 .orderStatus(OrderStatus.PENDING)
                 .build();
 
-        orderRepository.save(order);
+        Order order = orderRepository.save(create);
 
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : cart.getCartItems()) {
