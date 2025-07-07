@@ -6,7 +6,7 @@ import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.story.Story;
 import com.sarkhan.backend.model.story.item.Like;
 import com.sarkhan.backend.model.user.Seller;
-import com.sarkhan.backend.repository.seller.SellerRepository;
+import com.sarkhan.backend.repository.user.SellerRepository;
 import com.sarkhan.backend.repository.story.LikeRepository;
 import com.sarkhan.backend.repository.story.StoryRepository;
 import com.sarkhan.backend.service.CloudinaryService;

@@ -3,6 +3,7 @@ package com.sarkhan.backend.config;
 import com.sarkhan.backend.handler.CustomAccessDeniedHandler;
 import com.sarkhan.backend.handler.CustomAuthenticationEntryPoint;
 import com.sarkhan.backend.jwt.JwtFilter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import com.sarkhan.backend.service.impl.CustomOAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -103,6 +104,11 @@ public class SecurityConfig {
                                 "/api/v1/product/name/**", "/api/v1/product/sub-category/**",
                                 "/api/v1/product/seller/**", "/api/v1/product/filter"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/seller/myInfo").hasRole("SELLER")
+                        .requestMatchers(HttpMethod.POST,"/api/v1/seller").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/api/v1/seller").hasAnyRole("ADMIN","SELLER")
+                        .requestMatchers("/api/v1/seller/dashboard/**").hasRole("SELLER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/seller").authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
