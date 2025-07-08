@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 @Tag(name = "Product Controller", description = "Endpoints for managing products")
 public class ProductController {
+    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
     private final ProductService service;
 
     @PostMapping
@@ -33,7 +36,8 @@ public class ProductController {
     )
     public ResponseEntity<Product> add(@RequestPart ProductRequest productRequest,
                                        List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException, AuthException {
-        return ResponseEntity.ok(service.add(productRequest, images).get());
+        log.error("Product Request: {}", productRequest);
+        return ResponseEntity.ok(service.add(productRequest, images));
     }
 
     @GetMapping

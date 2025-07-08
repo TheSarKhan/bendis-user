@@ -1,4 +1,4 @@
-package com.sarkhan.backend.repository.seller;
+package com.sarkhan.backend.repository.user;
 
 import com.sarkhan.backend.model.user.Seller;
 import org.springframework.data.jpa.repository.JpaRepository;

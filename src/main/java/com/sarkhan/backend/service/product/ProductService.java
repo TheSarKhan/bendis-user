@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface ProductService {
-    CompletableFuture<Product> add(ProductRequest request, List<MultipartFile> images) throws IOException, AuthException;
+    Product add(ProductRequest request, List<MultipartFile> images) throws IOException, AuthException;
 
     List<Product> getAll();
 

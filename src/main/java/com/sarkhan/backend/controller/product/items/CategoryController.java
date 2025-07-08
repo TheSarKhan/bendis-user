@@ -31,6 +31,7 @@ public class CategoryController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
     @Operation(
             summary = "Get all categories",
             description = "Returns a list of all available categories."
@@ -40,6 +41,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
     @Operation(
             summary = "Get category by ID",
             description = "Fetches a category by its unique identifier (ID)."

@@ -15,6 +15,7 @@ public class HomePageServiceImpl implements HomePageService {
     private final ProductService productService;
 
     private final StoryService storyService;
+
     @Override
     public HomePageResponseDTO getHomePageInfo() {
         log.info("Someone try to get home page information.");

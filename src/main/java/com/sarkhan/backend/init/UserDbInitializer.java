@@ -1,6 +1,7 @@
 package com.sarkhan.backend.init;
 
 import com.sarkhan.backend.model.enums.Role;
+import com.sarkhan.backend.model.user.Seller;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.service.UserService;
 import jakarta.annotation.PostConstruct;
@@ -24,6 +25,7 @@ public class UserDbInitializer {
                 .email("admin1234@gmail.com")
                 .password(passwordEncoder.encode("Admin123"))
                 .role(Role.ADMIN)
+                .seller(Seller.builder().build())
                 .build();
 
         log.info("User created :" + userService.save(admin));

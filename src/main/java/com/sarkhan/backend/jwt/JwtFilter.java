@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
@@ -42,14 +44,22 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtService.isTokenValid(jwt, email)) {
+                var user = userService.getByEmail(email);
+                System.out.println("Authenticated user: " + user.getEmail() + " | Role: " + user.getRole());
+
                 List<SimpleGrantedAuthority> authorities =
-                        List.of(new SimpleGrantedAuthority("ROLE_" +
-                                                           userService.getByEmail(email).getRole()));
+                        List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
+
+                log.error("User email: " + email + " logged in successfully.");
 
                 SecurityContextHolder.getContext().setAuthentication(
                         new UsernamePasswordAuthenticationToken(email, null, authorities)
                 );
+            } else {
+                System.out.println("Token is not valid");
             }
+        } else {
+            System.out.println("Email is null or already authenticated: " + email);
         }
 
         filterChain.doFilter(request, response);

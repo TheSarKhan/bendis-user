@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class AsyncUtil {
 
     public static CompletableFuture<List<Product>> getProductsByName(String name, ProductRepository productRepository, Executor executor) {
-        return CompletableFuture.supplyAsync(() -> productRepository.findAll(ProductSpecification.searchTitle(name)), executor);
+        return CompletableFuture.supplyAsync(() -> productRepository.findAll(ProductSpecification.searchName(name)), executor);
     }
 
     public static CompletableFuture<List<Category>> getCategoriesByName(String name, CategoryService categoryService, Executor executor) {
