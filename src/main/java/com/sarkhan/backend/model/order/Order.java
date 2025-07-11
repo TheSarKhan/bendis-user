@@ -1,6 +1,5 @@
 package com.sarkhan.backend.model.order;
 
-import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -27,17 +28,26 @@ public class Order {
     @JoinColumn(name = "address_id")
     private Address address;
     @Enumerated(EnumType.STRING)
-    OrderStatus orderStatus;
-    LocalDate orderDate;
+    private OrderStatus orderStatus;
+    private LocalDate orderDate;
     @Column(name = "user_id", nullable = false)
     private Long userId;
-
+    private LocalDateTime updatedAt;
+    @OneToMany(mappedBy = "order")
+    private List<OrderItem> orderItemList;
 
     @PrePersist
     public void setDefault() {
-        if (orderStatus==null) {
+        if (orderItemList != null && !orderItemList.isEmpty()) {
+            this.totalPrice = orderItemList.stream().map(OrderItem::getTotalPrice)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        } else {
+            this.totalPrice = BigDecimal.ZERO;
+        }
+        if (orderStatus == null) {
             this.orderStatus = OrderStatus.PENDING;
         }
-        orderDate=LocalDate.now();
+        orderDate = LocalDate.now();
+        updatedAt = LocalDateTime.now();
     }
 }

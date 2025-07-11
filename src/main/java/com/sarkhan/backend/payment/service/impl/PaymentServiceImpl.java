@@ -1,13 +1,10 @@
 package com.sarkhan.backend.payment.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.jwt.JwtService;
-import com.sarkhan.backend.model.enums.PaymentStatus;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.payment.config.PayriffConfig;
-import com.sarkhan.backend.payment.dto.response.PaymentProviderResponse;
 import com.sarkhan.backend.payment.dto.response.PayriffInvoiceResponse;
 import com.sarkhan.backend.payment.model.Invoice;
 import com.sarkhan.backend.payment.service.PaymentService;
@@ -115,16 +112,4 @@ public class PaymentServiceImpl implements PaymentService {
         return response.getBody();
     }
 
-    @Override
-    public PaymentProviderResponse getPaymentResult(String uuid) throws JsonProcessingException {
-        String json = getInvoice(uuid);
-        PayriffInvoiceResponse payriffInvoiceResponse = objectMapper.readValue(json, PayriffInvoiceResponse.class);
-        return PaymentProviderResponse.builder()
-                .transactionId(payriffInvoiceResponse.getPayload().getInvoiceUuid())
-                .amount(payriffInvoiceResponse.getPayload().getAmount())
-                .paymentStatus(payriffInvoiceResponse.getPayload().getInvoiceStatus().equals("PAID")?"SUCCESS":"FAILED")
-                //.cardLastFourDigits(payriffInvoiceResponse.getPayload().)
-
-                .build();
-    }
 }
