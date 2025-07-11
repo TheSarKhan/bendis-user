@@ -94,7 +94,7 @@ public class OrderServiceImplTest {
         product.setId(1L);
         product.setColorAndSizes(List.of(colorAndSize));
         product.setDiscountedPrice(BigDecimal.TEN);
-
+        product.setSalesCount(0);
         AddressRequestDto addressDto = new AddressRequestDto(
                 "FIN123", "Baku", "Narimanov", "Main street", "AZ1000"
         );
@@ -146,7 +146,6 @@ public class OrderServiceImplTest {
         assertThrows(NotEnoughQuantityException.class,
                 () -> orderService.createOrder(orderRequest, "Bearer token"));
     }
-
 
 
     @Test

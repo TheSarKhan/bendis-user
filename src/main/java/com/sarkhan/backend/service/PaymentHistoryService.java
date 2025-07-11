@@ -1,7 +1,7 @@
 package com.sarkhan.backend.service;
 
-import org.springframework.stereotype.Service;
+import com.sarkhan.backend.dto.history.PaymentHistoryRequestDto;
 
-@Service
 public interface PaymentHistoryService {
+    void logPayment(PaymentHistoryRequestDto paymentHistoryRequestDto);
 }

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @Repository
-public interface OrderItemRepository extends JpaRepository<OrderItem,Long> {
+public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
     @Query("select sum(o.totalPrice) from OrderItem o where o.sellerId = :sellerId")
     BigDecimal getTotalRevenue(Long sellerId);
@@ -35,5 +35,4 @@ public interface OrderItemRepository extends JpaRepository<OrderItem,Long> {
             "AND (:status IS NULL OR o.order.orderStatus = :status) " +
             "AND (:startDate IS NULL OR o.order.orderDate >= :orderDate)")
     List<Order> findBySellerAndFilters(Long sellerId, OrderStatus status, LocalDate orderDate);
-
 }

@@ -1,36 +1,34 @@
 package com.sarkhan.backend.model.order;
 
-import com.sarkhan.backend.model.enums.PaymentStatus;
+import com.sarkhan.backend.model.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 
-
 @Entity
-@Table(name = "payment_history")
+@Table(name = "order_status_history")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PaymentHistory {
+public class OrderStatusHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String cardLastFourDigits;
-    @Enumerated(EnumType.STRING)
-    PaymentStatus paymentStatus;
     @ManyToOne
     @JoinColumn(name = "order_id")
     Order order;
-    LocalDate paidDate;
+    @Enumerated(EnumType.STRING)
+    OrderStatus orderStatus;
+    LocalDate changedAt;
 
     @PrePersist
     public void setDefault() {
-        paidDate = LocalDate.now();
-        paymentStatus = PaymentStatus.PENDING;
+        changedAt = LocalDate.now();
+        orderStatus = OrderStatus.PENDING;
     }
 
 }
