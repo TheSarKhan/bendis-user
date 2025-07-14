@@ -71,8 +71,8 @@ public class OrderStatusHistoryServiceImpl implements OrderStatusHistoryService 
                 return productHistoryDto;
             })).toList();
 
-            OrderStatusHistory lastStatus = orderStatusHistoryRepository.findLastByOrder_OrderIdOrderByOrderDateDesc(order.getOrderId()).orElse(null);
-            PaymentHistory lastPayment = paymentHistoryRepository.findLastPaymentByOrderIdOrderByPaidDateDesc(order.getOrderId()).orElse(null);
+            OrderStatusHistory lastStatus = orderStatusHistoryRepository.findLastByOrder_OrderIdOrderByChangedAtDesc(order.getOrderId()).orElse(null);
+            PaymentHistory lastPayment = paymentHistoryRepository.findLastPaymentByOrder_OrderIdOrderByPaidDateDesc(order.getOrderId()).orElse(null);
             String card = lastPayment != null ? lastPayment.getCardLastFourDigits() : "****";
             OrderStatus status = lastStatus != null ? lastStatus.getOrderStatus() : order.getOrderStatus();
             return new OrderHistoryResponseDto(
