@@ -3,9 +3,11 @@ package com.sarkhan.backend.service.impl;
 import com.sarkhan.backend.dto.cart.CartItemRequestDTO;
 import com.sarkhan.backend.dto.order.OrderFilterRequest;
 import com.sarkhan.backend.dto.order.OrderRequest;
+import com.sarkhan.backend.dto.order.OrderResponseDto;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
 import com.sarkhan.backend.jwt.JwtService;
+import com.sarkhan.backend.mapper.order.OrderMapper;
 import com.sarkhan.backend.model.order.Address;
 import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.cart.CartItem;
@@ -51,6 +53,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final CartItemRepository cartItemRepository;
     private final EntityManager entityManager;
+    private final OrderMapper orderMapper;
 
     private User extractUser(String token) {
         String email = jwtService.extractEmail(token);
@@ -58,6 +61,22 @@ public class OrderServiceImpl implements OrderService {
             log.error("User can not found with this email:" + email);
             return new ResourceNotFoundException("User can not found with this email");
         });
+    }
+
+    @Override
+    public List<OrderResponseDto> getAll(String token) {
+        User user = extractUser(token);
+        return orderMapper.ordersRoOrderResponseDtoList(orderRepository.findAll(), user);
+    }
+
+    @Override
+    public OrderResponseDto getById(Long orderId, String token) {
+        User user = extractUser(token);
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> {
+            log.error("Order can not found for this user:" + orderId);
+            return new ResourceNotFoundException("Order can not found {}" + orderId);
+        });
+        return orderMapper.orderToOrderResponseDto(order, user);
     }
 
     @Override
@@ -144,7 +163,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> filterOrders(OrderFilterRequest orderFilterRequest,String token) {
+    public List<Order> filterOrders(OrderFilterRequest orderFilterRequest, String token) {
         User user = extractUser(token);
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Order> query = criteriaBuilder.createQuery(Order.class);
@@ -168,7 +187,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(criteriaBuilder.equal(order.get("userId"),user.getId()));
+        predicates.add(criteriaBuilder.equal(order.get("userId"), user.getId()));
         if (startDate != null) {
             predicates.add(criteriaBuilder.between(order.get("orderDate"), startDate, endDate));
         }
