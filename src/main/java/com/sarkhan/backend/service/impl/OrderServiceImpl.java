@@ -1,6 +1,7 @@
 package com.sarkhan.backend.service.impl;
 
 import com.sarkhan.backend.dto.cart.CartItemRequestDTO;
+import com.sarkhan.backend.dto.order.OrderFilterRequest;
 import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
@@ -23,12 +24,15 @@ import com.sarkhan.backend.repository.order.OrderRepository;
 import com.sarkhan.backend.repository.product.ProductRepository;
 import com.sarkhan.backend.repository.user.UserRepository;
 import com.sarkhan.backend.service.OrderService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +50,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartItemRepository cartItemRepository;
+    private final EntityManager entityManager;
 
     private User extractUser(String token) {
         String email = jwtService.extractEmail(token);
@@ -136,5 +141,48 @@ public class OrderServiceImpl implements OrderService {
         cartItemRepository.deleteAll(cart.getCartItems());
 
         return paymentService.createInvoice(orderRequest, token);
+    }
+
+    @Override
+    public List<Order> filterOrders(OrderFilterRequest orderFilterRequest,String token) {
+        User user = extractUser(token);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Order> query = criteriaBuilder.createQuery(Order.class);
+        Root<Order> order = query.from(Order.class);
+        Join<Order, OrderItem> itemList = order.join("orderItemList", JoinType.LEFT);
+        LocalDate startDate = null;
+        LocalDate endDate = LocalDate.now();
+        if ("DAY".equalsIgnoreCase(orderFilterRequest.getDateType().name()) && orderFilterRequest.getDateAmount() != null) {
+            startDate = LocalDate.now().minusDays(orderFilterRequest.getDateAmount());
+        }
+        if ("MONTH".equalsIgnoreCase(orderFilterRequest.getDateType().name()) && orderFilterRequest.getDateAmount() != null) {
+            startDate = LocalDate.now().minusMonths(orderFilterRequest.getDateAmount());
+        }
+        if ("YEAR".equalsIgnoreCase(orderFilterRequest.getDateType().name())) {
+            if (orderFilterRequest.getSpecificYear() != null) {
+                startDate = LocalDate.of(orderFilterRequest.getSpecificYear(), 1, 1);
+                endDate = LocalDate.of(orderFilterRequest.getSpecificYear(), 12, 31);
+            } else if (orderFilterRequest.getDateAmount() != null) {
+                startDate = LocalDate.now().minusYears(orderFilterRequest.getDateAmount());
+
+            }
+        }
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(criteriaBuilder.equal(order.get("userId"),user.getId()));
+        if (startDate != null) {
+            predicates.add(criteriaBuilder.between(order.get("orderDate"), startDate, endDate));
+        }
+        if (orderFilterRequest.getOrderStatus() != null) {
+            predicates.add(criteriaBuilder.equal(order.get("orderStatus"), orderFilterRequest.getOrderStatus()));
+        }
+        if (orderFilterRequest.getProductName() != null && !orderFilterRequest.getProductName().isEmpty()) {
+            List<Long> idsFromName = productRepository.findIdsFromName(orderFilterRequest.getProductName());
+            if (!idsFromName.isEmpty()) {
+                predicates.add(itemList.get("id").in(idsFromName));
+            } else {
+                predicates.add(criteriaBuilder.disjunction());
+            }
+        }
+        return entityManager.createQuery(query).getResultList();
     }
 }

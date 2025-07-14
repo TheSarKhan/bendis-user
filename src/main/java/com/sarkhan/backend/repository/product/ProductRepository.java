@@ -69,4 +69,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             """, nativeQuery = true)
     List<String> getDistinctSizesBySubCategoryId(Long subCategoryId);
 
+    @Query("select p.id from Product p where p.name like lower(concat('%',:productName,'%') )")
+    List<Long> findIdsFromName(@Param("productName") String productName);
+
 }
