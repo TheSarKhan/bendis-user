@@ -38,12 +38,6 @@ public class Order {
 
     @PrePersist
     public void setDefault() {
-        if (orderItemList != null && !orderItemList.isEmpty()) {
-            this.totalPrice = orderItemList.stream().map(OrderItem::getTotalPrice)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-        } else {
-            this.totalPrice = BigDecimal.ZERO;
-        }
         if (orderStatus == null) {
             this.orderStatus = OrderStatus.PENDING;
         }

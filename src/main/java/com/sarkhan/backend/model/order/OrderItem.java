@@ -24,5 +24,7 @@ public class OrderItem {
     Long sellerId;
     Integer quantity;
     String color;
+    String size;
     BigDecimal totalPrice;
+    BigDecimal deliveryFee;
 }
