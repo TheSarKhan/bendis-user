@@ -12,7 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderRequest {
-    private Long orderId;
     private List<CartItemRequestDTO> items;
     private Double totalPrice;
     private AddressRequestDto addressRequestDto;

@@ -104,6 +104,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT,"/api/v1/seller").hasAnyRole("ADMIN","SELLER")
                         .requestMatchers("/api/v1/seller/dashboard/**").hasRole("SELLER")
                         .requestMatchers(HttpMethod.GET, "/api/v1/seller").authenticated()
+                        .requestMatchers(HttpMethod.POST,"/api/v1/orderHistory/orders/shipped/").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
