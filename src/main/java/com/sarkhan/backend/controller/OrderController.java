@@ -1,5 +1,6 @@
 package com.sarkhan.backend.controller;
 
+import com.sarkhan.backend.dto.order.OrderDetailsDto;
 import com.sarkhan.backend.dto.order.OrderFilterRequest;
 import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.dto.order.OrderResponseDto;
@@ -42,5 +43,10 @@ public class OrderController {
     public ResponseEntity<List<Order>> filterOrders(@RequestBody OrderFilterRequest orderFilterRequest, @RequestHeader("Authorization") String token) {
         token = token.substring(7);
         return ResponseEntity.ok(orderService.filterOrders(orderFilterRequest, token));
+    }
+
+    @GetMapping("/getDetails/{orderId}")
+    public ResponseEntity<OrderDetailsDto> getDetails(@PathVariable Long orderId,String token) {
+        return ResponseEntity.ok(orderService.getOrderDetails(orderId,token));
     }
 }

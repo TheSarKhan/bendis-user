@@ -1,9 +1,7 @@
 package com.sarkhan.backend.service.impl;
 
 import com.sarkhan.backend.dto.cart.CartItemRequestDTO;
-import com.sarkhan.backend.dto.order.OrderFilterRequest;
-import com.sarkhan.backend.dto.order.OrderRequest;
-import com.sarkhan.backend.dto.order.OrderResponseDto;
+import com.sarkhan.backend.dto.order.*;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
 import com.sarkhan.backend.jwt.JwtService;
@@ -36,7 +34,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderResponseDto> getAll(String token) {
         User user = extractUser(token);
-        return orderMapper.ordersRoOrderResponseDtoList(orderRepository.findAll(), user);
+        return orderMapper.ordersRoOrderResponseDtoList(orderRepository.findByUserId(user.getId()), user);
     }
 
     @Override
@@ -203,5 +203,82 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         return entityManager.createQuery(query).getResultList();
+    }
+
+    @Override
+    public OrderDetailsDto getOrderDetails(Long orderId, String token) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> {
+            log.error("Order can not found:" + orderId);
+            return new ResourceNotFoundException("Order can not found {}" + orderId);
+        });
+        Map<String, FirmDetailsDto> firmDetailsDtoMap = new HashMap<>();
+
+        for (OrderItem orderItem : order.getOrderItemList()) {
+            Product product = productRepository.findById(orderItem.getProductId()).orElseThrow(() -> {
+                log.error("Product can not found:" + orderItem.getProductId());
+                return new ResourceNotFoundException("Product can not found {}" + orderItem.getProductId());
+            });
+
+            String brand = product.getBrand();
+            String imageUrl = product.getColorAndSizes().stream().filter(colorAndSize -> colorAndSize.getColor().name().equals(orderItem.getColor()))
+                    .findFirst().map(colorAndSize -> {
+                        List<String> imageUrls = colorAndSize.getImageUrls();
+                        return (imageUrls != null && !imageUrls.isEmpty()) ? imageUrls.getFirst() : null;
+                    }).orElse(null);
+            ProductOrderDetailsDto productOrderDetailsDto = ProductOrderDetailsDto.builder()
+                    .productName(product.getName())
+                    .imageUrl(imageUrl)
+                    .color(orderItem.getColor())
+                    .status(order.getOrderStatus().name())
+                    .quantity(orderItem.getQuantity())
+                    .size(orderItem.getSize())
+                    .build();
+            firmDetailsDtoMap.putIfAbsent(brand, new FirmDetailsDto(brand, 0, BigDecimal.ZERO, new ArrayList<>()));
+
+            FirmDetailsDto firmDetailsDto = firmDetailsDtoMap.get(brand);
+            firmDetailsDto.getProductOrderDetailsDtoList().add(productOrderDetailsDto);
+            firmDetailsDto.setProductCount(firmDetailsDto.getProductCount() + 1);
+            firmDetailsDto.setTotalPrice(firmDetailsDto.getTotalPrice().add(orderItem.getTotalPrice()));
+        }
+        OrderSummaryDto orderSummaryDto = orderSummaryDto(orderId, token);
+        return OrderDetailsDto.builder()
+                .orderId(orderId)
+                .orderDate(order.getOrderDate())
+                .orderStatus(order.getOrderStatus().name())
+                .firmDetailsDtos((List<FirmDetailsDto>) firmDetailsDtoMap.values())
+                .orderSummaryDto(orderSummaryDto)
+                .build();
+    }
+
+    private OrderSummaryDto orderSummaryDto(Long orderId, String token) {
+        User user = extractUser(token);
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> {
+            log.error("Order can not found:" + orderId);
+            return new ResourceNotFoundException("Order can not found {}" + orderId);
+        });
+        Address address = order.getAddress();
+        BigDecimal discount = BigDecimal.ZERO;
+        BigDecimal deliveryFee = BigDecimal.ZERO;
+        for (OrderItem orderItem : order.getOrderItemList()) {
+            Product product = productRepository.findById(orderItem.getProductId()).orElseThrow(() -> {
+                log.error("Product can not found:" + orderItem.getProductId());
+                return new ResourceNotFoundException("Product can not found {}" + orderItem.getProductId());
+            });
+            discount = discount.add((product.getOriginalPrice().subtract(product.getDiscountedPrice()))
+                    .multiply(BigDecimal.valueOf(orderItem.getQuantity())));
+            deliveryFee = deliveryFee.add(orderItem.getDeliveryFee());
+        }
+        BigDecimal finalPrice = order.getTotalPrice().subtract(discount).add(deliveryFee);
+
+        return OrderSummaryDto.builder()
+                .toralPrice(order.getTotalPrice())
+                .discount(discount)
+                .deliveryFee(deliveryFee)
+                .finalPrice(finalPrice)
+                .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .address(address.getRegion() + "," + address.getCity() + "," +
+                        address.getStreet() + "," + address.getPostalCode())
+                .build();
     }
 }
