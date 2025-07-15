@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -65,9 +66,13 @@ public class OrderStatusHistoryServiceImpl implements OrderStatusHistoryService 
                     log.error("Product can not found {}", orderItem.getProductId());
                     return new NoSuchElementException("Product can not found {}" + orderItem.getProductId());
                 });
+                List<String> imageUrls = product.getColorAndSizes().stream().flatMap(item -> {
+                    List<String> images = item.getImageUrls();
+                    return (images != null && !images.isEmpty()) ? images.stream() : Stream.empty();
+                }).toList();
                 ProductHistoryDto productHistoryDto = new ProductHistoryDto();
                 productHistoryDto.setProductName(product.getName());
-                //   productHistoryDto.setImageUrl(product);
+                productHistoryDto.setImageUrls(imageUrls);
                 return productHistoryDto;
             })).toList();
 
@@ -75,12 +80,15 @@ public class OrderStatusHistoryServiceImpl implements OrderStatusHistoryService 
             PaymentHistory lastPayment = paymentHistoryRepository.findLastPaymentByOrder_OrderIdOrderByPaidDateDesc(order.getOrderId()).orElse(null);
             String card = lastPayment != null ? lastPayment.getCardLastFourDigits() : "****";
             OrderStatus status = lastStatus != null ? lastStatus.getOrderStatus() : order.getOrderStatus();
+            LocalDate lastStatusChangesAt = lastStatus != null ? lastStatus.getChangedAt() : order.getOrderDate();
             return new OrderHistoryResponseDto(
                     order.getOrderId(),
                     card,
                     order.getOrderDate(),
                     status,
-                    productHistoryDtoList
+                    order.getTotalPrice(),
+                    productHistoryDtoList,
+                    lastStatusChangesAt
             );
         }).toList();
     }

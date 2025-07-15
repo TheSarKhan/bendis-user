@@ -3,6 +3,8 @@ package com.sarkhan.backend.dto.history;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -10,5 +12,5 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductHistoryDto {
     String productName;
-    String imageUrl;
+    List<String> imageUrls;
 }
