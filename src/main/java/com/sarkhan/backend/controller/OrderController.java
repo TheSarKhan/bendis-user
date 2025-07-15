@@ -46,7 +46,7 @@ public class OrderController {
     }
 
     @GetMapping("/getDetails/{orderId}")
-    public ResponseEntity<OrderDetailsDto> getDetails(@PathVariable Long orderId,String token) {
+    public ResponseEntity<OrderDetailsDto> getDetails(@PathVariable Long orderId,@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(orderService.getOrderDetails(orderId,token));
     }
 }

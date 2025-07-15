@@ -50,7 +50,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 List<SimpleGrantedAuthority> authorities =
                         List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
 
-                log.error("User email: " + email + " logged in successfully.");
+                log.info("User email: " + email + " logged in successfully.");
 
                 SecurityContextHolder.getContext().setAuthentication(
                         new UsernamePasswordAuthenticationToken(email, null, authorities)

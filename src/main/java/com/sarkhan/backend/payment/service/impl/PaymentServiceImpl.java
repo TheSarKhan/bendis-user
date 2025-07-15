@@ -61,7 +61,6 @@ public class PaymentServiceImpl implements PaymentService {
         body.setAmountDynamic(false);
         body.setDirectPay(true);
         body.setMetadata(Map.of(
-                "Order İD", String.valueOf(orderRequest.getOrderId()),
                 "Total Price", String.valueOf(orderRequest.getTotalPrice())
         ));
 

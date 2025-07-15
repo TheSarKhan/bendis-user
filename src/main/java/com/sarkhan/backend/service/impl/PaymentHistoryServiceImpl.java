@@ -1,6 +1,7 @@
 package com.sarkhan.backend.service.impl;
 
 import com.sarkhan.backend.dto.history.PaymentHistoryRequestDto;
+import com.sarkhan.backend.model.enums.PaymentStatus;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.model.order.PaymentHistory;
 import com.sarkhan.backend.repository.order.OrderRepository;
@@ -30,4 +31,17 @@ public class PaymentHistoryServiceImpl implements PaymentHistoryService {
                 .build();
         paymentHistoryRepository.save(paymentHistory);
     }
+
+    @Override
+    public String handleApprove(Long orderId, String cardLast4Digits) {
+
+        logPayment(PaymentHistoryRequestDto.builder()
+                .orderId(orderId)
+                .cardLast4Digits(cardLast4Digits)
+                .paymentStatus(PaymentStatus.SUCCESS)
+                .build());
+
+        return "Successfully complicated";
+    }
 }
+
