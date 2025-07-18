@@ -19,6 +19,7 @@ public class OrderItem {
     Long id;
     @ManyToOne
     @JoinColumn(name = "order_id")
+    @ToString.Exclude
     Order order;
     Long productId;
     Long sellerId;

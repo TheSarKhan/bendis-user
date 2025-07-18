@@ -245,7 +245,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderId(orderId)
                 .orderDate(order.getOrderDate())
                 .orderStatus(order.getOrderStatus().name())
-                .firmDetailsDtos((List<FirmDetailsDto>) firmDetailsDtoMap.values())
+                .firmDetailsDtos(new ArrayList<>(firmDetailsDtoMap.values()))
                 .orderSummaryDto(orderSummaryDto)
                 .build();
     }
