@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/home")
-@Tag(name = "Home Controller", description = "Endpoints related to home page information")
+@Tag(name = "Home", description = "Endpoints related to home page information")
 public class HomeController {
     private final HomePageService service;
 

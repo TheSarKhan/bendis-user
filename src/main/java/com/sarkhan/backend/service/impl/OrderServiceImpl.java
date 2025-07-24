@@ -4,28 +4,29 @@ import com.sarkhan.backend.dto.cart.CartItemRequestDTO;
 import com.sarkhan.backend.dto.order.*;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
-import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.mapper.order.OrderMapper;
-import com.sarkhan.backend.model.order.Address;
 import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.cart.CartItem;
 import com.sarkhan.backend.model.enums.OrderStatus;
+import com.sarkhan.backend.model.order.Address;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.model.order.OrderItem;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.ColorAndSize;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.payment.service.PaymentService;
-import com.sarkhan.backend.repository.order.AddressRepository;
 import com.sarkhan.backend.repository.cart.CartItemRepository;
 import com.sarkhan.backend.repository.cart.CartRepository;
+import com.sarkhan.backend.repository.order.AddressRepository;
 import com.sarkhan.backend.repository.order.OrderItemRepository;
 import com.sarkhan.backend.repository.order.OrderRepository;
 import com.sarkhan.backend.repository.product.ProductRepository;
-import com.sarkhan.backend.repository.user.UserRepository;
 import com.sarkhan.backend.service.OrderService;
+import com.sarkhan.backend.service.UserService;
+import com.sarkhan.backend.service.impl.product.util.UserUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
+import jakarta.security.auth.message.AuthException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,15 +39,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-
-@Slf4j
 public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final PaymentService paymentService;
-    private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final CartRepository cartRepository;
     private final AddressRepository addressRepository;
     private final OrderRepository orderRepository;
@@ -55,36 +54,29 @@ public class OrderServiceImpl implements OrderService {
     private final EntityManager entityManager;
     private final OrderMapper orderMapper;
 
-    private User extractUser(String token) {
-        String email = jwtService.extractEmail(token);
-        return userRepository.findByEmail(email).orElseThrow(() -> {
-            log.error("User can not found with this email:" + email);
-            return new ResourceNotFoundException("User can not found with this email");
-        });
+    @Override
+    public List<OrderResponseDto> getAll() {
+        User user = getCurrentUser();
+        return orderMapper.ordersRoOrderResponseDtoList(
+                orderRepository.findByUserId(user.getId()), user);
     }
 
     @Override
-    public List<OrderResponseDto> getAll(String token) {
-        User user = extractUser(token);
-        return orderMapper.ordersRoOrderResponseDtoList(orderRepository.findByUserId(user.getId()), user);
-    }
-
-    @Override
-    public OrderResponseDto getById(Long orderId, String token) {
-        User user = extractUser(token);
+    public OrderResponseDto getById(Long orderId) {
+        User user = getCurrentUser();
         Order order = orderRepository.findById(orderId).orElseThrow(() -> {
-            log.error("Order can not found for this user:" + orderId);
-            return new ResourceNotFoundException("Order can not found {}" + orderId);
+            log.error("Order can not found for this user:{}", orderId);
+            return new ResourceNotFoundException("Order can not found " + orderId);
         });
         return orderMapper.orderToOrderResponseDto(order, user);
     }
 
     @Override
     @Transactional
-    public String createOrder(OrderRequest orderRequest, String token) throws NotEnoughQuantityException {
-        User user = extractUser(token);
+    public String createOrder(OrderRequest orderRequest) throws NotEnoughQuantityException {
+        User user = getCurrentUser();
         Cart cart = cartRepository.findByUserId(user.getId()).orElseThrow(() -> {
-            log.error("Cart can not found for this user:" + user.getId());
+            log.error("Cart can not found for this user:{}", user.getId());
             return new ResourceNotFoundException("Cart can not found for this user");
         });
         Address address = Address.builder()
@@ -115,7 +107,7 @@ public class OrderServiceImpl implements OrderService {
             if (item.getSize() != null && !item.getSize().isBlank()) {
                 Long sizeStock = colorAndSize.getSizeStockMap().get(item.getSize());
                 if (sizeStock == null) {
-                    log.error("Size not found: " + item.getSize());
+                    log.error("Size not found: {}", item.getSize());
                     throw new ResourceNotFoundException("Size not found: " + item.getSize());
                 }
                 if (item.getQuantity() > sizeStock) {
@@ -159,12 +151,12 @@ public class OrderServiceImpl implements OrderService {
 
         cartItemRepository.deleteAll(cart.getCartItems());
 
-        return paymentService.createInvoice(orderRequest, token);
+        return paymentService.createInvoice(orderRequest, user);
     }
 
     @Override
-    public List<Order> filterOrders(OrderFilterRequest orderFilterRequest, String token) {
-        User user = extractUser(token);
+    public List<Order> filterOrders(OrderFilterRequest orderFilterRequest) {
+        User user = getCurrentUser();
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Order> query = criteriaBuilder.createQuery(Order.class);
         Root<Order> order = query.from(Order.class);
@@ -206,7 +198,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDetailsDto getOrderDetails(Long orderId, String token) {
+    public OrderDetailsDto getOrderDetails(Long orderId) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> {
             log.error("Order can not found:" + orderId);
             return new ResourceNotFoundException("Order can not found {}" + orderId);
@@ -240,7 +232,7 @@ public class OrderServiceImpl implements OrderService {
             firmDetailsDto.setProductCount(firmDetailsDto.getProductCount() + 1);
             firmDetailsDto.setTotalPrice(firmDetailsDto.getTotalPrice().add(orderItem.getTotalPrice()));
         }
-        OrderSummaryDto orderSummaryDto = orderSummaryDto(orderId, token);
+        OrderSummaryDto orderSummaryDto = orderSummaryDto(orderId);
         return OrderDetailsDto.builder()
                 .orderId(orderId)
                 .orderDate(order.getOrderDate())
@@ -250,8 +242,8 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
-    private OrderSummaryDto orderSummaryDto(Long orderId, String token) {
-        User user = extractUser(token);
+    private OrderSummaryDto orderSummaryDto(Long orderId) {
+        User user = getCurrentUser();
         Order order = orderRepository.findById(orderId).orElseThrow(() -> {
             log.error("Order can not found:" + orderId);
             return new ResourceNotFoundException("Order can not found {}" + orderId);
@@ -280,5 +272,14 @@ public class OrderServiceImpl implements OrderService {
                 .address(address.getRegion() + "," + address.getCity() + "," +
                         address.getStreet() + "," + address.getPostalCode())
                 .build();
+    }
+
+    private User getCurrentUser() {
+        try {
+            return UserUtil.getCurrentUser(userService, log);
+        } catch (AuthException e) {
+            log.error("User not found");
+            return null;
+        }
     }
 }

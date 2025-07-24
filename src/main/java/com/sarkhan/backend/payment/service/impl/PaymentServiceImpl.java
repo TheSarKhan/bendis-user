@@ -38,6 +38,11 @@ public class PaymentServiceImpl implements PaymentService {
         String email = jwtService.extractEmail(token);
         User user = userRepository.findByEmail(email).orElseThrow();
 
+        return createInvoice(orderRequest, user);
+    }
+
+    @Override
+    public String createInvoice(OrderRequest orderRequest, User user) {
         String url = "https://api.payriff.com/api/v2/invoices";
 
         Invoice.Body body = new Invoice.Body();
@@ -45,7 +50,7 @@ public class PaymentServiceImpl implements PaymentService {
         body.setCurrencyType("AZN");
         body.setDescription("Ödəniş");
         body.setFullName(user.getFullName());
-        body.setEmail(email);
+        body.setEmail(user.getEmail());
         body.setPhoneNumber(user.getCountryCode() + user.getPhoneNumber());
         body.setApproveURL(payriffConfig.getApproveUrl());
         body.setCancelURL(payriffConfig.getCancelUrl());
@@ -81,10 +86,8 @@ public class PaymentServiceImpl implements PaymentService {
                 PayriffInvoiceResponse.class
         );
 
-        return response.getBody().getPayload().getPaymentUrl(); // <<< Kullanıcıyı buraya yönlendir!
+        return response.getBody().getPayload().getPaymentUrl();
     }
-
-
 
     @Override
     public String getInvoice(String uuid) {

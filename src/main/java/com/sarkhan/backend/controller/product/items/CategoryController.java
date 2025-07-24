@@ -17,7 +17,7 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/category")
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Category Controller", description = "Endpoints for managing categories")
+@Tag(name = "Category", description = "Endpoints for managing categories")
 public class CategoryController {
     private final CategoryService service;
 
