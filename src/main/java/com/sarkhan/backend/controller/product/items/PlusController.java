@@ -19,7 +19,7 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/plus")
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "Plus Controller", description = "Endpoints for managing Plus items (header, description, icon)")
+@Tag(name = "Plus", description = "Endpoints for managing Plus items (header, description, icon)")
 public class PlusController {
     private final PlusService service;
 

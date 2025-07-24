@@ -22,7 +22,7 @@ import java.util.concurrent.ExecutionException;
 @RestController
 @RequestMapping("/api/v1/product")
 @RequiredArgsConstructor
-@Tag(name = "Product Controller", description = "Endpoints for managing products")
+@Tag(name = "Product", description = "Endpoints for managing products")
 public class ProductController {
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
     private final ProductService service;

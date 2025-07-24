@@ -8,7 +8,6 @@ import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.dto.order.OrderResponseDto;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
-import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.mapper.order.OrderMapper;
 import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.cart.CartItem;
@@ -28,7 +27,7 @@ import com.sarkhan.backend.repository.order.AddressRepository;
 import com.sarkhan.backend.repository.order.OrderItemRepository;
 import com.sarkhan.backend.repository.order.OrderRepository;
 import com.sarkhan.backend.repository.product.ProductRepository;
-import com.sarkhan.backend.repository.user.UserRepository;
+import com.sarkhan.backend.service.UserService;
 import com.sarkhan.backend.service.impl.OrderServiceImpl;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -41,9 +40,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -57,9 +61,7 @@ public class OrderServiceImplTest {
     @Mock
     private PaymentService paymentService;
     @Mock
-    private JwtService jwtService;
-    @Mock
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Mock
     private AddressRepository addressRepository;
@@ -103,7 +105,7 @@ public class OrderServiceImplTest {
         cart.setCartItems(List.of(cartItem));
 
         colorAndSize = new ColorAndSize();
-        colorAndSize.setColor(Color.RED);
+        colorAndSize.setColor(Color.BLUE);
         colorAndSize.setStock(10L);
         colorAndSize.setSizeStockMap(new HashMap<>());
 
@@ -114,7 +116,7 @@ public class OrderServiceImplTest {
         product.setSalesCount(0);
         product.setOriginalPrice(BigDecimal.valueOf(100));
         product.setDiscountedPrice(BigDecimal.valueOf(50));
-        product.setColorAndSizes(List.of(ColorAndSize.builder().color(Color.BLUE).imageUrls(List.of("imageUrl")).build()));
+        product.setColorAndSizes(List.of(ColorAndSize.builder().color(Color.BLUE).stock(2L).imageUrls(List.of("imageUrl")).build()));
         AddressRequestDto addressDto = new AddressRequestDto(
                 "FIN123", "Baku", "Narimanov", "Main street", "AZ1000"
         );
@@ -128,13 +130,13 @@ public class OrderServiceImplTest {
 
     @Test
     void testCreateOrder_Success() throws NotEnoughQuantityException {
-        when(jwtService.extractEmail(any())).thenReturn("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        securityContextHolderConfigCorrectly();
+        when(userService.getByEmail("user@example.com")).thenReturn(user);
         when(cartRepository.findByUserId(user.getId())).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(paymentService.createInvoice(any(), any())).thenReturn("invoice_url");
+        when(paymentService.createInvoice(any(), any(User.class))).thenReturn("invoice_url");
 
-        String result = orderService.createOrder(orderRequest, "Bearer token");
+        String result = orderService.createOrder(orderRequest);
 
         assertNotNull(result);
         assertEquals("invoice_url", result);
@@ -143,96 +145,83 @@ public class OrderServiceImplTest {
         verify(cartItemRepository).deleteAll(cart.getCartItems());
     }
 
-
-    @Test
-    void testCreateOrder_UserNotFound() {
-        when(jwtService.extractEmail(any())).thenReturn("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> orderService.createOrder(orderRequest, "Bearer token"));
-    }
-
     @Test
     void testCreateOrder_NotEnoughStock() {
         colorAndSize.setStock(1L);
         product.setColorAndSizes(List.of(colorAndSize));
 
-        when(jwtService.extractEmail(any())).thenReturn("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        securityContextHolderConfigCorrectly();
+        when(userService.getByEmail("user@example.com")).thenReturn(user);
         when(cartRepository.findByUserId(user.getId())).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         assertThrows(NotEnoughQuantityException.class,
-                () -> orderService.createOrder(orderRequest, "Bearer token"));
+                () -> orderService.createOrder(orderRequest));
     }
 
 
     @Test
     void testCreateOrder_ProductNotFound() {
-        when(jwtService.extractEmail(any())).thenReturn("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        securityContextHolderConfigCorrectly();
+        when(userService.getByEmail("user@example.com")).thenReturn(user);
         when(cartRepository.findByUserId(user.getId())).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class,
-                () -> orderService.createOrder(orderRequest, "Bearer token"));
+                () -> orderService.createOrder(orderRequest));
     }
 
     @Test
     void testForGetAllSuccess_ShouldReturnListOfOrderResponseDto() {
-        String token = "Bearer token";
         List<Order> orders = List.of(new Order(), new Order());
         List<OrderResponseDto> orderResponseDtoList = List.of(new OrderResponseDto(), new OrderResponseDto());
-        when(jwtService.extractEmail(token)).thenReturn("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+
+        securityContextHolderConfigCorrectly();
+        when(userService.getByEmail("user@example.com")).thenReturn(user);
         when(orderRepository.findByUserId(1L)).thenReturn(orders);
         when(orderMapper.ordersRoOrderResponseDtoList(orders, user)).thenReturn(orderResponseDtoList);
 
-        List<OrderResponseDto> all = orderService.getAll(token);
+        List<OrderResponseDto> all = orderService.getAll();
         assertEquals(2, all.size());
         verify(orderRepository).findByUserId(1L);
     }
 
     @Test
     void testForGetBYId_ShouldReturnOrderResponseDto() {
-        String token = "Bearer token";
         Long orderId = 1L;
         Order order = new Order();
         OrderResponseDto orderResponseDto = new OrderResponseDto();
 
-        when(jwtService.extractEmail(token)).thenReturn("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        securityContextHolderConfigCorrectly();
+        when(userService.getByEmail("user@example.com")).thenReturn(user);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(orderMapper.orderToOrderResponseDto(order, user)).thenReturn(orderResponseDto);
 
-        OrderResponseDto byId = orderService.getById(orderId, token);
+        OrderResponseDto byId = orderService.getById(orderId);
         assertEquals(orderResponseDto, byId);
     }
 
     @Test
     void testForGetBYId_WhenUserNotFound_ShouldReturnResourceNotFoundException() {
-        String token = "notfound";
-        when(jwtService.extractEmail(token)).thenReturn("notfound");
-        when(userRepository.findByEmail("notfound")).thenReturn(Optional.empty());
+        securityContextHolderConfigCorrectly();
+        when(userService.getByEmail("user@example.com")).thenReturn(user);
 
         ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
-            orderService.getById(1L, token);
+            orderService.getById(1L);
         });
 
-        assertEquals("User can not found with this email", resourceNotFoundException.getMessage());
+        assertEquals("Order can not found 1", resourceNotFoundException.getMessage());
     }
 
     @Test
     void testForGetBYId_WhenOrderNotFound_ShouldReturnResourceNotFoundException() {
-        String token = "Bearer token";
         Long orderId = 1L;
 
-        when(jwtService.extractEmail(token)).thenReturn("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        securityContextHolderConfigCorrectly();
+        when(userService.getByEmail("user@example.com")).thenReturn(user);
         when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
         ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
-            orderService.getById(orderId, token);
+            orderService.getById(orderId);
         });
 
         assertTrue(resourceNotFoundException.getMessage().contains("Order can not found"));
@@ -240,7 +229,6 @@ public class OrderServiceImplTest {
 
     @Test
     void testForOrderDetails_ShouldReturnOrderDetailsDto() {
-        String token = "Bearer token";
         Long orderId = 1L;
 
         Order order = new Order();
@@ -248,26 +236,26 @@ public class OrderServiceImplTest {
         order.setOrderStatus(OrderStatus.SHIPPED);
         order.setTotalPrice(BigDecimal.valueOf(400));
         order.setAddress(new Address());
+
+        securityContextHolderConfigCorrectly();
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(jwtService.extractEmail(token)).thenReturn("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        when(userService.getByEmail("user@example.com")).thenReturn(user);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
-        OrderDetailsDto orderDetails = orderService.getOrderDetails(orderId, token);
+        OrderDetailsDto orderDetails = orderService.getOrderDetails(orderId);
         assertEquals(orderId, orderDetails.getOrderId());
         assertFalse(orderDetails.getFirmDetailsDtos().isEmpty());
     }
 
     @Test
     void testForOrderFilter_ShouldReturnFilteredOrder() {
-        String token = "Bearer token";
         OrderFilterRequest orderFilterRequest = new OrderFilterRequest();
         orderFilterRequest.setDateType(DateType.MONTH);
         orderFilterRequest.setDateAmount(1);
 
-        when(jwtService.extractEmail(token)).thenReturn("user@example.com");
-        when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
+        securityContextHolderConfigCorrectly();
+        when(userService.getByEmail("user@example.com")).thenReturn(user);
 
         CriteriaBuilder criteriaBuilder = mock(CriteriaBuilder.class);
         CriteriaQuery query = mock(CriteriaQuery.class);
@@ -280,7 +268,27 @@ public class OrderServiceImplTest {
         when(entityManager.createQuery(query)).thenReturn(typedQuery);
         when(typedQuery.getResultList()).thenReturn(List.of(new Order()));
 
-        List<Order> orders = orderService.filterOrders(orderFilterRequest, token);
-        assertEquals(1,orders.size());
+        List<Order> orders = orderService.filterOrders(orderFilterRequest);
+        assertEquals(1, orders.size());
+    }
+
+    private static void securityContextHolderConfigCorrectly() {
+        String userEmail = "user@example.com";
+        securityContextHolderConfig(userEmail);
+    }
+
+    private static void securityContextHolderConfigWrong() {
+        String anonymousUser = "anonymousUser";
+        securityContextHolderConfig(anonymousUser);
+    }
+
+    private static void securityContextHolderConfig(String userEmail) {
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(userEmail);
+
+        SecurityContextHolder.setContext(securityContext);
     }
 }

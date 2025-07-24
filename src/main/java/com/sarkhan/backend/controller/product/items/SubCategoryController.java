@@ -18,7 +18,7 @@ import java.util.List;
 @PreAuthorize("hasRole('ADMIN')")
 @RequestMapping("/api/v1/sub-category")
 @SecurityRequirement(name = "bearerAuth")
-@Tag(name = "SubCategory Controller", description = "Endpoints for managing sub-categories")
+@Tag(name = "SubCategory", description = "Endpoints for managing sub-categories")
 public class SubCategoryController {
     private final SubCategoryService service;
 

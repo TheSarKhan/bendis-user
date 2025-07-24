@@ -10,13 +10,13 @@ import com.sarkhan.backend.model.order.Order;
 import java.util.List;
 
 public interface OrderService {
-    List<OrderResponseDto> getAll(String token);
+    List<OrderResponseDto> getAll();
 
-    OrderResponseDto getById(Long orderId, String token);
+    OrderResponseDto getById(Long orderId);
 
-    String createOrder(OrderRequest orderRequest, String token) throws NotEnoughQuantityException;
+    String createOrder(OrderRequest orderRequest) throws NotEnoughQuantityException;
 
-    List<Order> filterOrders(OrderFilterRequest orderFilterRequest, String token);
+    List<Order> filterOrders(OrderFilterRequest orderFilterRequest);
 
-    OrderDetailsDto getOrderDetails(Long orderId,String token);
+    OrderDetailsDto getOrderDetails(Long orderId);
 }
