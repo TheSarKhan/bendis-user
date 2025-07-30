@@ -1,56 +1,71 @@
 package com.sarkhan.backend.controller;
 
 import com.sarkhan.backend.dto.comment.CommentRequest;
-import com.sarkhan.backend.dto.comment.CommentResponse;
-import com.sarkhan.backend.model.comment.Comment;
+import com.sarkhan.backend.dto.comment.CommentResponseForMyComment;
+import com.sarkhan.backend.dto.comment.UnCommentedProductResponse;
 import com.sarkhan.backend.service.CommentService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/comments")
 @RequiredArgsConstructor
+@RequestMapping("/api/v1/comment")
+@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Comment Controller", description = "Operations related to comments")
 public class CommentController {
 
     private final CommentService commentService;
 
-    // Yeni şərh əlavə et
     @PostMapping
-    public ResponseEntity<Comment> addComment(@RequestBody CommentRequest request) {
-        Comment createdComment = commentService.addComment(request);
-        return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
+    @Operation(
+            summary = "Add a new comment",
+            description = "Adds a new comment to a post or another comment."
+    )
+    public ResponseEntity<String> addComment(@RequestBody CommentRequest request) {
+        return ResponseEntity.ok(commentService.addComment(request));
     }
 
-    // Şərhi sil
-    @DeleteMapping("/{commentId}")
-    public ResponseEntity<String> deleteComment(@PathVariable Long commentId) {
-        commentService.deleteComment(commentId);
-        return new ResponseEntity<>("Comment deleted successfully", HttpStatus.OK);
+    @GetMapping
+    @Operation(
+            summary = "Get user's own comments",
+            description = "Retrieves comments made by the currently authenticated user. Supports pagination."
+    )
+    public ResponseEntity<List<CommentResponseForMyComment>> getMyComments(@RequestParam Integer page) throws AuthException {
+        return ResponseEntity.ok(commentService.getCurrentUserComments(page));
     }
 
-    // Şərhi yenilə
-    @PutMapping("/{commentId}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Long commentId,
-                                                 @RequestBody CommentRequest request) {
-        Comment updatedComment = commentService.updateComment(commentId, request);
-        return new ResponseEntity<>(updatedComment, HttpStatus.OK);
+    @GetMapping("/uncommented-product")
+    @Operation(
+            summary = "Get user's uncommented products",
+            description = "Returns a list of products that the authenticated user has not commented on yet."
+    )
+    public ResponseEntity<List<UnCommentedProductResponse>> getMyUnCommentedProducts(@RequestParam Integer page) throws AuthException {
+        return ResponseEntity.ok(commentService.getUnCommentedProducts(page));
     }
 
-    // Product-a aid şərhləri göstər
-    @GetMapping("/product/{productId}")
-    public ResponseEntity<List<CommentResponse>> getCommentsByProductId(@PathVariable String productId) {
-        List<CommentResponse> comments = commentService.getCommentsByProductId(productId);
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+    @PutMapping
+    @Operation(
+            summary = "Update a comment",
+            description = "Updates the content of a specific comment belonging to the authenticated user."
+    )
+    public ResponseEntity<String> updateComment(@RequestBody Long commentId,
+                                                @RequestBody String content) throws AuthException {
+        return ResponseEntity.ok(commentService.updateComment(commentId, content));
     }
 
-    // User-ə aid şərhləri göstər
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<CommentResponse>> getCommentsByUserId(@PathVariable String userId) {
-        List<CommentResponse> comments = commentService.getCommentsByUserId(userId);
-        return new ResponseEntity<>(comments, HttpStatus.OK);
+    @DeleteMapping
+    @Operation(
+            summary = "Delete a comment",
+            description = "Deletes a specific comment made by the authenticated user."
+    )
+    public ResponseEntity<String> deleteComment(@RequestParam Long commentId) throws AuthException {
+        return ResponseEntity.ok(commentService.deleteComment(commentId));
     }
 }

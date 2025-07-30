@@ -10,6 +10,7 @@ import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.redis.RedisService;
 import com.sarkhan.backend.service.SellerService;
 import com.sarkhan.backend.service.UserService;
+import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,10 +28,8 @@ public class UserController {
     ////-----
 
     @PostMapping("/create/seller")
-    public ResponseEntity<?> createBrand(@RequestBody SellerRequestDTO sellerRequest,
-                                         @RequestHeader("Authorization") String token) throws DataNotFoundException {
-        token = token.substring(7);
-        SellerResponseDTO seller = sellerService.createSeller(sellerRequest, token);
+    public ResponseEntity<?> createBrand(@RequestBody SellerRequestDTO sellerRequest) throws AuthException {
+        SellerResponseDTO seller = sellerService.createSeller(sellerRequest);
         return ResponseEntity.status(201).body(seller);
     }
 

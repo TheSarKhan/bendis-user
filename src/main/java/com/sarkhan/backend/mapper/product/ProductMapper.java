@@ -1,10 +1,17 @@
 package com.sarkhan.backend.mapper.product;
 
+import com.sarkhan.backend.dto.comment.CommentResponse;
 import com.sarkhan.backend.dto.product.ProductRequest;
+import com.sarkhan.backend.dto.product.ProductResponseForGetSingleOne;
+import com.sarkhan.backend.model.comment.Comment;
 import com.sarkhan.backend.model.product.Product;
+import com.sarkhan.backend.model.product.items.Plus;
+import com.sarkhan.backend.model.product.items.SubCategory;
+import com.sarkhan.backend.model.user.Seller;
 import com.sarkhan.backend.model.user.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductMapper {
 
@@ -44,6 +51,31 @@ public class ProductMapper {
 
         product.generateSlug();
         return product;
+    }
+
+    public static ProductResponseForGetSingleOne productToProductResponseForGetSingleOne(Product product, SubCategory subCategory, Seller seller, List<Plus> pluses, List<CommentResponse> comments){
+        return new ProductResponseForGetSingleOne(
+                product.getId(),
+                product.getName(),
+                product.getOriginalPrice(),
+                product.getDiscountedPrice(),
+                subCategory.getName(),
+                product.getSellerId(),
+                seller.getFullName(),
+                product.getBrand(),
+                product.getGender(),
+                product.getDescription(),
+                product.getSlug(),
+                product.getSalesCount(),
+                product.getTotalStock(),
+                product.getRating(),
+                product.getRatings(),
+                pluses,
+                product.getColorAndSizes(),
+                product.getSpecifications(),
+                product.getUpdateAt()!=null ?product.getUpdateAt():product.getCreateAt(),
+                comments
+        );
     }
 }
 

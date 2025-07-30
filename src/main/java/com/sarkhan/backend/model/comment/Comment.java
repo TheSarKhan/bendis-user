@@ -2,38 +2,53 @@ package com.sarkhan.backend.model.comment;
 
 import jakarta.persistence.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.format.annotation.DateTimeFormat;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Entity
-@Table(name = "comment")
 @Data
+@Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "comments")
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Comment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
     @Column(nullable = false)
-    String userId;
+    Long userId;
 
     @Column(nullable = false)
-    String productId;
+    String userName;
+
+    @Column(nullable = false)
+    Long productId;
 
     @Column(nullable = false)
     String content;
 
+    Long usefulCount;
+
+    List<Long> useful;
+
+    @Column(nullable = false)
+    double rating;
+
     @CreationTimestamp
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        usefulCount = 0L;
+    }
 }

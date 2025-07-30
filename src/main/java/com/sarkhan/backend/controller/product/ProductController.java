@@ -8,8 +8,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +22,6 @@ import java.util.concurrent.ExecutionException;
 @RequiredArgsConstructor
 @Tag(name = "Product", description = "Endpoints for managing products")
 public class ProductController {
-    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
     private final ProductService service;
 
     @PostMapping
@@ -35,8 +32,7 @@ public class ProductController {
             description = "Adds a new product along with its images. Only users with ADMIN or SELLER roles are allowed."
     )
     public ResponseEntity<Product> add(@RequestPart ProductRequest productRequest,
-                                       List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException, AuthException {
-        log.error("Product Request: {}", productRequest);
+                                                              List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException, AuthException {
         return ResponseEntity.ok(service.add(productRequest, images));
     }
 
@@ -100,7 +96,7 @@ public class ProductController {
             summary = "Get product by ID",
             description = "Fetches a single product by its unique identifier (ID)."
     )
-    public ResponseEntity<Product> getById(@PathVariable Long id) {
+    public ResponseEntity<ProductResponseForGetSingleOne> getById(@PathVariable Long id) {
         return ResponseEntity.ok(service.getByIdAndAddHistory(id));
     }
 
@@ -109,7 +105,7 @@ public class ProductController {
             summary = "Get product by slug",
             description = "Retrieves a product using its unique slug value."
     )
-    public ResponseEntity<Product> getBySlug(@PathVariable String slug) {
+    public ResponseEntity<ProductResponseForGetSingleOne> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(service.getBySlug(slug));
     }
 
@@ -159,49 +155,13 @@ public class ProductController {
         return ResponseEntity.ok(service.getAllFavorite());
     }
 
-    @PatchMapping("/{id}/rating/{rating}")
-    @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Rate a product",
-            description = "Allows a user to submit a rating for a product by its ID."
-    )
-    public ResponseEntity<Product> giveRating(@PathVariable Long id,
-                                              @PathVariable Double rating) throws AuthException {
-        return ResponseEntity.ok(service.giveRating(id, rating));
-    }
-
     @PatchMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "Toggle product favorite status",
             description = "Marks or unMarks the given product as a favorite for the current user."
     )
-    public ResponseEntity<Product> toggleFavorite(@PathVariable Long id) throws AuthException {
+    public ResponseEntity<ProductResponseForGetSingleOne> toggleFavorite(@PathVariable Long id) throws AuthException {
         return ResponseEntity.ok(service.toggleFavorite(id));
-    }
-
-    @PutMapping("/{id}")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
-    @Operation(
-            summary = "Update a product",
-            description = "Updates the details and images of an existing product. Only users with ADMIN or SELLER roles are allowed."
-    )
-    public ResponseEntity<Product> update(@PathVariable Long id,
-                                          @RequestPart ProductRequest productRequest,
-                                          List<MultipartFile> images) throws IOException, AuthException {
-        return ResponseEntity.ok(service.update(id, productRequest, images));
-    }
-
-    @DeleteMapping("/{id}")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
-    @Operation(
-            summary = "Delete a product",
-            description = "Deletes a product by its ID. Only users with ADMIN or SELLER roles are allowed to perform this operation."
-    )
-    public ResponseEntity<Void> delete(@PathVariable Long id) throws AuthException {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
     }
 }
