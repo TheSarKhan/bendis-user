@@ -10,6 +10,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,9 +60,6 @@ public class Product {
     Map<Long, Double> ratings;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    List<Long> comments;
-
-    @JdbcTypeCode(SqlTypes.JSON)
     Long favoriteCount;
 
     @JdbcTypeCode(SqlTypes.JSON)
@@ -81,6 +79,7 @@ public class Product {
     public void init() {
         createAt = LocalDateTime.now();
         rating = 0.0;
+        ratings = new HashMap<>();
         salesCount = 0;
         totalStock = colorAndSizes.stream().
                 mapToLong(color -> {
@@ -105,13 +104,6 @@ public class Product {
                 .replace("ö", "o")
                 .replace("ı", "i")
                 .replace("ə", "e")
-                .replace("İ", "i")
-                .replace("Ç", "ch")
-                .replace("Ş", "sh")
-                .replace("Ğ", "gh")
-                .replace("Ü", "u")
-                .replace("Ö", "o")
-                .replace("Ə", "e")
                 .replaceAll("[^a-z0-9\\s-]", "")
                 .replaceAll("\\s+", "-")
                 .replaceAll("-{2,}", "-")

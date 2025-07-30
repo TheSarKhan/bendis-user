@@ -1,20 +1,20 @@
 package com.sarkhan.backend.service;
 
 import com.sarkhan.backend.dto.comment.CommentRequest;
-import com.sarkhan.backend.dto.comment.CommentResponse;
-import com.sarkhan.backend.model.comment.Comment;
+import com.sarkhan.backend.dto.comment.CommentResponseForMyComment;
+import com.sarkhan.backend.dto.comment.UnCommentedProductResponse;
+import jakarta.security.auth.message.AuthException;
 
 import java.util.List;
 
 public interface CommentService {
+    String addComment(CommentRequest request);
 
-    Comment addComment(CommentRequest request);
+    List<CommentResponseForMyComment> getCurrentUserComments(Integer page) throws AuthException;
 
-    void deleteComment(Long commentId); // commentId Long qalır, çünki entity-də id Long-dur
+    List<UnCommentedProductResponse> getUnCommentedProducts(Integer page) throws AuthException;
 
-    Comment updateComment(Long commentId, CommentRequest request);
+    String updateComment(Long commentId, String content) throws AuthException;
 
-    List<CommentResponse> getCommentsByProductId(String productId); // Long -> String
-
-    List<CommentResponse> getCommentsByUserId(String userId);
+    String deleteComment(Long id) throws AuthException;
 }

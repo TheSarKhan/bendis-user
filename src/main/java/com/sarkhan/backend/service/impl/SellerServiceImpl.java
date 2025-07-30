@@ -11,6 +11,9 @@ import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.user.SellerRepository;
 import com.sarkhan.backend.repository.user.UserRepository;
 import com.sarkhan.backend.service.SellerService;
+import com.sarkhan.backend.service.UserService;
+import com.sarkhan.backend.service.impl.product.util.UserUtil;
+import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,7 @@ public class SellerServiceImpl implements SellerService {
     private final UserRepository userRepository;
     private final SellerMapper sellerMapper;
     private final SellerRepository sellerRepository;
+    private final UserService userService;
 
     public List<SellerResponseDTO> getAll() {
         return sellerMapper.sellersToSellersResponseDto(sellerRepository.findAll());
@@ -42,12 +46,8 @@ public class SellerServiceImpl implements SellerService {
     }
 
     @Override
-    public SellerResponseDTO createSeller(SellerRequestDTO sellerRequestDTO, String token) throws DataNotFoundException {
-        String email = jwtService.extractEmail(token);
-        User user = userRepository.findByEmail(email).orElseThrow(() -> {
-            log.error("User not found {}",token);
-            return new DataNotFoundException("User not found");
-        });
+    public SellerResponseDTO createSeller(SellerRequestDTO sellerRequestDTO) throws AuthException {
+        User user = UserUtil.getCurrentUser(userService, log);
         Seller seller = sellerMapper.sellerRequestDtoToSeller(sellerRequestDTO);
         seller.setBrandEmail(user.getEmail());
         seller.setBrandName(sellerRequestDTO.brandName());
@@ -56,6 +56,7 @@ public class SellerServiceImpl implements SellerService {
         seller.setFinCode(sellerRequestDTO.finCode());
         seller.setBrandVOEN(sellerRequestDTO.brandVOEN());
         seller.setBrandPhone(user.getPhoneNumber());
+        seller = sellerRepository.save(seller);
         user.setSeller(seller);
         userRepository.save(user);
         return sellerMapper.sellerToSellerResponseDto(seller);

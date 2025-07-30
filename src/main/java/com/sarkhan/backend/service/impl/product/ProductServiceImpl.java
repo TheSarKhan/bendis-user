@@ -1,18 +1,21 @@
 package com.sarkhan.backend.service.impl.product;
 
 import com.sarkhan.backend.dto.product.*;
+import com.sarkhan.backend.mapper.comment.CommentMapper;
 import com.sarkhan.backend.mapper.product.ProductMapper;
+import com.sarkhan.backend.model.comment.Comment;
 import com.sarkhan.backend.model.enums.Color;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
-import com.sarkhan.backend.model.product.items.Category;
-import com.sarkhan.backend.model.product.items.ColorAndSize;
-import com.sarkhan.backend.model.product.items.SubCategory;
-import com.sarkhan.backend.model.product.items.UserFavoriteProduct;
+import com.sarkhan.backend.model.product.items.*;
+import com.sarkhan.backend.model.user.Seller;
 import com.sarkhan.backend.model.user.User;
+import com.sarkhan.backend.repository.comment.CommentRepository;
 import com.sarkhan.backend.repository.product.ProductRepository;
+import com.sarkhan.backend.repository.product.items.PlusRepository;
 import com.sarkhan.backend.repository.product.items.ProductUserHistoryRepository;
 import com.sarkhan.backend.repository.product.items.UserFavoriteProductRepository;
+import com.sarkhan.backend.repository.user.SellerRepository;
 import com.sarkhan.backend.service.CloudinaryService;
 import com.sarkhan.backend.service.UserService;
 import com.sarkhan.backend.service.product.ProductService;
@@ -60,6 +63,12 @@ public class ProductServiceImpl implements ProductService {
 
     private final UserFavoriteProductRepository favoriteRepository;
 
+    private final SellerRepository sellerRepository;
+
+    private final PlusRepository plusRepository;
+
+    private final CommentRepository commentRepository;
+
     private final Executor executor;
 
     @Value("${product.recommend.maxProduct}")
@@ -80,7 +89,9 @@ public class ProductServiceImpl implements ProductService {
                               CategoryService categoryService,
                               SubCategoryService subCategoryService,
                               UserService userService, UserFavoriteProductRepository favoriteRepository,
-                              @Qualifier("taskExecutor") Executor executor) {
+                              @Qualifier("taskExecutor") Executor executor,
+                              SellerRepository sellerRepository,
+                              PlusRepository plusRepository, CommentRepository commentRepository) {
         this.productRepository = productRepository;
         this.historyRepository = historyRepository;
         this.cloudinaryService = cloudinaryService;
@@ -89,6 +100,9 @@ public class ProductServiceImpl implements ProductService {
         this.userService = userService;
         this.favoriteRepository = favoriteRepository;
         this.executor = executor;
+        this.sellerRepository = sellerRepository;
+        this.plusRepository = plusRepository;
+        this.commentRepository = commentRepository;
     }
 
     @Override
@@ -176,15 +190,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product getByIdAndAddHistory(Long id) {
+    public ProductResponseForGetSingleOne getByIdAndAddHistory(Long id) {
         log.info("Someone try to get a product. Id : " + id);
         Product product = getById(id);
         addProductUserHistory(product, userService, historyRepository, log);
-        return product;
+        return mapProductToResponse(product);
     }
 
     @Override
-    public Product getBySlug(String slug) {
+    public ProductResponseForGetSingleOne getBySlug(String slug) {
         log.info("Someone try to get a product. Slug : " + slug);
 
         Product product = productRepository.getBySlug(slug).orElseThrow(() -> {
@@ -193,7 +207,7 @@ public class ProductServiceImpl implements ProductService {
         });
 
         addProductUserHistory(product, userService, historyRepository, log);
-        return product;
+        return mapProductToResponse(product);
     }
 
     @Override
@@ -339,7 +353,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product giveRating(Long id, Double rating) throws AuthException {
+    public void giveRating(Long id, Double rating) throws AuthException {
         User user = getCurrentUser(userService, log);
         Product product = getById(id);
 
@@ -348,7 +362,8 @@ public class ProductServiceImpl implements ProductService {
         Map<Long, Double> ratings = product.getRatings();
         if (ratings.containsKey(user.getId())) {
             log.warn(user.getFullName() + " try to give additional rating.");
-            return product;
+            mapProductToResponse(product);
+            return;
         }
         Double oldRating = product.getRating();
         Double newRating = (oldRating * ratings.size() + rating) / (ratings.size() + 1);
@@ -356,11 +371,11 @@ public class ProductServiceImpl implements ProductService {
 
         product.setRating(newRating);
         product.setRatings(ratings);
-        return productRepository.save(product);
+        productRepository.save(product);
     }
 
     @Override
-    public Product toggleFavorite(Long id) throws AuthException {
+    public ProductResponseForGetSingleOne toggleFavorite(Long id) throws AuthException {
         User user = getCurrentUser(userService, log);
         Product product = getById(id);
 
@@ -380,7 +395,7 @@ public class ProductServiceImpl implements ProductService {
             favoriteRepository.save(UserFavoriteProduct.builder().
                     userId(userId).productId(product.getId()).build());
         }
-        return product;
+        return mapProductToResponse(product);
     }
 
     @Override
@@ -424,6 +439,7 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    @Override
     public Product getById(Long id) {
         return productRepository.findById(id).orElseThrow(() -> {
             log.info("Cannot find product by " + id + " id.");
@@ -443,5 +459,22 @@ public class ProductServiceImpl implements ProductService {
                 subCategoryService, userService,
                 log, recommendedProductMaxSize,
                 shuffleProbability, maxSwapDistance);
+    }
+
+    private ProductResponseForGetSingleOne mapProductToResponse(Product product) {
+        SubCategory subCategory = subCategoryService.getById(product.getSubCategoryId());
+        log.info("Flag 1");
+        Seller seller = sellerRepository.findById(product.getSellerId()).orElseThrow();
+        log.info("Flag 2");
+        List<Plus> pluses = plusRepository.findAllById(product.getPluses());
+        log.info("Flag 3");
+        List<Comment> byProductId = commentRepository.getByProductId(product.getId());
+        log.info("Flag 4");
+        return ProductMapper.productToProductResponseForGetSingleOne(
+                product,
+                subCategory,
+                seller,
+                pluses,
+                CommentMapper.mapCommentsToCommentResponses(byProductId));
     }
 }

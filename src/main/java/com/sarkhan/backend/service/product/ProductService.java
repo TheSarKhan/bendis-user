@@ -26,9 +26,9 @@ public interface ProductService {
 
     ProductResponseSimple getAllRecommendedProduct();
 
-    Product getByIdAndAddHistory(Long id);
+    ProductResponseForGetSingleOne getByIdAndAddHistory(Long id);
 
-    Product getBySlug(String slug);
+    ProductResponseForGetSingleOne getBySlug(String slug);
 
     CompletableFuture<ProductResponseForSearchByName> searchByName(String name);
 
@@ -36,13 +36,15 @@ public interface ProductService {
 
     ProductResponseForGetBySellerId getBySellerId(Long sellerId);
 
+    Product getById(Long id);
+
     CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getByComplexFiltering(ProductFilterRequest request);
 
     List<Product> getAllFavorite() throws AuthException;
 
-    Product giveRating(Long id, Double rating) throws AuthException;
+    void giveRating(Long id, Double rating) throws AuthException;
 
-    Product toggleFavorite(Long id) throws AuthException;
+    ProductResponseForGetSingleOne toggleFavorite(Long id) throws AuthException;
 
     Product update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException, AuthException;
 
