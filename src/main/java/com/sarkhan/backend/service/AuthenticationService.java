@@ -5,7 +5,9 @@ import com.sarkhan.backend.dto.authorization.RegisterRequest;
 import com.sarkhan.backend.dto.authorization.TokenResponse;
 
 public interface AuthenticationService {
-     TokenResponse register(RegisterRequest request);
+    TokenResponse register(RegisterRequest request);
+
     TokenResponse login(LoginRequest request);
 
+    TokenResponse getTokensAfterUpdateProfile(String email);
 }
