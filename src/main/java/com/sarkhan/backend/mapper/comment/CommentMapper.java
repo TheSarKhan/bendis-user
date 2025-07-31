@@ -7,10 +7,11 @@ import com.sarkhan.backend.dto.comment.UnCommentedProductResponse;
 import com.sarkhan.backend.model.comment.Comment;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.UserFavoriteProduct;
+import org.mapstruct.Mapper;
 
 import java.util.List;
 import java.util.Optional;
-
+@Mapper(componentModel = "spring")
 public class CommentMapper {
     public static Comment mapRequestToComment(CommentRequest request) {
         return Comment.builder()
