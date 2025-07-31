@@ -38,7 +38,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = new User();
         Set<Role> roles = new HashSet<>();
         roles.add(Role.USER);
-      //  user.setRoles(roles);
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setCreatedAt(now);
@@ -46,7 +45,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
 
-        String accessToken = jwtService.generateAccessToken(request.getEmail(), null); // Claims kısmı null olabilir
+        String accessToken = jwtService.generateAccessToken(request.getEmail(), null);
 
         redisService.saveTokenToRedis(accessToken, request.getEmail());
 
@@ -70,7 +69,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String accessToken = jwtService.generateAccessToken(user.getEmail(), null);
         String refreshToken = jwtService.generateRefreshToken(user.getEmail());
 
+        redisService.saveRefreshToken(user.getEmail(), refreshToken, 7);
+
         return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
     }
 
+
+    @Override
+    public TokenResponse getTokensAfterUpdateProfile(String email) {
+        String accessToken = jwtService.generateAccessToken(email, null);
+        String refreshToken = jwtService.generateRefreshToken(email);
+
+        redisService.saveRefreshToken(email, refreshToken, 7);
+
+        return TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+    }
 }
