@@ -50,7 +50,7 @@ public class ProductController {
             summary = "Get all famous products",
             description = "Fetches all products marked as famous. Typically includes trending or highly recognized items."
     )
-    public ResponseEntity<ProductResponseSimple> getAllFamousProducts() {
+    public ResponseEntity<List<ProductResponseForGroupOfProduct>> getAllFamousProducts() {
         return ResponseEntity.ok(service.getAllFamousProducts());
     }
 
@@ -59,7 +59,7 @@ public class ProductController {
             summary = "Get all discounted products",
             description = "Fetches all products that currently have active discounts."
     )
-    public ResponseEntity<ProductResponseSimple> getAllDiscountedProducts() {
+    public ResponseEntity<List<ProductResponseForGroupOfProduct>> getAllDiscountedProducts() {
         return ResponseEntity.ok(service.getAllDiscountedProducts());
     }
 
@@ -68,7 +68,7 @@ public class ProductController {
             summary = "Get all most favorite products",
             description = "Fetches products that are mostly add favorite by users."
     )
-    public ResponseEntity<ProductResponseSimple> getAllMostFavoriteProducts() {
+    public ResponseEntity<List<ProductResponseForGroupOfProduct>> getAllMostFavoriteProducts() {
         return ResponseEntity.ok(service.getAllMostFavoriteProducts());
     }
 
@@ -77,7 +77,7 @@ public class ProductController {
             summary = "Get all flush products",
             description = "Fetches all products that has limited-stock."
     )
-    public ResponseEntity<ProductResponseSimple> getAllFlushProducts() {
+    public ResponseEntity<List<ProductResponseForGroupOfProduct>> getAllFlushProducts() {
         return ResponseEntity.ok(service.getAllFlushProducts());
     }
 
@@ -86,7 +86,7 @@ public class ProductController {
             summary = "Get all recommended products",
             description = "Fetches products recommended to the user based on preferences or system logic."
     )
-    public ResponseEntity<ProductResponseSimple> getAllRecommendedProduct() {
+    public ResponseEntity<List<ProductResponseForGroupOfProduct>> getAllRecommendedProduct() {
         return ResponseEntity.ok(service.getAllRecommendedProduct());
     }
 
@@ -132,7 +132,7 @@ public class ProductController {
             summary = "Get products by seller",
             description = "Retrieves all products associated with a specific seller ID."
     )
-    public ResponseEntity<ProductResponseForGetBySellerId> getBySellerId(@PathVariable Long sellerId) {
+    public ResponseEntity<List<ProductResponseForGroupOfProduct>> getBySellerId(@PathVariable Long sellerId) {
         return ResponseEntity.ok(service.getBySellerId(sellerId));
     }
 
