@@ -19,7 +19,6 @@ import com.sarkhan.backend.service.product.ProductService;
 import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.ap.shaded.freemarker.template.utility.NullArgumentException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -157,7 +157,7 @@ public class CommentServiceImpl implements CommentService {
     private Comment getCommentById(Long commentId) {
         return commentRepository.findById(commentId).orElseThrow(() -> {
             log.error("Comment not found");
-            return new NullArgumentException("Comment not found");
+            return new NoSuchElementException("Comment not found");
         });
     }
 
