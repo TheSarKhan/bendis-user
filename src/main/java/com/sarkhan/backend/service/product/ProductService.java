@@ -16,15 +16,15 @@ public interface ProductService {
 
     ProductResponseForHomePage getForHomePage();
 
-    ProductResponseSimple getAllFamousProducts();
+    List<ProductResponseForGroupOfProduct> getAllFamousProducts();
 
-    ProductResponseSimple getAllDiscountedProducts();
+    List<ProductResponseForGroupOfProduct> getAllDiscountedProducts();
 
-    ProductResponseSimple getAllMostFavoriteProducts();
+    List<ProductResponseForGroupOfProduct> getAllMostFavoriteProducts();
 
-    ProductResponseSimple getAllFlushProducts();
+    List<ProductResponseForGroupOfProduct> getAllFlushProducts();
 
-    ProductResponseSimple getAllRecommendedProduct();
+    List<ProductResponseForGroupOfProduct> getAllRecommendedProduct();
 
     ProductResponseForGetSingleOne getByIdAndAddHistory(Long id);
 
@@ -34,7 +34,7 @@ public interface ProductService {
 
     CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getBySubCategoryId(Long subCategoryId);
 
-    ProductResponseForGetBySellerId getBySellerId(Long sellerId);
+    List<ProductResponseForGroupOfProduct> getBySellerId(Long sellerId);
 
     Product getById(Long id);
 

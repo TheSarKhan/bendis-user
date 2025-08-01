@@ -7,7 +7,10 @@ import com.sarkhan.backend.model.comment.Comment;
 import com.sarkhan.backend.model.enums.Color;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
-import com.sarkhan.backend.model.product.items.*;
+import com.sarkhan.backend.model.product.items.ColorAndSize;
+import com.sarkhan.backend.model.product.items.Plus;
+import com.sarkhan.backend.model.product.items.SubCategory;
+import com.sarkhan.backend.model.product.items.UserFavoriteProduct;
 import com.sarkhan.backend.model.user.Seller;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.comment.CommentRepository;
@@ -139,54 +142,38 @@ public class ProductServiceImpl implements ProductService {
                 shuffleAndDecreaseSize(productRepository.getDiscountedProducts(pageable)),
                 shuffleAndDecreaseSize(productRepository.getMostFavoriteProducts(pageable)),
                 shuffleAndDecreaseSize(productRepository.getFlushProducts(pageable)),
-                recommendedProduct(),
-                categoryService.getAll(),
-                subCategoryService.getAll());
+                recommendedProduct()
+        );
     }
 
     @Override
-    public ProductResponseSimple getAllFamousProducts() {
+    public List<ProductResponseForGroupOfProduct> getAllFamousProducts() {
         log.info("Someone try to get all famous products.");
-        return new ProductResponseSimple(
-                productRepository.getFamousProducts(),
-                categoryService.getAll(),
-                subCategoryService.getAll());
+        return mapProductsToProductsResponse(productRepository.getFamousProducts());
     }
 
     @Override
-    public ProductResponseSimple getAllDiscountedProducts() {
+    public List<ProductResponseForGroupOfProduct> getAllDiscountedProducts() {
         log.info("Someone try to get all discounted products.");
-        return new ProductResponseSimple(
-                productRepository.getDiscountedProducts(),
-                categoryService.getAll(),
-                subCategoryService.getAll());
+        return mapProductsToProductsResponse(productRepository.getDiscountedProducts());
     }
 
     @Override
-    public ProductResponseSimple getAllMostFavoriteProducts() {
+    public List<ProductResponseForGroupOfProduct> getAllMostFavoriteProducts() {
         log.info("Someone try to get all most favorite products.");
-        return new ProductResponseSimple(
-                productRepository.getMostFavoriteProducts(),
-                categoryService.getAll(),
-                subCategoryService.getAll());
+        return mapProductsToProductsResponse(productRepository.getMostFavoriteProducts());
     }
 
     @Override
-    public ProductResponseSimple getAllFlushProducts() {
+    public List<ProductResponseForGroupOfProduct> getAllFlushProducts() {
         log.info("Someone try to get all flush products.");
-        return new ProductResponseSimple(
-                productRepository.getFlushProducts(),
-                categoryService.getAll(),
-                subCategoryService.getAll());
+        return mapProductsToProductsResponse(productRepository.getFlushProducts());
     }
 
     @Override
-    public ProductResponseSimple getAllRecommendedProduct() {
+    public List<ProductResponseForGroupOfProduct> getAllRecommendedProduct() {
         log.info("Someone try to get all recommended products.");
-        return new ProductResponseSimple(
-                recommendedProduct(),
-                categoryService.getAll(),
-                subCategoryService.getAll());
+        return mapProductsToProductsResponse(recommendedProduct());
     }
 
     @Override
@@ -237,13 +224,10 @@ public class ProductServiceImpl implements ProductService {
                         products.addAll(productsFuture.get());
                         products.addAll(subCategoryProductsFuture.get());
 
-                        var allData = allCategoriesAndSubCategories.get();
-
                         return new ProductResponseForSearchByName(
                                 name,
-                                products.stream().toList(),
-                                allData.categories(),
-                                allData.subCategories()
+                                mapProductsToProductsResponse(
+                                        products.stream().toList())
                         );
                     } catch (Exception e) {
                         throw new RuntimeException("Failed to build response", e);
@@ -259,12 +243,6 @@ public class ProductServiceImpl implements ProductService {
         CompletableFuture<List<Product>> productsFuture = CompletableFuture.supplyAsync(
                 () -> productRepository.getBySubCategoryId(subCategoryId), executor);
 
-        CompletableFuture<List<Category>> categoriesFuture = CompletableFuture.supplyAsync(
-                categoryService::getAll, executor);
-
-        CompletableFuture<List<SubCategory>> subCategoriesFuture = CompletableFuture.supplyAsync(
-                subCategoryService::getAll, executor);
-
         CompletableFuture<List<String>> specsFuture = CompletableFuture.supplyAsync(
                 () -> subCategoryService.getById(subCategoryId).getSpecifications(), executor);
 
@@ -274,13 +252,12 @@ public class ProductServiceImpl implements ProductService {
         CompletableFuture<List<String>> sizeFuture = CompletableFuture.supplyAsync(
                 () -> productRepository.getDistinctSizesBySubCategoryId(subCategoryId), executor);
 
-        return CompletableFuture.allOf(productsFuture, categoriesFuture, subCategoriesFuture, specsFuture, colorFuture, sizeFuture)
+        return CompletableFuture.allOf(productsFuture, specsFuture, colorFuture, sizeFuture)
                 .thenApply(v -> {
                     try {
                         return new ProductResponseForSelectedSubCategoryAndComplexFilter(
-                                productsFuture.get(),
-                                categoriesFuture.get(),
-                                subCategoriesFuture.get(),
+                                mapProductsToProductsResponse(
+                                        productsFuture.get()),
                                 specsFuture.get(),
                                 colorFuture.get().stream()
                                         .map(Color::valueOf)
@@ -297,12 +274,9 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public ProductResponseForGetBySellerId getBySellerId(Long sellerId) {
+    public List<ProductResponseForGroupOfProduct> getBySellerId(Long sellerId) {
         log.info("Someone try to get products. Seller id : " + sellerId);
-        return new ProductResponseForGetBySellerId(
-                productRepository.getBySellerId(sellerId),
-                categoryService.getAll(),
-                subCategoryService.getAll());
+        return mapProductsToProductsResponse(productRepository.getBySellerId(sellerId));
     }
 
     @Override
@@ -312,11 +286,6 @@ public class ProductServiceImpl implements ProductService {
         CompletableFuture<List<Product>> productsFuture = CompletableFuture.supplyAsync(() ->
                 getByComplexFilteringUseSpecification(request, productRepository));
 
-        CompletableFuture<List<Category>> categoriesFuture =
-                CompletableFuture.supplyAsync(categoryService::getAll, executor);
-
-        CompletableFuture<List<SubCategory>> subCategoriesFuture =
-                CompletableFuture.supplyAsync(subCategoryService::getAll, executor);
 
         CompletableFuture<List<String>> specsFuture = CompletableFuture.supplyAsync(() ->
                 subCategoryService.getById(request.subCategoryId()).getSpecifications(), executor);
@@ -327,13 +296,12 @@ public class ProductServiceImpl implements ProductService {
         CompletableFuture<List<String>> sizeFuture = CompletableFuture.supplyAsync(
                 () -> productRepository.getDistinctSizesBySubCategoryId(request.subCategoryId()), executor);
 
-        return CompletableFuture.allOf(productsFuture, categoriesFuture, subCategoriesFuture, specsFuture, colorFuture, sizeFuture)
+        return CompletableFuture.allOf(productsFuture, specsFuture, colorFuture, sizeFuture)
                 .thenApply(unused -> {
                     try {
                         return new ProductResponseForSelectedSubCategoryAndComplexFilter(
-                                productsFuture.get(),
-                                categoriesFuture.get(),
-                                subCategoriesFuture.get(),
+                                mapProductsToProductsResponse(
+                                        productsFuture.get()),
                                 specsFuture.get(),
                                 colorFuture.get().stream()
                                         .map(Color::valueOf)
@@ -476,5 +444,27 @@ public class ProductServiceImpl implements ProductService {
                 seller,
                 pluses,
                 CommentMapper.mapCommentsToCommentResponses(byProductId));
+    }
+
+    private List<ProductResponseForGroupOfProduct> mapProductsToProductsResponse(List<Product> products) {
+        try {
+            User currentUser = getCurrentUser(userService, log);
+            Map<Product, Boolean> productResponseMap =
+                    mapProductsToResponseWhenUserLogin(products, currentUser);
+            return ProductMapper.mapListOfProductToResponse(productResponseMap);
+        } catch (AuthException e) {
+            return ProductMapper.mapListOfProductToResponse(products);
+        }
+    }
+
+    private Map<Product, Boolean> mapProductsToResponseWhenUserLogin(List<Product> products, User currentUser) {
+        HashMap<Product, Boolean> productIsFavoriteMap = new HashMap<>();
+        for (Product product : products)
+            productIsFavoriteMap.put(
+                    product,
+                    favoriteRepository.getByProductIdAndUserId(
+                            product.getId(),
+                            currentUser.getId()).isPresent());
+        return productIsFavoriteMap;
     }
 }
