@@ -21,18 +21,19 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-
+    private final CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl;
 
     private final AuthenticationService authenticationService;
+
     private final UserRepository userRepository;
-    private final JwtService jwtService;
+
     private final RedisService redisService;
-    private final CustomOAuth2UserServiceImpl customOAuth2UserServiceImpl;
+
+    private final JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest dto) {
@@ -49,24 +50,14 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        Optional<User> user = userRepository.findByEmail(request.getEmail());
         TokenResponse tokenResponse = authenticationService.login(request);
-        if (request.getEmail() == null || request.getPassword() == null) {
-            ResponseEntity.status(400).body("Email or Password is null");
-        }
-        if (user.isEmpty()) {
-            ResponseEntity.status(400).body("Email does not exist");
-        }
-        if (!Objects.equals(request.getPassword(), user.get().getPassword())) {
-            ResponseEntity.status(400).body("Passwords do not match");
-        }
         return ResponseEntity.status(200).body(tokenResponse);
     }
 
 
     @PostMapping("/google-login")
     @Operation(summary = "Google linki istifadə edərək asan login üçün endpoint")
-    public ResponseEntity<TokenResponse> googleLogin(@RequestBody Map<String, String> body) throws Exception {
+    public ResponseEntity<TokenResponse> googleLogin(@RequestBody Map<String, String> body) {
         String idToken = body.get("id_token");
         try {
             TokenResponse response = customOAuth2UserServiceImpl.processGoogleLogin(idToken);
@@ -89,7 +80,6 @@ public class AuthenticationController {
             return ResponseEntity.status(401).body("Invalid refresh token");
         }
 
-        // 2. Redis'teki refresh token ile eşleşiyor mu kontrol et
         String storedRefreshToken = redisService.getRefreshToken(email);
         System.out.println(storedRefreshToken +"Stored Refresh Token");
         System.out.println(refreshToken + "Current Refresh token");
@@ -97,15 +87,12 @@ public class AuthenticationController {
             return ResponseEntity.status(401).body("Refresh token mismatch or expired");
         }
 
-        // 3. Yeni access token üret
         String newAccessToken = jwtService.generateAccessToken(email,null);
 
-        // 4. (Opsiyonel) Yeni refresh token üretip Redis'i güncelle
         String newRefreshToken = jwtService.generateRefreshToken(email);
         redisService.deleteRefreshToken(email);
-        redisService.saveRefreshToken(email, newRefreshToken, 7); // 7 gün geçerli
+        redisService.saveRefreshToken(email, newRefreshToken, 7);
 
-        // 5. Yeni token'ları döndür
         return ResponseEntity.ok(new TokenResponse(newAccessToken, newRefreshToken));
     }
 

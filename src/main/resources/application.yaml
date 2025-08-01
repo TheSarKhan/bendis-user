@@ -35,36 +35,35 @@ spring:
             enable: true
         debug: true
   datasource:
-    first:
-      #url: jdbc:postgresql://users_service:5432/User
-      url: jdbc:postgresql://localhost:5450/User
-      username: root
-      password: root
-    second:
-      #url: jdbc:postgresql://product_service:5432/Product
-      url: jdbc:postgresql://localhost:5451/Product
-      username: root
-      password: root
-    third: # Üçüncü datasource
-      #url: jdbc:postgresql://story_service:5432/Story
-      url: jdbc:postgresql://localhost:5452/Story
-      username: root
-      password: root
-    four: # 4 cu datasource
-      #url: jdbc:postgresql://comment_service:5432/Comment
-      url: jdbc:postgresql://localhost:5453/Comment
-      username: root
-      password: root
-    fifth:
-      #url: jdbc:postgresql://cart_service:5432/Cart
-      url: jdbc:postgresql://localhost:5454/Cart
-      username: root
-      password: root
-    sixth:
-        #url: jdbc:postgresql://cart_service:5432/Order
-        url: jdbc:postgresql://localhost:5455/Order
-        username: root
-        password: root
+   first:
+    url: jdbc:postgresql://localhost:5450/User
+    username: root
+    password: root
+   second:
+    url: jdbc:postgresql://localhost:5451/Product
+    username: root
+    password: root
+   third:
+    url: jdbc:postgresql://localhost:5452/Story
+    username: root
+    password: root
+   four:
+    url: jdbc:postgresql://localhost:5453/Comment
+    username: root
+    password: root
+   fifth:
+    url: jdbc:postgresql://localhost:5454/Cart
+    username: root
+    password: root
+   sixth:
+    url: jdbc:postgresql://localhost:5455/Order
+    username: root
+    password: root
+   seventh:
+    url: jdbc:postgresql://localhost:5456/Seller
+    username: root
+    password: root
+
   jpa:
     hibernate:
       ddl-auto: create-drop

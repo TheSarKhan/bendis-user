@@ -8,7 +8,9 @@ import com.sarkhan.backend.service.UserService;
 import jakarta.security.auth.message.AuthException;
 import org.slf4j.Logger;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserUtil {
 
     public static User getCurrentUser(UserService userService, Logger log) throws AuthException {

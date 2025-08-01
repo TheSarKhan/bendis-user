@@ -1,23 +1,27 @@
 package com.sarkhan.backend.controller;
 
 import com.sarkhan.backend.dto.authorization.TokenResponse;
-import com.sarkhan.backend.dto.authorization.UserProfileRequest;
 import com.sarkhan.backend.dto.seller.SellerRequestDTO;
 import com.sarkhan.backend.dto.seller.SellerResponseDTO;
-import com.sarkhan.backend.exception.DataNotFoundException;
-import com.sarkhan.backend.jwt.JwtService;
-import com.sarkhan.backend.model.user.User;
-import com.sarkhan.backend.redis.RedisService;
+import com.sarkhan.backend.dto.user.UserResponse;
+import com.sarkhan.backend.dto.user.UserUpdateRequest;
 import com.sarkhan.backend.service.SellerService;
 import com.sarkhan.backend.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/user")
 @RequiredArgsConstructor
+@Tag(name = "User Controller", description = "Operations related to users and sellers")
 public class UserController {
 
     private final SellerService sellerService;
@@ -25,24 +29,26 @@ public class UserController {
     private final JwtService jwtService;
     private final RedisService redisService;
 
-    ////-----
+    @GetMapping("/current")
+    @Operation(summary = "Get current user",
+            description = "Returns the currently authenticated user's information")
+    public ResponseEntity<UserResponse> getCurrentUser() throws AuthException {
+        return ResponseEntity.ok(userService.getCurrentUser());
+    }
+
+    @PutMapping(name = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Update user information",
+            description = "Updates user profile with the provided data and profile image")
+    public ResponseEntity<TokenResponse> updateUser(@RequestPart UserUpdateRequest request,
+                                                    @RequestPart MultipartFile profileImage) throws AuthException, IOException {
+        return ResponseEntity.ok(userService.updateUser(request, profileImage));
+    }
 
     @PostMapping("/create/seller")
+    @Operation(summary = "Create a seller",
+            description = "Creates a new seller (brand) based on the provided data")
     public ResponseEntity<?> createBrand(@RequestBody SellerRequestDTO sellerRequest) throws AuthException {
         SellerResponseDTO seller = sellerService.createSeller(sellerRequest);
         return ResponseEntity.status(201).body(seller);
-    }
-
-    @PostMapping("/change/user/profile")
-    public ResponseEntity<?> completeUserProfile(@RequestHeader("Authorization") String token, @RequestBody UserProfileRequest userProfileRequest) {
-        token = token.substring(7);
-      User user=userService.updateUserProfile(userProfileRequest, token);
-      String accessToken=jwtService.generateAccessToken(user.getEmail(),null);
-      String refreshToken=jwtService.generateRefreshToken(user.getEmail());
-      redisService.deleteRefreshToken(user.getEmail());
-      redisService.deleteTokenFromRedis(user.getEmail());
-      redisService.saveTokenToRedis(accessToken,user.getEmail());
-      redisService.saveRefreshToken(user.getEmail(),refreshToken,7);
-    return ResponseEntity.status(201).body(TokenResponse.builder().accessToken(accessToken).refreshToken(refreshToken).build());
     }
 }
