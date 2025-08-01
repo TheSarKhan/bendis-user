@@ -97,7 +97,8 @@ public class SecurityConfig {
                                 "/api/v1/product/flush", "/api/v1/product/recommended",
                                 "/api/v1/product/id/**", "/api/v1/product/slug/**",
                                 "/api/v1/product/name/**", "/api/v1/product/sub-category/**",
-                                "/api/v1/product/seller/**", "/api/v1/product/filter"
+                                "/api/v1/product/seller/**", "/api/v1/product/filter",
+                                "/api/v1/header"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/seller/myInfo").hasRole("SELLER")
                         .requestMatchers(HttpMethod.POST,"/api/v1/seller").hasRole("ADMIN")
