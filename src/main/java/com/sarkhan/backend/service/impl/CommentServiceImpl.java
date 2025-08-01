@@ -50,7 +50,7 @@ public class CommentServiceImpl implements CommentService {
         log.info("Someone is trying to add comment");
         try {
             User currentUser = UserUtil.getCurrentUser(userService, log);
-            if (commentRepository.getByUserIdAndProductId(currentUser.getId(), request.productId()).isEmpty()) {
+            if (!commentRepository.getByUserIdAndProductId(currentUser.getId(), request.productId()).isEmpty()) {
                 log.info(currentUser.getFullName() + "try to add 2 or more comments in one product.");
                 return "You cannot add 2 or more comments in one product.";
             }
@@ -71,7 +71,7 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentResponseForMyComment> getCurrentUserComments(Integer page) throws AuthException {
         log.info("Someone is trying to get current user comments");
         User currentUser = UserUtil.getCurrentUser(userService, log);
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page - 1, 10);
         List<Comment> comments = commentRepository.getByUserId(currentUser.getId(), pageable);
         log.info("Current user comments count: {}", comments.size());
         List<CommentResponseForMyComment> list = comments.stream().map(comment ->

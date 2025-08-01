@@ -26,8 +26,6 @@ public class UserController {
 
     private final SellerService sellerService;
     private final UserService userService;
-    private final JwtService jwtService;
-    private final RedisService redisService;
 
     @GetMapping("/current")
     @Operation(summary = "Get current user",
