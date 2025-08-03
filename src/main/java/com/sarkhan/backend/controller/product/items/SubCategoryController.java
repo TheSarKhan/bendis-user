@@ -40,49 +40,49 @@ public class SubCategoryController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id")
     @Operation(
             summary = "Get sub-category by ID",
             description = "Returns the sub-category that matches the given ID."
     )
-    public ResponseEntity<SubCategory> getById(@PathVariable Long id) {
+    public ResponseEntity<SubCategory> getById(@RequestParam Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
-    @GetMapping("/name/{name}")
+    @GetMapping("/name")
     @Operation(
             summary = "Get sub-category by name",
             description = "Returns the sub-category that matches the given name."
     )
-    public ResponseEntity<SubCategory> getByName(@PathVariable String name) {
+    public ResponseEntity<SubCategory> getByName(@RequestParam String name) {
         return ResponseEntity.ok(service.getByName(name));
     }
 
-    @GetMapping("/category/{categoryId}")
+    @GetMapping("/category")
     @Operation(
             summary = "Get sub-categories by category ID",
             description = "Returns a list of sub-categories belonging to a specific category."
     )
-    public ResponseEntity<List<SubCategory>> getByCategoryId(@PathVariable Long categoryId) {
+    public ResponseEntity<List<SubCategory>> getByCategoryId(@RequestParam Long categoryId) {
         return ResponseEntity.ok(service.getByCategoryId(categoryId));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     @Operation(
             summary = "Update a sub-category",
             description = "Updates a sub-category by ID using the provided request data. Only ADMINs can perform this action."
     )
-    public ResponseEntity<SubCategory> update(@PathVariable Long id,
+    public ResponseEntity<SubCategory> update(@RequestParam Long id,
                                               @RequestBody SubCategoryRequest request) {
         return ResponseEntity.ok(service.update(id, request));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping
     @Operation(
             summary = "Delete a sub-category",
             description = "Deletes the sub-category with the specified ID. Only ADMINs can delete sub-categories."
     )
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@RequestParam Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

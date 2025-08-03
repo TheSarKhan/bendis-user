@@ -49,7 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> searchByName(String name) {
-        log.info("Someone try to search categories. name : " + name);
+        log.info("Someone try to search categories. Name : " + name);
         return categoryRepository.searchByName(name);
     }
 

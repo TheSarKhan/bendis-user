@@ -34,11 +34,13 @@ public class RecommendationUtil {
         try {
             user = getCurrentUser(userService, log);
         } catch (AuthException ignored) {
-            return productRepository.
+            List<Product> recommendedProducts = productRepository.
                     findAll(PageRequest.of(1,
                             recommendedProductMaxSize,
                             Sort.by("createAt"))).
                     toList();
+            log.info("recommended products: " + recommendedProducts);
+            return recommendedProducts;
         }
 
         Set<Product> products = new LinkedHashSet<>();

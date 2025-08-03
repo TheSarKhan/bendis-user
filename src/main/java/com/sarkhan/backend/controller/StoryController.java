@@ -35,15 +35,15 @@ public class StoryController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<StoryResponseDTO> getByIdAndAddView(@PathVariable Long id) {
+    @GetMapping("/id")
+    public ResponseEntity<StoryResponseDTO> getByIdAndAddView(@RequestParam Long id) {
         return ResponseEntity.ok(service.getByIdAndAddView(id));
     }
 
-    @PatchMapping("/{storyId}/{likeType}")
+    @PatchMapping("/toggle-like")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<StoryResponseDTO> toggleLikeOrDislike(@PathVariable Long storyId,
-                                                                @PathVariable String likeType) throws AuthException {
+    public ResponseEntity<StoryResponseDTO> toggleLikeOrDislike(@RequestParam Long storyId,
+                                                                @RequestParam String likeType) throws AuthException {
         return ResponseEntity.ok(service.toggleLikeOrDislike(storyId, likeType));
     }
 

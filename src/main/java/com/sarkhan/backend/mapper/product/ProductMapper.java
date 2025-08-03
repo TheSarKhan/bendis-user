@@ -54,7 +54,7 @@ public class ProductMapper {
         return product;
     }
 
-    public static ProductResponseForGetSingleOne productToProductResponseForGetSingleOne(Product product, SubCategory subCategory, Seller seller, List<Plus> pluses, List<CommentResponse> comments){
+    public static ProductResponseForGetSingleOne productToProductResponseForGetSingleOne(Product product, SubCategory subCategory, Seller seller, List<Plus> pluses, List<CommentResponse> comments, boolean isFavorite) {
         return new ProductResponseForGetSingleOne(
                 product.getId(),
                 product.getName(),
@@ -68,6 +68,7 @@ public class ProductMapper {
                 product.getDescription(),
                 product.getSlug(),
                 product.getSalesCount(),
+                product.getFavoriteCount(),
                 product.getTotalStock(),
                 product.getRating(),
                 product.getRatings(),
@@ -75,6 +76,7 @@ public class ProductMapper {
                 product.getColorAndSizes(),
                 product.getSpecifications(),
                 product.getUpdateAt()!=null ?product.getUpdateAt():product.getCreateAt(),
+                isFavorite,
                 comments
         );
     }

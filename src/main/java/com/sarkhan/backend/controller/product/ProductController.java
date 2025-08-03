@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ import java.util.concurrent.ExecutionException;
 public class ProductController {
     private final ProductService service;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
     @Operation(
@@ -32,7 +33,7 @@ public class ProductController {
             description = "Adds a new product along with its images. Only users with ADMIN or SELLER roles are allowed."
     )
     public ResponseEntity<Product> add(@RequestPart ProductRequest productRequest,
-                                                              List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException, AuthException {
+                                       @RequestPart List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException, AuthException {
         return ResponseEntity.ok(service.add(productRequest, images));
     }
 
@@ -91,48 +92,48 @@ public class ProductController {
     }
 
 
-    @GetMapping("/id/{id}")
+    @GetMapping("/id")
     @Operation(
             summary = "Get product by ID",
             description = "Fetches a single product by its unique identifier (ID)."
     )
-    public ResponseEntity<ProductResponseForGetSingleOne> getById(@PathVariable Long id) {
+    public ResponseEntity<ProductResponseForGetSingleOne> getById(@RequestParam Long id) {
         return ResponseEntity.ok(service.getByIdAndAddHistory(id));
     }
 
-    @GetMapping("/slug/{slug}")
+    @GetMapping("/slug")
     @Operation(
             summary = "Get product by slug",
             description = "Retrieves a product using its unique slug value."
     )
-    public ResponseEntity<ProductResponseForGetSingleOne> getBySlug(@PathVariable String slug) {
+    public ResponseEntity<ProductResponseForGetSingleOne> getBySlug(@RequestParam String slug) {
         return ResponseEntity.ok(service.getBySlug(slug));
     }
 
-    @GetMapping("/name/{name}")
+    @GetMapping("/name")
     @Operation(
             summary = "Search products by name with fuzzy search",
             description = "Returns products whose names approximately match the provided name (supports typo tolerance)"
     )
-    public ResponseEntity<ProductResponseForSearchByName> search(@PathVariable String name) throws ExecutionException, InterruptedException {
+    public ResponseEntity<ProductResponseForSearchByName> search(@RequestParam String name) throws ExecutionException, InterruptedException {
         return ResponseEntity.ok(service.searchByName(name).get());
     }
 
-    @GetMapping("/sub-category/{subCategoryId}")
+    @GetMapping("/sub-category")
     @Operation(
             summary = "Get products by sub-category",
             description = "Returns all products that belong to a given sub-category ID."
     )
-    public ResponseEntity<ProductResponseForSelectedSubCategoryAndComplexFilter> getBySubCategoryId(@PathVariable Long subCategoryId) throws ExecutionException, InterruptedException {
-        return ResponseEntity.ok(service.getBySubCategoryId(subCategoryId).get());
+    public ResponseEntity<ProductResponseForSelectedSubCategoryAndComplexFilter> getBySubCategoryId(@RequestParam Long subCategoryId) throws ExecutionException, InterruptedException {
+        return ResponseEntity.ok(service.getBySubCategoryId(subCategoryId));
     }
 
-    @GetMapping("/seller/{sellerId}")
+    @GetMapping("/seller")
     @Operation(
             summary = "Get products by seller",
             description = "Retrieves all products associated with a specific seller ID."
     )
-    public ResponseEntity<List<ProductResponseForGroupOfProduct>> getBySellerId(@PathVariable Long sellerId) {
+    public ResponseEntity<List<ProductResponseForGroupOfProduct>> getBySellerId(@RequestParam Long sellerId) {
         return ResponseEntity.ok(service.getBySellerId(sellerId));
     }
 
@@ -141,7 +142,7 @@ public class ProductController {
             summary = "Filter products with complex criteria",
             description = "Applies multiple filtering criteria (e.g., price range, category, rating) to retrieve matching products."
     )
-    public ResponseEntity<ProductResponseForSelectedSubCategoryAndComplexFilter> getByComplexFilter(@ModelAttribute ProductFilterRequest request) throws ExecutionException, InterruptedException {
+    public ResponseEntity<ProductResponseForSelectedSubCategoryAndComplexFilter> getByComplexFilter(@RequestBody ProductFilterRequest request) throws ExecutionException, InterruptedException {
         return ResponseEntity.ok(service.getByComplexFiltering(request).get());
     }
 
@@ -155,13 +156,36 @@ public class ProductController {
         return ResponseEntity.ok(service.getAllFavorite());
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "Toggle product favorite status",
             description = "Marks or unMarks the given product as a favorite for the current user."
     )
-    public ResponseEntity<ProductResponseForGetSingleOne> toggleFavorite(@PathVariable Long id) throws AuthException {
+    public ResponseEntity<ProductResponseForGetSingleOne> toggleFavorite(@RequestParam Long id) throws AuthException {
         return ResponseEntity.ok(service.toggleFavorite(id));
+    }
+
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Update product",
+            description = "Updates a product by its ID. Only users with ADMIN or SELLER roles are allowed."
+    )
+    public ResponseEntity<ProductResponseForGetSingleOne> updateProduct(@RequestParam long id,
+                                                                        @RequestPart ProductRequest request,
+                                                                        @RequestPart List<MultipartFile> images) throws IOException, AuthException {
+        return ResponseEntity.ok(service.update(id, request, images));
+    }
+
+    @DeleteMapping
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+            summary = "Delete a product",
+            description = "Deletes a product by its ID. Only users with ADMIN or SELLER roles are allowed."
+    )
+    public ResponseEntity<Void> delete(@RequestParam Long id) throws AuthException {
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

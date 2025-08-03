@@ -81,6 +81,7 @@ public class Product {
         rating = 0.0;
         ratings = new HashMap<>();
         salesCount = 0;
+        favoriteCount = 0L;
         totalStock = colorAndSizes.stream().
                 mapToLong(color -> {
                     if (color.getSizeStockMap() == null) return color.getStock();

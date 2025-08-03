@@ -23,6 +23,7 @@ public record ProductResponseForGetSingleOne(
         String description,
         String slug,
         Integer salesCount,
+        Long favoriteCount,
         Long totalStock,
         Double rating,
         Map<Long, Double> ratings,
@@ -30,5 +31,6 @@ public record ProductResponseForGetSingleOne(
         List<ColorAndSize> colorAndSizes,
         Map<String, String> specifications,
         LocalDateTime dateTime,
+        boolean isFavorite,
         List<CommentResponse> comments) {
 }

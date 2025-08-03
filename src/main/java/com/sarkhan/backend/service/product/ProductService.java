@@ -32,7 +32,7 @@ public interface ProductService {
 
     CompletableFuture<ProductResponseForSearchByName> searchByName(String name);
 
-    CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getBySubCategoryId(Long subCategoryId);
+    ProductResponseForSelectedSubCategoryAndComplexFilter getBySubCategoryId(Long subCategoryId);
 
     List<ProductResponseForGroupOfProduct> getBySellerId(Long sellerId);
 
@@ -46,7 +46,7 @@ public interface ProductService {
 
     ProductResponseForGetSingleOne toggleFavorite(Long id) throws AuthException;
 
-    Product update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException, AuthException;
+    ProductResponseForGetSingleOne update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException, AuthException;
 
     void delete(Long id) throws AuthException;
 }

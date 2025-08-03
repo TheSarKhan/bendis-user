@@ -40,36 +40,36 @@ public class CategoryController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id")
     @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
     @Operation(
             summary = "Get category by ID",
             description = "Fetches a category by its unique identifier (ID)."
     )
-    public ResponseEntity<Category> getById(@PathVariable Long id) {
+    public ResponseEntity<Category> getById(@RequestParam Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
-    @GetMapping("/name/{name}")
+    @GetMapping("/name")
     @Operation(
             summary = "Get category by name",
             description = "Fetches a category by its name value."
     )
-    public ResponseEntity<Category> getByName(@PathVariable String name) {
+    public ResponseEntity<Category> getByName(@RequestParam String name) {
         return ResponseEntity.ok(service.getByName(name));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     @Operation(
             summary = "Update a category",
             description = "Updates the name of the category with the specified ID."
     )
-    public ResponseEntity<Category> update(@PathVariable Long id,
+    public ResponseEntity<Category> update(@RequestParam Long id,
                                            @RequestBody String name) {
         return ResponseEntity.ok(service.update(id, name));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping
     @Operation(
             summary = "Delete a category",
             description = "Deletes a category by its ID."

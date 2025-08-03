@@ -43,42 +43,42 @@ public class PlusController {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id")
     @Operation(
             summary = "Get Plus item by ID",
             description = "Fetches a Plus item using its unique ID."
     )
-    public ResponseEntity<Plus> getById(@PathVariable Long id) {
+    public ResponseEntity<Plus> getById(@RequestParam Long id) {
         return ResponseEntity.ok(service.getById(id));
     }
 
-    @GetMapping("/header/{header}")
+    @GetMapping("/header")
     @Operation(
             summary = "Get Plus item by header",
             description = "Fetches a Plus item using its unique header value."
     )
-    public ResponseEntity<Plus> getByHeader(@PathVariable String header) {
+    public ResponseEntity<Plus> getByHeader(@RequestParam String header) {
         return ResponseEntity.ok(service.getByHeader(header));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping
     @Operation(
             summary = "Update an existing Plus item",
             description = "Updates the header, description, and icon of an existing Plus item by ID. Only ADMINs can perform this action."
     )
-    public ResponseEntity<Plus> update(@PathVariable Long id,
+    public ResponseEntity<Plus> update(@RequestParam Long id,
                                        @RequestPart String header,
                                        @RequestPart String description,
                                        MultipartFile icon) throws IOException {
         return ResponseEntity.ok(service.update(id, header, description, icon));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping
     @Operation(
             summary = "Delete a Plus item",
             description = "Deletes a Plus item by its ID. Only ADMINs are allowed to perform this operation."
     )
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@RequestParam Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
