@@ -4,6 +4,7 @@ import com.sarkhan.backend.dto.product.*;
 import com.sarkhan.backend.mapper.comment.CommentMapper;
 import com.sarkhan.backend.mapper.product.ProductMapper;
 import com.sarkhan.backend.model.comment.Comment;
+import com.sarkhan.backend.model.enums.Color;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.ColorAndSize;
@@ -249,28 +250,26 @@ public class ProductServiceImpl implements ProductService {
                 })
                 .orElse(new ArrayList<>());
 
+        List<ProductResponseForGroupOfProduct> products = mapProductsToProductsResponse(productsBySubCategory);
+
+        List<Color> uniqueColors = colorAndSizes
+                .stream()
+                .map(ColorAndSize::getColor)
+                .collect(Collectors.toSet())
+                .stream()
+                .toList();
+
+        var availableSizes = getUniqueSizes(colorAndSizes);
+
+        ProductFilterRequest productFilter = new ProductFilterRequest(subCategoryId, null, null,
+                null, null, null, null,
+                null);
         return new ProductResponseForSelectedSubCategoryAndComplexFilter(
-                mapProductsToProductsResponse(productsBySubCategory),
+                products,
                 specifications,
-                colorAndSizes
-                        .stream()
-                        .map(ColorAndSize::getColor)
-                        .collect(Collectors.toSet())
-                        .stream()
-                        .toList(),
-                colorAndSizes
-                        .stream()
-                        .map(colorAndSize -> colorAndSize.getSizeStockMap().keySet())
-                        .reduce((a,b)->{
-                            a.addAll(b);
-                            return a;
-                        })
-                        .orElse(new HashSet<>())
-                        .stream()
-                        .toList(),
-                                new ProductFilterRequest(subCategoryId, null, null,
-                                        null, null, null, null,
-                                        null));
+                uniqueColors,
+                availableSizes,
+                productFilter);
     }
 
 
@@ -306,6 +305,8 @@ public class ProductServiceImpl implements ProductService {
                                     return a;
                                 })
                                 .orElse(new ArrayList<>());
+
+                        List<String> availableSizes =  getUniqueSizes(colorAndSizes);
                         return new ProductResponseForSelectedSubCategoryAndComplexFilter(
                                 mapProductsToProductsResponse(
                                         productsFuture.get()),
@@ -316,22 +317,21 @@ public class ProductServiceImpl implements ProductService {
                                         .collect(Collectors.toSet())
                                         .stream()
                                         .toList(),
-                                colorAndSizes
-                                        .stream()
-                                        .map(colorAndSize ->
-                                                colorAndSize.getSizeStockMap().keySet())
-                                        .reduce((a,b)->{
-                                            a.addAll(b);
-                                            return a;
-                                        })
-                                        .orElse(new HashSet<>())
-                                        .stream()
-                                        .toList(),
+                                availableSizes,
                                 request);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 });
+    }
+
+    private List<String> getUniqueSizes(List<ColorAndSize> colorAndSizes) {
+        HashSet<String> sizes = new HashSet<>();
+        for (ColorAndSize colorAndSize : colorAndSizes){
+            Set<String> sizeKeys = colorAndSize.getSizeStockMap().keySet();
+            sizes.addAll(sizeKeys);
+        }
+        return sizes.stream().toList();
     }
 
     @Override
