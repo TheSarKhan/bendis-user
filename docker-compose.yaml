@@ -17,22 +17,6 @@ services:
     networks:
       - bendis
 
-#  bendis_seller_redis:
-#    image: redis:7.2
-#    container_name: bendis_seller_redis
-#    ports:
-#      - '6381:6379'
-#    volumes:
-#      - redis_seller_data:/data
-#    restart: always
-#    healthcheck:
-#      test: ["CMD", "redis-cli", "ping"]
-#      interval: 5s
-#      timeout: 3s
-#      retries: 5
-#    networks:
-#      - bendis
-
   users_service:
     image: postgres
     container_name: users_service

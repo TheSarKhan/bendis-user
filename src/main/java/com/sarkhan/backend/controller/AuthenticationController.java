@@ -10,6 +10,7 @@ import com.sarkhan.backend.repository.user.UserRepository;
 import com.sarkhan.backend.service.AuthenticationService;
 import com.sarkhan.backend.service.impl.CustomOAuth2UserServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +37,7 @@ public class AuthenticationController {
     private final JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<TokenResponse> register(@RequestBody RegisterRequest dto) {
-
+    public ResponseEntity<TokenResponse> register(@RequestBody @Valid RegisterRequest dto) {
         TokenResponse tokenResponse = authenticationService.register(dto);
         Optional<User> user = userRepository.findByEmail(jwtService.extractEmail(tokenResponse.getAccessToken()));
         if (user.isPresent()) {

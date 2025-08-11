@@ -10,6 +10,7 @@ import com.sarkhan.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.security.auth.message.AuthException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class UserController {
     @PutMapping(name = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Operation(summary = "Update user information",
             description = "Updates user profile with the provided data and profile image")
-    public ResponseEntity<TokenResponse> updateUser(@RequestPart UserUpdateRequest request,
+    public ResponseEntity<TokenResponse> updateUser(@RequestPart @Valid UserUpdateRequest request,
                                                     @RequestPart MultipartFile profileImage) throws AuthException, IOException {
         return ResponseEntity.ok(userService.updateUser(request, profileImage));
     }
