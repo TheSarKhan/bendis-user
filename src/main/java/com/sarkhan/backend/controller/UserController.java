@@ -39,7 +39,7 @@ public class UserController {
     @Operation(summary = "Update user information",
             description = "Updates user profile with the provided data and profile image")
     public ResponseEntity<TokenResponse> updateUser(@RequestPart @Valid UserUpdateRequest request,
-                                                    @RequestPart MultipartFile profileImage) throws AuthException, IOException {
+                                                    @RequestPart(required = false) MultipartFile profileImage) throws AuthException, IOException {
         return ResponseEntity.ok(userService.updateUser(request, profileImage));
     }
 
