@@ -9,6 +9,7 @@ public class UserMapper {
         return new UserResponse(
                 user.getProfileImg(),
                 user.getFullName(),
+                user.getUserCode(),
                 user.getEmail(),
                 user.getPhoneNumber(),
                 user.getGender());

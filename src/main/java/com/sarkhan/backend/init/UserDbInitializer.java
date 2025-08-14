@@ -28,6 +28,10 @@ public class UserDbInitializer {
                 .seller(Seller.builder().build())
                 .build();
 
+        admin = userService.save(admin);
+
+        admin.setUserCode("A" + 10000000 + admin.getId());
+
         log.info("User created :" + userService.save(admin));
     }
 }

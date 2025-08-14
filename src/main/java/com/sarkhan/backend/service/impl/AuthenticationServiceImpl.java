@@ -43,6 +43,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setCreatedAt(now);
         user.setUpdatedAt(now);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user = userRepository.save(user);
+
+        user.setUserCode("B" + 10000000 + user.getId());
+
         userRepository.save(user);
 
         String accessToken = jwtService.generateAccessToken(request.getEmail(), null);
