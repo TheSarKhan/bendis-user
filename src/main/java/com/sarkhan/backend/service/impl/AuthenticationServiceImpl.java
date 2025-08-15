@@ -36,8 +36,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String refreshToken = jwtService.generateRefreshToken(request.getEmail());
         redisService.saveRefreshToken(request.getEmail(), refreshToken, 7);
         User user = new User();
-        Set<Role> roles = new HashSet<>();
-        roles.add(Role.USER);
+        user.setRole(Role.USER);
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setCreatedAt(now);
