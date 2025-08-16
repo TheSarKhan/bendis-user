@@ -4,6 +4,7 @@ import com.sarkhan.backend.dto.authorization.TokenResponse;
 import com.sarkhan.backend.dto.user.UserResponse;
 import com.sarkhan.backend.dto.user.UserUpdateRequest;
 import com.sarkhan.backend.mapper.user.UserMapper;
+import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.user.UserRepository;
 import com.sarkhan.backend.service.AuthenticationService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Slf4j
@@ -54,8 +56,10 @@ public class UserServiceImpl implements UserService {
         log.info("Someone try to update user.");
         var oldUser = UserUtil.getCurrentUser(this, log);
         var user = UserMapper.updateOldUserViaUserUpdateRequest(request, oldUser);
-        if (user.getProfileImg()!=null)
+        if (user.getProfileImg()!=null) {
             cloudinaryService.deleteFile(user.getProfileImg());
+            user.setProfileImg(null);
+        }
         if (profileImage != null && !profileImage.isEmpty()) {
             String uploadedImageUrl = cloudinaryService.uploadFile(profileImage, "userProfileImages").getUrl();
             user.setProfileImg(uploadedImageUrl);
@@ -63,5 +67,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         log.info("User successfully updated. User : " + user.getFullName());
         return authenticationService.getTokensAfterUpdateProfile(user.getEmail());
+    }
+
+    @Override
+    public List<User> findUsersByRole(Role role) {
+        log.info("Someone try to find users by role.");
+        return userRepository.findUserByRole(role);
     }
 }

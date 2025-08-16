@@ -20,18 +20,20 @@ public class UserDbInitializer {
 
     @PostConstruct
     public void init() {
-        User admin = User.builder()
-                .fullName("Admin")
-                .email("admin1234@gmail.com")
-                .password(passwordEncoder.encode("Admin123"))
-                .role(Role.ADMIN)
-                .seller(Seller.builder().build())
-                .build();
+        if (userService.findUsersByRole(Role.ADMIN).isEmpty()) {
+            User admin = User.builder()
+                    .fullName("Admin")
+                    .email("admin1234@gmail.com")
+                    .password(passwordEncoder.encode("Admin123"))
+                    .role(Role.ADMIN)
+                    .seller(Seller.builder().build())
+                    .build();
 
-        admin = userService.save(admin);
+            admin = userService.save(admin);
 
-        admin.setUserCode("A" + 10000000 + admin.getId());
+            admin.setUserCode("A" + 10000000 + admin.getId());
 
-        log.info("User created :" + userService.save(admin));
+            log.info("User created :" + userService.save(admin));
+        }
     }
 }

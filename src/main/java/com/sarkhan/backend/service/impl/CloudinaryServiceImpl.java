@@ -39,6 +39,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
         String url = uploadResult.get("secure_url").toString();
         String publicId = uploadResult.get("public_id").toString();
 
+        log.info("Uploaded file to cloudinary. url: {}, publicId: {}", url, publicId);
         return new CloudinaryUploadResponse(url, publicId);
     }
 
@@ -114,8 +115,11 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
     @Override
     public void deleteFile(String url) throws IOException {
-        log.warn("Remove file. file url : " + url);
-        deleteImage(extractPublicIdFromUrl(url));
+        log.warn("Remove file. file url : {}", url);
+        String publicId = extractPublicIdFromUrl(url);
+        log.info("Extracted publicId: {}", publicId);
+        String result = deleteImage(publicId);
+        log.info("Cloudinary delete response: {}", result);
     }
 
     private String extractPublicIdFromUrl(String url) {

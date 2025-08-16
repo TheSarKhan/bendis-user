@@ -28,6 +28,8 @@ public class User {
     String fullName;
     String googleId;
     String profileImg;
+
+    @Column(unique = true)
     String email;
     String refreshToken;
     String password;
