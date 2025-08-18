@@ -92,8 +92,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public String getInvoice(String uuid) {
         String url = "https://api.payriff.com/api/v2/get-invoice";
-        //    d3f48371896f46e9a8a341ac3ea44726
-        // İstek gövdesini oluşturuyoruz
+
         Map<String, Object> body = new HashMap<>();
         body.put("uuid", uuid);
 
@@ -101,15 +100,12 @@ public class PaymentServiceImpl implements PaymentService {
         request.put("merchant", merchantId);
         request.put("body", body);
 
-        // Header ayarları
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", apiKey);  // Eğer "Bearer " gerekiyorsa: "Bearer " + apiKey
+        headers.set("Authorization", apiKey);
 
-        // HTTP isteği oluşturuluyor
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(request, headers);
 
-        // API'ye istek gönderiliyor
         ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
         return response.getBody();
     }
