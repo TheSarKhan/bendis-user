@@ -13,27 +13,21 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler
+    @ExceptionHandler(DataNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleDataNotFoundException(DataNotFoundException dataNotFoundException) {
         ErrorResponse errorResponse = new ErrorResponse(dataNotFoundException.getMessage(), "There isn't any data like that");
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(NotEnoughQuantityException.class)
     public ResponseEntity<ErrorResponse> handleNotEnoughQuantityException(NotEnoughQuantityException notEnoughQuantityException) {
         ErrorResponse errorResponse = new ErrorResponse(notEnoughQuantityException.getMessage(), "Not enough quantity exception");
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(Exception exception) {
         ErrorResponse errorResponse = new ErrorResponse(exception.getMessage(), "Internal server error");
-        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> generalExceptionHandler(Exception exception) {
-        ErrorResponse errorResponse = new ErrorResponse(exception.getMessage(), "Internal Server Error");
         return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
