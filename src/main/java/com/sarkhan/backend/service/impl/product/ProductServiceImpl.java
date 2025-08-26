@@ -5,7 +5,10 @@ import com.sarkhan.backend.mapper.comment.CommentMapper;
 import com.sarkhan.backend.mapper.product.ProductMapper;
 import com.sarkhan.backend.model.comment.Comment;
 import com.sarkhan.backend.model.enums.Color;
+import com.sarkhan.backend.model.enums.OrderStatus;
 import com.sarkhan.backend.model.enums.Role;
+import com.sarkhan.backend.model.order.Order;
+import com.sarkhan.backend.model.order.OrderItem;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.ColorAndSize;
 import com.sarkhan.backend.model.product.items.Plus;
@@ -14,6 +17,7 @@ import com.sarkhan.backend.model.product.items.UserFavoriteProduct;
 import com.sarkhan.backend.model.user.Seller;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.comment.CommentRepository;
+import com.sarkhan.backend.repository.order.OrderRepository;
 import com.sarkhan.backend.repository.product.ProductRepository;
 import com.sarkhan.backend.repository.product.items.PlusRepository;
 import com.sarkhan.backend.repository.product.items.ProductUserHistoryRepository;
@@ -74,6 +78,8 @@ public class ProductServiceImpl implements ProductService {
 
     private final CommentRepository commentRepository;
 
+    private final OrderRepository orderRepository;
+
     private final Executor executor;
 
     @Value("${product.recommend.maxProduct}")
@@ -96,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
                               UserService userService, UserFavoriteProductRepository favoriteRepository,
                               @Qualifier("taskExecutor") Executor executor,
                               SellerRepository sellerRepository,
-                              PlusRepository plusRepository, CommentRepository commentRepository) {
+                              PlusRepository plusRepository, CommentRepository commentRepository, OrderRepository orderRepository) {
         this.productRepository = productRepository;
         this.historyRepository = historyRepository;
         this.cloudinaryService = cloudinaryService;
@@ -108,6 +114,7 @@ public class ProductServiceImpl implements ProductService {
         this.sellerRepository = sellerRepository;
         this.plusRepository = plusRepository;
         this.commentRepository = commentRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -194,6 +201,21 @@ public class ProductServiceImpl implements ProductService {
 
         addProductUserHistory(product, userService, historyRepository, log);
         return mapProductToResponse(product);
+    }
+
+    @Override
+    public List<Long> getMyDeliveredProductId() throws AuthException {
+        User currentUser = getCurrentUser(userService, log);
+        List<Order> byUserId = orderRepository.findByUserId(currentUser.getId());
+        return byUserId.stream()
+                .filter(order -> OrderStatus.DELIVERED.equals(order.getOrderStatus()))
+                .map(Order::getOrderItemList)
+                .reduce((a, b) -> {
+                    a.addAll(b);
+                    return a;
+                })
+                .orElseThrow(() -> new NoSuchElementException("Cannot find any order for this user."))
+                .stream().map(OrderItem::getProductId).toList();
     }
 
     @Override

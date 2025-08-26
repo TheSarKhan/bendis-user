@@ -36,6 +36,8 @@ public interface ProductService {
 
     List<ProductResponseForGroupOfProduct> getBySellerId(Long sellerId);
 
+    List<Long> getMyDeliveredProductId() throws AuthException;
+
     Product getById(Long id);
 
     CompletableFuture<ProductResponseForSelectedSubCategoryAndComplexFilter> getByComplexFiltering(ProductFilterRequest request);

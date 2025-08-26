@@ -50,8 +50,12 @@ public class CommentServiceImpl implements CommentService {
         log.info("Someone is trying to add comment");
         try {
             User currentUser = UserUtil.getCurrentUser(userService, log);
-            if (!commentRepository.getByUserIdAndProductId(currentUser.getId(), request.productId()).isEmpty()) {
-                log.info(currentUser.getFullName() + "try to add 2 or more comments in one product.");
+            if (!productService.getMyDeliveredProductId().contains(request.productId())){
+                log.info("{} try to add comment in not delivered product.", currentUser.getFullName());
+                  return "You cannot add comment in not delivered product.";
+            }
+            if (commentRepository.getByUserIdAndProductId(currentUser.getId(), request.productId()).isPresent()) {
+                log.info("{} try to add 2 or more comments in one product.", currentUser.getFullName());
                 return "You cannot add 2 or more comments in one product.";
             }
             Comment comment = CommentMapper.mapRequestToComment(request);
