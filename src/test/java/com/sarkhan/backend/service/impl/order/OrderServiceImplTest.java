@@ -122,7 +122,7 @@ public class OrderServiceImplTest {
         );
 
         CartItemRequestDTO cartItemRequestDTO = new CartItemRequestDTO(
-                1L, 1L, 2, "BLUE", null, BigDecimal.TEN
+                1L, 2, "BLUE", null, BigDecimal.TEN
         );
 
         orderRequest = new OrderRequest(List.of(cartItemRequestDTO), 100.0, addressDto);

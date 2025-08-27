@@ -67,7 +67,7 @@ class CartServiceImplTest {
 
     @Test
     void testAddToCart_Success_WithSize() throws NotEnoughQuantityException {
-        CartItemRequestDTO dto = new CartItemRequestDTO(1L, 1L,1,"BLACK", "M", BigDecimal.valueOf(100));
+        CartItemRequestDTO dto = new CartItemRequestDTO(1L,1,"BLACK", "M", BigDecimal.valueOf(100));
 
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -82,7 +82,7 @@ class CartServiceImplTest {
 
     @Test
     void testAddToCart_NotEnoughSizeStock() {
-        CartItemRequestDTO dto = new CartItemRequestDTO(1L, 1L,3,"BLACK", "M", BigDecimal.valueOf(1));
+        CartItemRequestDTO dto = new CartItemRequestDTO( 1L,3,"BLACK", "M", BigDecimal.valueOf(1));
 
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -107,7 +107,7 @@ class CartServiceImplTest {
     @Test
     void testUpdateCartItem_Success() {
         CartItem cartItem = CartItem.builder().productId(1L).color("BLACK").quantity(2).build();
-        CartItemRequestDTO dto = new CartItemRequestDTO(1L, 1L,2,"BLACK", "M", BigDecimal.valueOf(100));
+        CartItemRequestDTO dto = new CartItemRequestDTO(1L,2,"BLACK", "M", BigDecimal.valueOf(100));
 
         when(cartRepository.findByUserId(1L)).thenReturn(Optional.of(cart));
         when(cartItemRepository.findByCartAndProductIdAndColor(any(), anyLong(), anyString())).thenReturn(Optional.of(cartItem));
