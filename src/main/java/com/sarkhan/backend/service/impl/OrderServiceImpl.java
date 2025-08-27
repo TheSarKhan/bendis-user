@@ -243,6 +243,19 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+    @Override
+    public List<OrderResponseDto> changeOrderStatus(Long orderId, OrderStatus status) {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> {
+            log.error("Order can not found:" + orderId);
+            return new ResourceNotFoundException("Order can not found {}" + orderId);
+        });
+        order.setOrderStatus(status);
+        orderRepository.save(order);
+        User user = getCurrentUser();
+        List<Order> orders = orderRepository.findByOrderStatus(status);
+        return orderMapper.ordersRoOrderResponseDtoList(orders,user);
+    }
+
     private OrderSummaryDto orderSummaryDto(Long orderId) {
         User user = getCurrentUser();
         Order order = orderRepository.findById(orderId).orElseThrow(() -> {

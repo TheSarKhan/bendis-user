@@ -5,6 +5,7 @@ import com.sarkhan.backend.dto.order.OrderFilterRequest;
 import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.dto.order.OrderResponseDto;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
+import com.sarkhan.backend.model.enums.OrderStatus;
 import com.sarkhan.backend.model.order.Order;
 
 import java.util.List;
@@ -19,4 +20,6 @@ public interface OrderService {
     List<Order> filterOrders(OrderFilterRequest orderFilterRequest);
 
     OrderDetailsDto getOrderDetails(Long orderId);
+
+    List<OrderResponseDto> changeOrderStatus(Long orderId, OrderStatus status);
 }

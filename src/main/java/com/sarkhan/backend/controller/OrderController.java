@@ -5,6 +5,7 @@ import com.sarkhan.backend.dto.order.OrderFilterRequest;
 import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.dto.order.OrderResponseDto;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
+import com.sarkhan.backend.model.enums.OrderStatus;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,4 +55,9 @@ public class OrderController {
     public ResponseEntity<OrderDetailsDto> getDetails(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOrderDetails(orderId));
     }
+    @PostMapping("/change-status")
+     public ResponseEntity<List<OrderResponseDto>> changeOrderStatus(@RequestParam Long orderId, @RequestParam OrderStatus status){
+        return ResponseEntity.ok(orderService.changeOrderStatus(orderId, status));
+    }
+
 }
