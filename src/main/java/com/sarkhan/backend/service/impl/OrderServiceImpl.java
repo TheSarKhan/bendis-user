@@ -129,6 +129,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order create = Order.builder()
                 .address(address)
+                .userId(user.getId())
                 .totalPrice(sum)
                 .cartId(cart.getId())
                 .orderStatus(OrderStatus.PENDING)
