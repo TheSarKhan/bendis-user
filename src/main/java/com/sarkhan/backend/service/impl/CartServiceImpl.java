@@ -36,11 +36,13 @@ public class CartServiceImpl implements CartService {
     @Override
     public void addToCart(Long userId, CartItemRequestDTO cartItemRequestDTO) throws NotEnoughQuantityException {
 
-        Cart cart = cartRepository.findByUserId(userId).orElseThrow(() -> {
-            log.error("Cart can not found");
-            return new ResourceNotFoundException("Cart can not found");
-        });
-
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseGet(() -> {
+                    Cart newCart = Cart.builder()
+                            .userId(userId)
+                            .build();
+                    return cartRepository.save(newCart);
+                });
         Product product = productRepository.findById(cartItemRequestDTO.getProductId())
                 .orElseThrow(() -> {
                     log.error("Product can not found");

@@ -14,9 +14,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class CartItemRequestDTO {
 
-    @NotNull
-    private Long cartId;
-
     @NotNull(message = "product id can not be null")
     private Long productId;
 
