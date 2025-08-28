@@ -20,6 +20,11 @@ spring:
       user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
       jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
 
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+
   mail:
     host: smtp.gmail.com
     port: 587
