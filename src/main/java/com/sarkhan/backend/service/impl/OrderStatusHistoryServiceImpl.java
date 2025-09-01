@@ -2,7 +2,7 @@ package com.sarkhan.backend.service.impl;
 
 import com.sarkhan.backend.dto.history.OrderHistoryResponseDto;
 import com.sarkhan.backend.dto.history.ProductHistoryDto;
-import com.sarkhan.backend.exception.DataNotFoundException;
+import com.sarkhan.backend.handler.exception.DataNotFoundException;
 import com.sarkhan.backend.model.enums.OrderStatus;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.model.order.OrderStatusHistory;

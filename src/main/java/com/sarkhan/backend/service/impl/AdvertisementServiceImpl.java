@@ -3,7 +3,7 @@ package com.sarkhan.backend.service.impl;
 import com.sarkhan.backend.dto.advertisement.AdvertisementRequest;
 import com.sarkhan.backend.dto.advertisement.AdvertisementResponse;
 import com.sarkhan.backend.dto.advertisement.AdvertisementUpdateRequest;
-import com.sarkhan.backend.exception.DataNotFoundException;
+import com.sarkhan.backend.handler.exception.DataNotFoundException;
 import com.sarkhan.backend.mapper.advertisement.AdvertisementMapper;
 import com.sarkhan.backend.model.story.Advertisement;
 import com.sarkhan.backend.model.user.User;

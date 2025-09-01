@@ -1,7 +1,7 @@
 package com.sarkhan.backend.history;
 
 import com.sarkhan.backend.dto.history.OrderHistoryResponseDto;
-import com.sarkhan.backend.exception.DataNotFoundException;
+import com.sarkhan.backend.handler.exception.DataNotFoundException;
 import com.sarkhan.backend.model.enums.Color;
 import com.sarkhan.backend.model.enums.OrderStatus;
 import com.sarkhan.backend.model.order.Order;

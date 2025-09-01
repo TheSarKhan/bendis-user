@@ -6,7 +6,7 @@ import com.sarkhan.backend.dto.order.OrderDetailsDto;
 import com.sarkhan.backend.dto.order.OrderFilterRequest;
 import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.dto.order.OrderResponseDto;
-import com.sarkhan.backend.exception.NotEnoughQuantityException;
+import com.sarkhan.backend.handler.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
 import com.sarkhan.backend.mapper.order.OrderMapper;
 import com.sarkhan.backend.model.cart.Cart;

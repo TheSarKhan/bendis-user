@@ -2,7 +2,7 @@ package com.sarkhan.backend.service.impl;
 
 import com.sarkhan.backend.dto.cart.CartItemRequestDTO;
 import com.sarkhan.backend.dto.order.*;
-import com.sarkhan.backend.exception.NotEnoughQuantityException;
+import com.sarkhan.backend.handler.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
 import com.sarkhan.backend.mapper.order.OrderMapper;
 import com.sarkhan.backend.model.cart.Cart;
@@ -265,7 +265,6 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
-
     @Override
     public List<OrderResponseDto> changeOrderStatus(Long orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> {
@@ -286,21 +285,32 @@ public class OrderServiceImpl implements OrderService {
             return new ResourceNotFoundException("Order can not found {}" + orderId);
         });
         Address address = order.getAddress();
+
         BigDecimal discount = BigDecimal.ZERO;
         BigDecimal deliveryFee = BigDecimal.ZERO;
+
         for (OrderItem orderItem : order.getOrderItemList()) {
             Product product = productRepository.findById(orderItem.getProductId()).orElseThrow(() -> {
                 log.error("Product can not found:" + orderItem.getProductId());
                 return new ResourceNotFoundException("Product can not found {}" + orderItem.getProductId());
             });
-            discount = discount.add((product.getOriginalPrice().subtract(product.getDiscountedPrice()))
-                    .multiply(BigDecimal.valueOf(orderItem.getQuantity())));
-            deliveryFee = deliveryFee.add(orderItem.getDeliveryFee());
+
+            BigDecimal original = Optional.ofNullable(product.getOriginalPrice()).orElse(BigDecimal.ZERO);
+            BigDecimal discounted = Optional.ofNullable(product.getDiscountedPrice()).orElse(BigDecimal.ZERO);
+            BigDecimal itemDiscount = original.subtract(discounted)
+                    .multiply(BigDecimal.valueOf(orderItem.getQuantity()));
+
+            discount = discount.add(itemDiscount);
+
+            BigDecimal itemDelivery = Optional.ofNullable(orderItem.getDeliveryFee()).orElse(BigDecimal.ZERO);
+            deliveryFee = deliveryFee.add(itemDelivery);
         }
-        BigDecimal finalPrice = order.getTotalPrice().subtract(discount).add(deliveryFee);
+
+        BigDecimal orderTotal = Optional.ofNullable(order.getTotalPrice()).orElse(BigDecimal.ZERO);
+        BigDecimal finalPrice = orderTotal.subtract(discount).add(deliveryFee);
 
         return OrderSummaryDto.builder()
-                .toralPrice(order.getTotalPrice())
+                .toralPrice(orderTotal)
                 .discount(discount)
                 .deliveryFee(deliveryFee)
                 .finalPrice(finalPrice)
@@ -310,6 +320,7 @@ public class OrderServiceImpl implements OrderService {
                         address.getStreet() + "," + address.getPostalCode())
                 .build();
     }
+
 
     private User getCurrentUser() {
         try {

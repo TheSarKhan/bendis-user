@@ -2,7 +2,7 @@ package com.sarkhan.backend.service.impl.cart;
 
 import com.sarkhan.backend.dto.cart.CartItemRequestDTO;
 import com.sarkhan.backend.dto.cart.UserCartDTO;
-import com.sarkhan.backend.exception.NotEnoughQuantityException;
+import com.sarkhan.backend.handler.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.model.cart.Cart;
 import com.sarkhan.backend.model.cart.CartItem;

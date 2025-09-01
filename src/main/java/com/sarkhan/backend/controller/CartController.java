@@ -2,7 +2,7 @@ package com.sarkhan.backend.controller;
 
 import com.sarkhan.backend.dto.cart.CartItemRequestDTO;
 import com.sarkhan.backend.dto.cart.UserCartDTO;
-import com.sarkhan.backend.exception.NotEnoughQuantityException;
+import com.sarkhan.backend.handler.exception.NotEnoughQuantityException;
 import com.sarkhan.backend.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

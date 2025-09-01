@@ -3,7 +3,7 @@ package com.sarkhan.backend.service.impl;
 import com.sarkhan.backend.dto.seller.SellerRequestDTO;
 import com.sarkhan.backend.dto.seller.SellerResponseDTO;
 import com.sarkhan.backend.dto.seller.UpdateSellerRequestDto;
-import com.sarkhan.backend.exception.DataNotFoundException;
+import com.sarkhan.backend.handler.exception.DataNotFoundException;
 import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.mapper.seller.SellerMapper;
 import com.sarkhan.backend.model.user.Seller;

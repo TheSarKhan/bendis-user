@@ -1,4 +1,4 @@
-package com.sarkhan.backend.exception;
+package com.sarkhan.backend.handler.exception;
 
 public class DataNotFoundException extends RuntimeException {
     public DataNotFoundException(String message) {

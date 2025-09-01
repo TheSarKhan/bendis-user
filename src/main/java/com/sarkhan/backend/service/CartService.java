@@ -2,7 +2,7 @@ package com.sarkhan.backend.service;
 
 import com.sarkhan.backend.dto.cart.CartItemRequestDTO;
 import com.sarkhan.backend.dto.cart.UserCartDTO;
-import com.sarkhan.backend.exception.NotEnoughQuantityException;
+import com.sarkhan.backend.handler.exception.NotEnoughQuantityException;
 public interface CartService {
     void addToCart(Long userId, CartItemRequestDTO basketItemDTO) throws NotEnoughQuantityException;
 

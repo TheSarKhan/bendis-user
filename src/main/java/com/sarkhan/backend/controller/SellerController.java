@@ -3,7 +3,7 @@ package com.sarkhan.backend.controller;
 import com.sarkhan.backend.dto.seller.SellerRequestDTO;
 import com.sarkhan.backend.dto.seller.SellerResponseDTO;
 import com.sarkhan.backend.dto.seller.UpdateSellerRequestDto;
-import com.sarkhan.backend.exception.DataNotFoundException;
+import com.sarkhan.backend.handler.exception.DataNotFoundException;
 import com.sarkhan.backend.service.SellerService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.security.auth.message.AuthException;

@@ -1,7 +1,7 @@
 package com.sarkhan.backend.service.story;
 
 import com.sarkhan.backend.dto.story.StoryResponseDTO;
-import com.sarkhan.backend.exception.DataNotFoundException;
+import com.sarkhan.backend.handler.exception.DataNotFoundException;
 import com.sarkhan.backend.model.story.Story;
 import jakarta.security.auth.message.AuthException;
 import org.springframework.web.multipart.MultipartFile;
