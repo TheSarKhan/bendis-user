@@ -149,7 +149,7 @@ public class CommentServiceImpl implements CommentService {
         log.info("Someone is trying to delete comment");
         User currentUser = UserUtil.getCurrentUser(userService, log);
         Comment comment = getCommentById(id);
-        if (currentUser.getId().equals(comment.getUserId())) {
+        if (!currentUser.getId().equals(comment.getUserId())) {
             log.info("Someone is trying to delete other user's comment.");
             return "You cannot change other user's comment.";
         }
