@@ -33,7 +33,7 @@ public class Order {
     @Column(name = "user_id", nullable = false)
     private Long userId;
     private LocalDateTime updatedAt;
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
     private List<OrderItem> orderItemList;
 
     @PrePersist
