@@ -3,17 +3,17 @@ package com.sarkhan.backend.config;
 import com.sarkhan.backend.handler.CustomAccessDeniedHandler;
 import com.sarkhan.backend.handler.CustomAuthenticationEntryPoint;
 import com.sarkhan.backend.jwt.JwtFilter;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationProvider;
 import com.sarkhan.backend.service.impl.CustomOAuth2UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
@@ -100,6 +100,8 @@ public class SecurityConfig {
                                 "/api/v1/product/seller/**", "/api/v1/product/filter",
                                 "/api/v1/header"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.GET, "api/v1/advertisements/**")
+                        .permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/seller/myInfo").hasRole("SELLER")
                         .requestMatchers(HttpMethod.POST,"/api/v1/seller").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT,"/api/v1/seller").hasAnyRole("ADMIN","SELLER")
