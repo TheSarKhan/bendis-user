@@ -231,7 +231,15 @@ public class OrderServiceImpl implements OrderService {
             FirmDetailsDto firmDetailsDto = firmDetailsDtoMap.get(brand);
             firmDetailsDto.getProductOrderDetailsDtoList().add(productOrderDetailsDto);
             firmDetailsDto.setProductCount(firmDetailsDto.getProductCount() + 1);
-            firmDetailsDto.setTotalPrice(firmDetailsDto.getTotalPrice().add(orderItem.getTotalPrice()));
+            BigDecimal currentTotal = firmDetailsDto.getTotalPrice() != null
+                    ? firmDetailsDto.getTotalPrice()
+                    : BigDecimal.ZERO;
+
+            BigDecimal itemPrice = orderItem.getTotalPrice() != null
+                    ? orderItem.getTotalPrice()
+                    : BigDecimal.ZERO;
+
+            firmDetailsDto.setTotalPrice(currentTotal.add(itemPrice));
         }
         OrderSummaryDto orderSummaryDto = orderSummaryDto(orderId);
         return OrderDetailsDto.builder()
