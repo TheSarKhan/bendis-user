@@ -22,4 +22,6 @@ public interface OrderService {
     OrderDetailsDto getOrderDetails(Long orderId);
 
     List<OrderResponseDto> changeOrderStatus(Long orderId, OrderStatus status);
+
+    List<Order> getForTest();
 }
