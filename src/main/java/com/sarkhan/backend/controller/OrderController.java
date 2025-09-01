@@ -5,6 +5,7 @@ import com.sarkhan.backend.dto.order.OrderFilterRequest;
 import com.sarkhan.backend.dto.order.OrderRequest;
 import com.sarkhan.backend.dto.order.OrderResponseDto;
 import com.sarkhan.backend.exception.NotEnoughQuantityException;
+import com.sarkhan.backend.model.enums.DateType;
 import com.sarkhan.backend.model.enums.OrderStatus;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.service.OrderService;
@@ -45,10 +46,25 @@ public class OrderController {
     }
 
     @GetMapping("/filter")
-    @Operation(summary = "Filter orders", description = "Filters orders based on the provided criteria")
-    public ResponseEntity<List<Order>> filterOrders(@RequestBody OrderFilterRequest orderFilterRequest) {
-        return ResponseEntity.ok(orderService.filterOrders(orderFilterRequest));
+    @Operation(summary = "Filter orders", description = "Returns a list of orders based on the provided filter criteria")
+    public ResponseEntity<List<Order>> filterOrders(
+            @RequestParam(required = false) String productName,
+            @RequestParam(required = false) OrderStatus orderStatus,
+            @RequestParam(required = false) DateType dateType,
+            @RequestParam(required = false) Integer dateAmount,
+            @RequestParam(required = false) Integer specificYear) {
+
+        OrderFilterRequest filter = OrderFilterRequest.builder()
+                .productName(productName)
+                .orderStatus(orderStatus)
+                .dateType(dateType)
+                .dateAmount(dateAmount)
+                .specificYear(specificYear)
+                .build();
+
+        return ResponseEntity.ok(orderService.filterOrders(filter));
     }
+
 
     @GetMapping("/getDetails/{orderId}")
     @Operation(summary = "Get order details", description = "Returns detailed information about a specific order")
