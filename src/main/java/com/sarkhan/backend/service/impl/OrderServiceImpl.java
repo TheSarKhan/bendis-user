@@ -34,10 +34,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -156,69 +153,86 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> filterOrders(OrderFilterRequest orderFilterRequest) {
+    @Transactional
+    public List<Order> filterOrders(OrderFilterRequest filterRequest) {
         User user = getCurrentUser();
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Order> query = criteriaBuilder.createQuery(Order.class);
-        Root<Order> order = query.from(Order.class);
-        Join<Order, OrderItem> itemList = order.join("orderItemList", JoinType.LEFT);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Order> query = cb.createQuery(Order.class);
+        Root<Order> orderRoot = query.from(Order.class);
+        query.select(orderRoot);
+
+        Join<Order, OrderItem> orderItems = orderRoot.join("orderItemList", JoinType.LEFT);
+
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.equal(orderRoot.get("userId"), user.getId()));
+
         LocalDate startDate = null;
         LocalDate endDate = LocalDate.now();
-        if ("DAY".equalsIgnoreCase(orderFilterRequest.getDateType().name()) && orderFilterRequest.getDateAmount() != null) {
-            startDate = LocalDate.now().minusDays(orderFilterRequest.getDateAmount());
-        }
-        if ("MONTH".equalsIgnoreCase(orderFilterRequest.getDateType().name()) && orderFilterRequest.getDateAmount() != null) {
-            startDate = LocalDate.now().minusMonths(orderFilterRequest.getDateAmount());
-        }
-        if ("YEAR".equalsIgnoreCase(orderFilterRequest.getDateType().name())) {
-            if (orderFilterRequest.getSpecificYear() != null) {
-                startDate = LocalDate.of(orderFilterRequest.getSpecificYear(), 1, 1);
-                endDate = LocalDate.of(orderFilterRequest.getSpecificYear(), 12, 31);
-            } else if (orderFilterRequest.getDateAmount() != null) {
-                startDate = LocalDate.now().minusYears(orderFilterRequest.getDateAmount());
 
+        if (filterRequest.getDateType() != null && filterRequest.getDateAmount() != null) {
+            switch (filterRequest.getDateType()) {
+                case DAY -> startDate = LocalDate.now().minusDays(filterRequest.getDateAmount());
+                case MONTH -> startDate = LocalDate.now().minusMonths(filterRequest.getDateAmount());
+                case YEAR -> startDate = LocalDate.now().minusYears(filterRequest.getDateAmount());
             }
         }
-        List<Predicate> predicates = new ArrayList<>();
-        predicates.add(criteriaBuilder.equal(order.get("userId"), user.getId()));
+
+        if (filterRequest.getSpecificYear() != null) {
+            startDate = LocalDate.of(filterRequest.getSpecificYear(), 1, 1);
+            endDate = LocalDate.of(filterRequest.getSpecificYear(), 12, 31);
+        }
+
         if (startDate != null) {
-            predicates.add(criteriaBuilder.between(order.get("orderDate"), startDate, endDate));
+            predicates.add(cb.between(orderRoot.get("orderDate"), startDate, endDate));
         }
-        if (orderFilterRequest.getOrderStatus() != null) {
-            predicates.add(criteriaBuilder.equal(order.get("orderStatus"), orderFilterRequest.getOrderStatus()));
+
+        if (filterRequest.getOrderStatus() != null) {
+            predicates.add(cb.equal(orderRoot.get("orderStatus"), filterRequest.getOrderStatus()));
         }
-        if (orderFilterRequest.getProductName() != null && !orderFilterRequest.getProductName().isEmpty()) {
-            List<Long> idsFromName = productRepository.findIdsFromName(orderFilterRequest.getProductName());
-            if (!idsFromName.isEmpty()) {
-                predicates.add(itemList.get("id").in(idsFromName));
+
+        if (filterRequest.getProductName() != null && !filterRequest.getProductName().isEmpty()) {
+            List<Long> productIds = productRepository.findIdsFromName(filterRequest.getProductName());
+            if (!productIds.isEmpty()) {
+                predicates.add(orderItems.get("productId").in(productIds));
             } else {
-                predicates.add(criteriaBuilder.disjunction());
+                predicates.add(cb.disjunction());
             }
         }
+
+        query.where(predicates.toArray(new Predicate[0]));
+        query.distinct(true);
+
         return entityManager.createQuery(query).getResultList();
     }
 
     @Override
     @Transactional
     public OrderDetailsDto getOrderDetails(Long orderId) {
-        Order order = orderRepository.findWithItemsByOrderId(orderId).orElseThrow(() -> {
-            log.error("Order can not found:" + orderId);
-            return new ResourceNotFoundException("Order can not found {}" + orderId);
-        });
+        Order order = orderRepository.findWithItemsByOrderId(orderId)
+                .orElseThrow(() -> {
+                    log.error("Order not found: " + orderId);
+                    return new ResourceNotFoundException("Order not found: " + orderId);
+                });
+
         Map<String, FirmDetailsDto> firmDetailsDtoMap = new HashMap<>();
 
         for (OrderItem orderItem : order.getOrderItemList()) {
-            Product product = productRepository.findById(orderItem.getProductId()).orElseThrow(() -> {
-                log.error("Product can not found:" + orderItem.getProductId());
-                return new ResourceNotFoundException("Product can not found {}" + orderItem.getProductId());
-            });
+            Product product = productRepository.findById(orderItem.getProductId())
+                    .orElseThrow(() -> {
+                        log.error("Product not found: " + orderItem.getProductId());
+                        return new ResourceNotFoundException("Product not found: " + orderItem.getProductId());
+                    });
 
             String brand = product.getBrand();
-            String imageUrl = product.getColorAndSizes().stream().filter(colorAndSize -> colorAndSize.getColor().name().equals(orderItem.getColor()))
-                    .findFirst().map(colorAndSize -> {
-                        List<String> imageUrls = colorAndSize.getImageUrls();
-                        return (imageUrls != null && !imageUrls.isEmpty()) ? imageUrls.getFirst() : null;
+            String imageUrl = product.getColorAndSizes().stream()
+                    .filter(c -> c.getColor().name().equals(orderItem.getColor()))
+                    .findFirst()
+                    .map(c -> {
+                        List<String> images = c.getImageUrls();
+                        return (images != null && !images.isEmpty()) ? images.get(0) : null;
                     }).orElse(null);
+
             ProductOrderDetailsDto productOrderDetailsDto = ProductOrderDetailsDto.builder()
                     .productName(product.getName())
                     .imageUrl(imageUrl)
@@ -227,22 +241,21 @@ public class OrderServiceImpl implements OrderService {
                     .quantity(orderItem.getQuantity())
                     .size(orderItem.getSize())
                     .build();
+
             firmDetailsDtoMap.putIfAbsent(brand, new FirmDetailsDto(brand, 0, BigDecimal.ZERO, new ArrayList<>()));
 
             FirmDetailsDto firmDetailsDto = firmDetailsDtoMap.get(brand);
             firmDetailsDto.getProductOrderDetailsDtoList().add(productOrderDetailsDto);
             firmDetailsDto.setProductCount(firmDetailsDto.getProductCount() + 1);
-            BigDecimal currentTotal = firmDetailsDto.getTotalPrice() != null
-                    ? firmDetailsDto.getTotalPrice()
-                    : BigDecimal.ZERO;
 
-            BigDecimal itemPrice = orderItem.getTotalPrice() != null
-                    ? orderItem.getTotalPrice()
-                    : BigDecimal.ZERO;
+            BigDecimal currentTotal = Optional.ofNullable(firmDetailsDto.getTotalPrice()).orElse(BigDecimal.ZERO);
+            BigDecimal itemPrice = Optional.ofNullable(orderItem.getTotalPrice()).orElse(BigDecimal.ZERO);
 
             firmDetailsDto.setTotalPrice(currentTotal.add(itemPrice));
         }
+
         OrderSummaryDto orderSummaryDto = orderSummaryDto(orderId);
+
         return OrderDetailsDto.builder()
                 .orderId(orderId)
                 .orderDate(order.getOrderDate())
@@ -251,6 +264,7 @@ public class OrderServiceImpl implements OrderService {
                 .orderSummaryDto(orderSummaryDto)
                 .build();
     }
+
 
     @Override
     public List<OrderResponseDto> changeOrderStatus(Long orderId, OrderStatus status) {
