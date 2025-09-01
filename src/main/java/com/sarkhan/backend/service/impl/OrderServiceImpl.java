@@ -199,8 +199,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDetailsDto getOrderDetails(Long orderId) {
-        Order order = orderRepository.findById(orderId).orElseThrow(() -> {
+        Order order = orderRepository.findWithItemsByOrderId(orderId).orElseThrow(() -> {
             log.error("Order can not found:" + orderId);
             return new ResourceNotFoundException("Order can not found {}" + orderId);
         });
