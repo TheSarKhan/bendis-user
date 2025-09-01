@@ -1,6 +1,7 @@
 package com.sarkhan.backend.service.impl;
 
 import com.sarkhan.backend.dto.home.HomePageResponseDTO;
+import com.sarkhan.backend.service.AdvertisementService;
 import com.sarkhan.backend.service.HomePageService;
 import com.sarkhan.backend.service.product.ProductService;
 import com.sarkhan.backend.service.story.StoryService;
@@ -16,10 +17,13 @@ public class HomePageServiceImpl implements HomePageService {
 
     private final StoryService storyService;
 
+    private final AdvertisementService advertisementService;
+
     @Override
     public HomePageResponseDTO getHomePageInfo() {
-        log.info("Someone try to get home page information.");
-        return new HomePageResponseDTO(productService.getForHomePage(),
+        return new HomePageResponseDTO(
+                productService.getForHomePage(),
+                advertisementService.getAll(),
                 storyService.getForHomePage());
     }
 }
