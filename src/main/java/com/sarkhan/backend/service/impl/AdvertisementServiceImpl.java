@@ -69,6 +69,7 @@ public class AdvertisementServiceImpl implements AdvertisementService {
             Set<Long> view = advertisement.getView();
             view.add(currentUser.getId());
             advertisement.setView(view);
+            advertisement = advertisementRepository.save(advertisement);
         } catch (AuthException ignored) {
         }
         return AdvertisementMapper.toResponse(advertisement);
