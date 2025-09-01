@@ -238,7 +238,7 @@ public class OrderServiceImplTest {
         order.setAddress(new Address());
 
         securityContextHolderConfigCorrectly();
-        when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+        when(orderRepository.findWithItemsByOrderId(orderId)).thenReturn(Optional.of(order));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(userService.getByEmail("user@example.com")).thenReturn(user);
         when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
