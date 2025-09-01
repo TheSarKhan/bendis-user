@@ -76,9 +76,4 @@ public class OrderController {
         return ResponseEntity.ok(orderService.changeOrderStatus(orderId, status));
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<List<Order>> get() {
-        return ResponseEntity.ok(orderService.getForTest());
-    }
-
 }

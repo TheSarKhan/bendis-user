@@ -330,9 +330,4 @@ public class OrderServiceImpl implements OrderService {
             return null;
         }
     }
-
-    @Override
-    public List<Order> getForTest() {
-        return orderRepository.findAll();
-    }
 }
