@@ -50,5 +50,7 @@ public interface ProductService {
 
     ProductResponseForGetSingleOne update(Long id, ProductRequest request, List<MultipartFile> newImages) throws IOException, AuthException;
 
+    void removeRating(Long productId, Long userId) throws AuthException;
+
     void delete(Long id) throws AuthException;
 }

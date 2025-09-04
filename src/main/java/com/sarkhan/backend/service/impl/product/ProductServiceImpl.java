@@ -30,6 +30,7 @@ import com.sarkhan.backend.service.product.items.CategoryService;
 import com.sarkhan.backend.service.product.items.SubCategoryService;
 import jakarta.security.auth.message.AuthException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -435,6 +436,20 @@ public class ProductServiceImpl implements ProductService {
 
         log.info("Product update successfully.");
         return mapProductToResponse(productRepository.save(product));
+    }
+
+    @Override
+    public void removeRating(Long productId, Long userId) {
+        Product product = getById(productId);
+        Map<Long, Double> ratings = product.getRatings();
+        if (ratings.containsKey(userId)) {
+            ratings.remove(userId);
+            product.setRating(ratings.values().stream().reduce(0.0, Double::sum) / ratings.size());
+            product.setRatings(ratings);
+            productRepository.save(product);
+        } else {
+            log.warn("User try to remove rating that doesn't exist.");
+        }
     }
 
     @Override
