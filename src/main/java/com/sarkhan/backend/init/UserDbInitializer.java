@@ -1,5 +1,6 @@
 package com.sarkhan.backend.init;
 
+import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.user.Seller;
 import com.sarkhan.backend.model.user.User;
@@ -26,7 +27,9 @@ public class UserDbInitializer {
                     .email("admin1234@gmail.com")
                     .password(passwordEncoder.encode("Admin123"))
                     .role(Role.ADMIN)
+                    .gender(Gender.FEMALE)
                     .build();
+
 
             admin = userService.save(admin);
 
