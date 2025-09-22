@@ -50,9 +50,9 @@ public class CommentServiceImpl implements CommentService {
         log.info("Someone is trying to add comment");
         try {
             User currentUser = UserUtil.getCurrentUser(userService, log);
-            if (!productService.getMyDeliveredProductId().contains(request.productId())){
+            if (!productService.getMyDeliveredProductId().contains(request.productId())) {
                 log.info("{} try to add comment in not delivered product.", currentUser.getFullName());
-                  return "You cannot add comment in not delivered product.";
+                return "You cannot add comment in not delivered product.";
             }
             if (commentRepository.getByUserIdAndProductId(currentUser.getId(), request.productId()).isPresent()) {
                 log.info("{} try to add 2 or more comments in one product.", currentUser.getFullName());
@@ -154,6 +154,7 @@ public class CommentServiceImpl implements CommentService {
             return "You cannot change other user's comment.";
         }
         commentRepository.deleteById(id);
+        productService.removeRating(comment.getProductId(), currentUser.getId());
         log.info("Comment deleted successfully");
         return "Delete is successful.";
     }
