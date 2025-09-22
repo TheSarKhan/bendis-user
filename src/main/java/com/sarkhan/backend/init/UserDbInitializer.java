@@ -26,7 +26,6 @@ public class UserDbInitializer {
                     .email("admin1234@gmail.com")
                     .password(passwordEncoder.encode("Admin123"))
                     .role(Role.ADMIN)
-                    .seller(Seller.builder().build())
                     .build();
 
             admin = userService.save(admin);

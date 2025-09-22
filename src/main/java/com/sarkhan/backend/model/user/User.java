@@ -59,7 +59,4 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     Role role;
-
-    @JdbcTypeCode(SqlTypes.JSON)
-    Seller seller;
 }
