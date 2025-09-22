@@ -44,4 +44,6 @@ public interface ProductService {
     void giveRating(Long id, Double rating) throws AuthException;
 
     ProductResponseForGetSingleOne toggleFavorite(Long id) throws AuthException;
+
+    void removeRating(Long productId, Long userId);
 }

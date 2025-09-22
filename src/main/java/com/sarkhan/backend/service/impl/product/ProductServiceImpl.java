@@ -449,4 +449,18 @@ public class ProductServiceImpl implements ProductService {
                             currentUser.getId()).isPresent());
         return productIsFavoriteMap;
     }
+
+    @Override
+    public void removeRating(Long productId, Long userId) {
+        Product product = getById(productId);
+        Double rating = product.getRating();
+        Map<Long, Double> ratings = product.getRatings();
+        double point = rating * ratings.size();
+        Double userRating = ratings.get(userId);
+        ratings.remove(userId);
+        point -= userRating;
+        point /= ratings.size();
+        product.setRating(point);
+        productRepository.save(product);
+    }
 }

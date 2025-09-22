@@ -43,11 +43,4 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(request, profileImage));
     }
 
-    @PostMapping("/create/seller")
-    @Operation(summary = "Create a seller",
-            description = "Creates a new seller (brand) based on the provided data")
-    public ResponseEntity<?> createBrand(@RequestBody SellerRequestDTO sellerRequest) throws AuthException {
-        SellerResponseDTO seller = sellerService.createSeller(sellerRequest);
-        return ResponseEntity.status(201).body(seller);
-    }
 }
