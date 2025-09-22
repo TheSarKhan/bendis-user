@@ -17,12 +17,12 @@ public class Like {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
-    @Column(nullable = false)
+    @Column(name = "story_id", nullable = false)
     Long storyId;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     Long userId;
 
-    @Column(nullable = false)
+    @Column(name = "like_type", nullable = false)
     LikeType likeType;
 }

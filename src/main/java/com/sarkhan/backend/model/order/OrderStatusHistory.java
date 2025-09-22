@@ -22,7 +22,9 @@ public class OrderStatusHistory {
     @JoinColumn(name = "order_id")
     Order order;
     @Enumerated(EnumType.STRING)
+    @Column(name = "order_status")
     OrderStatus orderStatus;
+    @Column(name = "changed_at")
     LocalDate changedAt;
 
     @PrePersist

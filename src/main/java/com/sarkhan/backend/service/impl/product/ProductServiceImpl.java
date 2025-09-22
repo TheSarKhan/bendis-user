@@ -6,7 +6,6 @@ import com.sarkhan.backend.mapper.product.ProductMapper;
 import com.sarkhan.backend.model.comment.Comment;
 import com.sarkhan.backend.model.enums.Color;
 import com.sarkhan.backend.model.enums.OrderStatus;
-import com.sarkhan.backend.model.enums.Role;
 import com.sarkhan.backend.model.order.Order;
 import com.sarkhan.backend.model.order.OrderItem;
 import com.sarkhan.backend.model.product.Product;
@@ -23,7 +22,6 @@ import com.sarkhan.backend.repository.product.items.PlusRepository;
 import com.sarkhan.backend.repository.product.items.ProductUserHistoryRepository;
 import com.sarkhan.backend.repository.product.items.UserFavoriteProductRepository;
 import com.sarkhan.backend.repository.user.SellerRepository;
-import com.sarkhan.backend.service.CloudinaryService;
 import com.sarkhan.backend.service.UserService;
 import com.sarkhan.backend.service.product.ProductService;
 import com.sarkhan.backend.service.product.items.CategoryService;
@@ -34,13 +32,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -48,8 +43,6 @@ import java.util.stream.Collectors;
 
 import static com.sarkhan.backend.service.impl.product.util.AsyncUtil.*;
 import static com.sarkhan.backend.service.impl.product.util.ProductFilterUtil.getByComplexFilteringUseSpecification;
-import static com.sarkhan.backend.service.impl.product.util.ProductImageUtil.deleteAllImages;
-import static com.sarkhan.backend.service.impl.product.util.ProductImageUtil.uploadImages;
 import static com.sarkhan.backend.service.impl.product.util.RecommendationUtil.getRecommendedProduct;
 import static com.sarkhan.backend.service.impl.product.util.RecommendationUtil.partialShuffle;
 import static com.sarkhan.backend.service.impl.product.util.UserUtil.addProductUserHistory;
@@ -61,8 +54,6 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     private final ProductUserHistoryRepository historyRepository;
-
-    private final CloudinaryService cloudinaryService;
 
     private final CategoryService categoryService;
 
@@ -96,7 +87,6 @@ public class ProductServiceImpl implements ProductService {
 
     public ProductServiceImpl(ProductRepository productRepository,
                               ProductUserHistoryRepository historyRepository,
-                              CloudinaryService cloudinaryService,
                               CategoryService categoryService,
                               SubCategoryService subCategoryService,
                               UserService userService, UserFavoriteProductRepository favoriteRepository,
@@ -105,7 +95,6 @@ public class ProductServiceImpl implements ProductService {
                               PlusRepository plusRepository, CommentRepository commentRepository, OrderRepository orderRepository) {
         this.productRepository = productRepository;
         this.historyRepository = historyRepository;
-        this.cloudinaryService = cloudinaryService;
         this.categoryService = categoryService;
         this.subCategoryService = subCategoryService;
         this.userService = userService;
@@ -117,19 +106,6 @@ public class ProductServiceImpl implements ProductService {
         this.orderRepository = orderRepository;
     }
 
-    @Override
-    public Product add(ProductRequest request, List<MultipartFile> images)
-            throws IOException, AuthException {
-        User user = getCurrentUser(userService, log);
-        log.info(user.getFullName() + " try to create product");
-
-        Product product = ProductMapper.toEntity(request, user);
-        List<ColorAndSize> colorAndSizes = uploadImages(request, images, cloudinaryService, log);
-        product.setColorAndSizes(colorAndSizes);
-
-        log.info("Product create successfully.");
-        return productRepository.save(product);
-    }
 
     @Override
     public List<Product> getAll() {
@@ -328,7 +304,7 @@ public class ProductServiceImpl implements ProductService {
                                 })
                                 .orElse(new ArrayList<>());
 
-                        List<String> availableSizes =  getUniqueSizes(colorAndSizes);
+                        List<String> availableSizes = getUniqueSizes(colorAndSizes);
                         return new ProductResponseForSelectedSubCategoryAndComplexFilter(
                                 mapProductsToProductsResponse(
                                         productsFuture.get()),
@@ -349,7 +325,7 @@ public class ProductServiceImpl implements ProductService {
 
     private List<String> getUniqueSizes(List<ColorAndSize> colorAndSizes) {
         HashSet<String> sizes = new HashSet<>();
-        for (ColorAndSize colorAndSize : colorAndSizes){
+        for (ColorAndSize colorAndSize : colorAndSizes) {
             Set<String> sizeKeys = colorAndSize.getSizeStockMap().keySet();
             sizes.addAll(sizeKeys);
         }
@@ -410,47 +386,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductResponseForGetSingleOne update(Long id, ProductRequest request, List<MultipartFile> newImages)
-            throws IOException, AuthException {
-        Product oldProduct = ProductMapper.updateEntity(getById(id), request);
-        User user = getCurrentUser(userService, log);
-        if (user == null) {
-            log.warn("Someone try to update product but he/she doesn't login!!!");
-            throw new AuthException("Someone try to update product but he/she doesn't login!!!");
-        }
-        log.info(user.getFullName() + " try to update product. Id : " + id);
-
-        if (!(Role.ADMIN.equals(user.getRole()) || getById(id).getSellerId().equals(user.getId()))) {
-            log.warn("User is not authorized to update this product");
-            throw new AccessDeniedException("You are not authorized to update this product");
-        }
-
-        Product product = ProductMapper.updateEntity(oldProduct, request);
-
-        deleteAllImages(product, cloudinaryService);
-
-        List<ColorAndSize> colorAndSizes = uploadImages(request, newImages, cloudinaryService, log);
-
-        product.setColorAndSizes(colorAndSizes);
-
-        log.info("Product update successfully.");
-        return mapProductToResponse(productRepository.save(product));
-    }
-
-    @Override
-    public void delete(Long id) throws AuthException {
-        User user = getCurrentUser(userService, log);
-        log.warn("Someone try to delete product but he/she doesn't login!!!");
-        if (user == null) throw new AuthException("Someone try to delete product but he/she doesn't login!!!");
-        log.warn(user.getFullName() + " delete product. Id : " + id);
-        if (Role.ADMIN.equals(user.getRole()) || getById(id).getSellerId().equals(user.getId())) {
-            productRepository.deleteById(id);
-        } else {
-            log.warn(user.getFullName() + " cannot delete this product.");
-        }
-    }
-
-    @Override
     public Product getById(Long id) {
         return productRepository.findById(id).orElseThrow(() -> {
             log.info("Cannot find product by " + id + " id.");
@@ -481,7 +416,7 @@ public class ProductServiceImpl implements ProductService {
         try {
             User currentUser = getCurrentUser(userService, log);
             isFavorite = favoriteRepository.getByProductIdAndUserId(product.getId(), currentUser.getId()).isPresent();
-        }catch (AuthException e){
+        } catch (AuthException e) {
             log.warn("User is not login. Cannot check favorite status.");
         }
         return ProductMapper.productToProductResponseForGetSingleOne(

@@ -24,35 +24,59 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id")
     Long id;
+
+    @Column(name = "full_name")
     String fullName;
+
+    @Column(name = "google_id")
     String googleId;
+
+    @Column(name = "profile_img")
     String profileImg;
 
-    @Column(unique = true)
+    @Column(name = "email", unique = true)
     String email;
+
+    @Column(name = "refresh_token")
     String refreshToken;
+
+    @Column(name = "password")
     String password;
+
+    @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
     Gender gender;
+
+    @Column(name = "user_code")
     String userCode;
+
+    @Column(name = "country_code")
     String countryCode;
+
+    @Column(name = "phone_number")
     String phoneNumber;
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "birth_date")
     BirthDate birthDate;
 
     @CreationTimestamp
     @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "created_at")
     LocalDateTime createdAt;
 
     @UpdateTimestamp
     @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "updated_at")
     LocalDateTime updatedAt;
 
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
     Role role;
 
-
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "seller")
     Seller seller;
 }

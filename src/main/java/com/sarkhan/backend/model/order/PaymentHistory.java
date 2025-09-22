@@ -19,12 +19,15 @@ public class PaymentHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    @Column(name = "card_last_four_digits")
     String cardLastFourDigits;
     @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
     PaymentStatus paymentStatus;
     @ManyToOne
     @JoinColumn(name = "order_id")
     Order order;
+    @Column(name = "paid_date")
     LocalDate paidDate;
 
     @PrePersist

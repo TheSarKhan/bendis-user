@@ -20,9 +20,11 @@ public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    @Column(name = "user_id")
     Long userId;
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     List<CartItem> cartItems;
+    @Column(name = "created_at")
     LocalDate createdAt;
 
     @PrePersist

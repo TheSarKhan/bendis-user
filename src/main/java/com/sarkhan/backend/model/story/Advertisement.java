@@ -21,7 +21,7 @@ public class Advertisement {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
     @Column(nullable = false)
@@ -31,8 +31,10 @@ public class Advertisement {
 
     private Set<Long> view;
 
+    @Column(name = "created_at")
     private Instant createdAt;
 
+    @Column(name = "updated_at")
     private Instant updatedAt;
 
     @PrePersist

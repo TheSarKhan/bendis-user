@@ -21,29 +21,33 @@ public class Story {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     Long id;
 
+    @Column(name = "seller_id")
     Long sellerId;
 
-    @Column(nullable = false)
+    @Column(name = "main_content_url", nullable = false)
     String mainContentUrl;
 
-    @Column(nullable = false)
+    @Column(name = "logo_url", nullable = false)
     String logoUrl;
 
     String description;
 
+    @Column(name = "like_count")
     Long likeCount;
 
+    @Column(name = "dislike_count")
     Long dislikeCount;
 
+    @Column(name = "share_count")
     Long shareCount;
 
     @JdbcTypeCode(SqlTypes.JSON)
     List<Long> view;
 
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     LocalDateTime createdAt;
 
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     LocalDateTime updatedAt;
 
     @PrePersist

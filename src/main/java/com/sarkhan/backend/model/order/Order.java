@@ -21,19 +21,25 @@ import java.util.List;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "order_id")
     private Long orderId;
+    @Column(name = "cart_id")
     private Long cartId;
+    @Column(name = "total_price")
     private BigDecimal totalPrice;
     @ManyToOne
     @JoinColumn(name = "address_id")
     private Address address;
     @Enumerated(EnumType.STRING)
+    @Column(name = "order_status")
     private OrderStatus orderStatus;
+    @Column(name = "order_date")
     private LocalDate orderDate;
     @Column(name = "user_id", nullable = false)
     private Long userId;
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    @OneToMany(mappedBy = "order",fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
     private List<OrderItem> orderItemList;
 
     @PrePersist

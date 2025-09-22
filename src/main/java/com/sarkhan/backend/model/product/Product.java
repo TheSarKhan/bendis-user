@@ -29,15 +29,16 @@ public class Product {
     @Column(nullable = false)
     String name;
 
-    @Column(nullable = false)
+    @Column(name = "original_price", nullable = false)
     BigDecimal originalPrice;
 
+    @Column(name = "discounted_price")
     BigDecimal discountedPrice;
 
-    @Column(nullable = false)
+    @Column(name = "sub_category_id")
     Long subCategoryId;
 
-    @Column(nullable = false)
+    @Column(name = "seller_id", nullable = false)
     Long sellerId;
 
     String brand;
@@ -50,8 +51,10 @@ public class Product {
 
     String slug;
 
+    @Column(name = "sales_count")
     Integer salesCount;
 
+    @Column(name = "total_stock")
     Long totalStock;
 
     Double rating;
@@ -60,24 +63,28 @@ public class Product {
     Map<Long, Double> ratings;
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "favorite_count")
     Long favoriteCount;
 
     @JdbcTypeCode(SqlTypes.JSON)
     List<Long> pluses;
 
     @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "color_and_sizes")
     List<ColorAndSize> colorAndSizes;
 
     @JdbcTypeCode(SqlTypes.JSON)
     Map<String, String> specifications;
 
-    LocalDateTime createAt;
+    @Column(name = "created_at")
+    LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
     LocalDateTime updateAt;
 
     @PrePersist
     public void init() {
-        createAt = LocalDateTime.now();
+        createdAt = LocalDateTime.now();
         rating = 0.0;
         ratings = new HashMap<>();
         salesCount = 0;

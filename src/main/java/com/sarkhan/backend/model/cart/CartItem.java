@@ -23,6 +23,7 @@ public class CartItem {
     Long productId;
     Integer quantity;
     String color;
+    @Column(name = "total_price")
     BigDecimal totalPrice;
 
 }

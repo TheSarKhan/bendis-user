@@ -8,13 +8,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.security.auth.message.AuthException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -25,17 +21,6 @@ import java.util.concurrent.ExecutionException;
 public class ProductController {
     private final ProductService service;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ADMIN','SELLER')")
-    @Operation(
-            summary = "Create a new product",
-            description = "Adds a new product along with its images. Only users with ADMIN or SELLER roles are allowed."
-    )
-    public ResponseEntity<Product> add(@RequestPart ProductRequest productRequest,
-                                       @RequestPart List<MultipartFile> images) throws IOException, ExecutionException, InterruptedException, AuthException {
-        return ResponseEntity.ok(service.add(productRequest, images));
-    }
 
     @GetMapping
     @Operation(
@@ -164,28 +149,5 @@ public class ProductController {
     )
     public ResponseEntity<ProductResponseForGetSingleOne> toggleFavorite(@RequestParam Long id) throws AuthException {
         return ResponseEntity.ok(service.toggleFavorite(id));
-    }
-
-    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Update product",
-            description = "Updates a product by its ID. Only users with ADMIN or SELLER roles are allowed."
-    )
-    public ResponseEntity<ProductResponseForGetSingleOne> updateProduct(@RequestParam long id,
-                                                                        @RequestPart ProductRequest request,
-                                                                        @RequestPart List<MultipartFile> images) throws IOException, AuthException {
-        return ResponseEntity.ok(service.update(id, request, images));
-    }
-
-    @DeleteMapping
-    @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Delete a product",
-            description = "Deletes a product by its ID. Only users with ADMIN or SELLER roles are allowed."
-    )
-    public ResponseEntity<Void> delete(@RequestParam Long id) throws AuthException {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
     }
 }
