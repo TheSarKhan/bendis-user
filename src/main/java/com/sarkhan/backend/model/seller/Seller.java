@@ -1,4 +1,4 @@
-package com.sarkhan.backend.model.user;
+package com.sarkhan.backend.model.seller;
 
 import jakarta.persistence.*;
 import lombok.*;

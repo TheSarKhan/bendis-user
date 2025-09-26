@@ -2,7 +2,7 @@ package com.sarkhan.backend.mapper.seller;
 
 import com.sarkhan.backend.dto.seller.SellerRequestDTO;
 import com.sarkhan.backend.dto.seller.SellerResponseDTO;
-import com.sarkhan.backend.model.user.Seller;
+import com.sarkhan.backend.model.seller.Seller;
 import org.mapstruct.Mapper;
 
 import java.util.List;

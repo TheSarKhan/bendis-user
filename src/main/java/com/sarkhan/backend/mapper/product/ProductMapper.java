@@ -6,7 +6,7 @@ import com.sarkhan.backend.dto.product.ProductResponseForGroupOfProduct;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.model.product.items.Plus;
 import com.sarkhan.backend.model.product.items.SubCategory;
-import com.sarkhan.backend.model.user.Seller;
+import com.sarkhan.backend.model.seller.Seller;
 
 import java.util.List;
 import java.util.Map;

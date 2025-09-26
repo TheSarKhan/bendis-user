@@ -13,7 +13,7 @@ import com.sarkhan.backend.model.product.items.ColorAndSize;
 import com.sarkhan.backend.model.product.items.Plus;
 import com.sarkhan.backend.model.product.items.SubCategory;
 import com.sarkhan.backend.model.product.items.UserFavoriteProduct;
-import com.sarkhan.backend.model.user.Seller;
+import com.sarkhan.backend.model.seller.Seller;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.repository.comment.CommentRepository;
 import com.sarkhan.backend.repository.order.OrderRepository;
@@ -21,7 +21,7 @@ import com.sarkhan.backend.repository.product.ProductRepository;
 import com.sarkhan.backend.repository.product.items.PlusRepository;
 import com.sarkhan.backend.repository.product.items.ProductUserHistoryRepository;
 import com.sarkhan.backend.repository.product.items.UserFavoriteProductRepository;
-import com.sarkhan.backend.repository.user.SellerRepository;
+import com.sarkhan.backend.service.SellerService;
 import com.sarkhan.backend.service.UserService;
 import com.sarkhan.backend.service.product.ProductService;
 import com.sarkhan.backend.service.product.items.CategoryService;
@@ -63,7 +63,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final UserFavoriteProductRepository favoriteRepository;
 
-    private final SellerRepository sellerRepository;
+    private final SellerService sellerService;
 
     private final PlusRepository plusRepository;
 
@@ -91,7 +91,7 @@ public class ProductServiceImpl implements ProductService {
                               SubCategoryService subCategoryService,
                               UserService userService, UserFavoriteProductRepository favoriteRepository,
                               @Qualifier("taskExecutor") Executor executor,
-                              SellerRepository sellerRepository,
+                              SellerService sellerService,
                               PlusRepository plusRepository, CommentRepository commentRepository, OrderRepository orderRepository) {
         this.productRepository = productRepository;
         this.historyRepository = historyRepository;
@@ -100,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
         this.userService = userService;
         this.favoriteRepository = favoriteRepository;
         this.executor = executor;
-        this.sellerRepository = sellerRepository;
+        this.sellerService = sellerService;
         this.plusRepository = plusRepository;
         this.commentRepository = commentRepository;
         this.orderRepository = orderRepository;
@@ -409,7 +409,10 @@ public class ProductServiceImpl implements ProductService {
 
     private ProductResponseForGetSingleOne mapProductToResponse(Product product) {
         SubCategory subCategory = subCategoryService.getById(product.getSubCategoryId());
-        Seller seller = sellerRepository.findById(product.getSellerId()).orElseThrow();
+        log.info("seller : " + product.getSellerId());
+
+        Seller seller = sellerService.getById(product.getSellerId());
+
         List<Plus> pluses = plusRepository.findAllById(product.getPluses());
         List<Comment> byProductId = commentRepository.getByProductId(product.getId());
         boolean isFavorite = false;

@@ -1,10 +1,9 @@
 package com.sarkhan.backend.controller;
 
 import com.sarkhan.backend.dto.authorization.TokenResponse;
-import com.sarkhan.backend.dto.seller.SellerRequestDTO;
-import com.sarkhan.backend.dto.seller.SellerResponseDTO;
 import com.sarkhan.backend.dto.user.UserResponse;
 import com.sarkhan.backend.dto.user.UserUpdateRequest;
+import com.sarkhan.backend.model.seller.Seller;
 import com.sarkhan.backend.service.SellerService;
 import com.sarkhan.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -43,4 +42,9 @@ public class UserController {
         return ResponseEntity.ok(userService.updateUser(request, profileImage));
     }
 
+    @GetMapping("/seller")
+    public ResponseEntity<Seller> getSeller(@RequestParam("id") Long id){
+        Seller seller = sellerService.getById(id);
+        return ResponseEntity.ok(seller);
+    }
 }

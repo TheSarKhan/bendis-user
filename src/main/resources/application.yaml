@@ -40,34 +40,34 @@ spring:
             enable: true
         debug: true
   datasource:
-   first:
-    url: jdbc:postgresql://localhost:5450/User
-    username: root
-    password: root
-   second:
-    url: jdbc:postgresql://localhost:5451/Product
-    username: root
-    password: root
-   third:
-    url: jdbc:postgresql://localhost:5452/Story
-    username: root
-    password: root
-   four:
-    url: jdbc:postgresql://localhost:5453/Comment
-    username: root
-    password: root
-   fifth:
-    url: jdbc:postgresql://localhost:5454/Cart
-    username: root
-    password: root
-   sixth:
-    url: jdbc:postgresql://localhost:5455/Order
-    username: root
-    password: root
-   seventh:
-    url: jdbc:postgresql://localhost:5456/Seller
-    username: root
-    password: root
+    first:
+      url: jdbc:postgresql://localhost:5450/User
+      username: root
+      password: root
+    second:
+      url: jdbc:postgresql://localhost:5451/Product
+      username: root
+      password: root
+    third:
+      url: jdbc:postgresql://localhost:5452/Story
+      username: root
+      password: root
+    four:
+      url: jdbc:postgresql://localhost:5453/Comment
+      username: root
+      password: root
+    fifth:
+      url: jdbc:postgresql://localhost:5454/Cart
+      username: root
+      password: root
+    sixth:
+      url: jdbc:postgresql://localhost:5455/Order
+      username: root
+      password: root
+    fourth:
+      url: jdbc:postgresql://localhost:5456/Seller
+      username: root
+      password: root
 
   jpa:
     hibernate:
@@ -77,7 +77,7 @@ spring:
       #host: redis
       host: localhost
       port: 6380
-   #   password: redispass  # Buraya Docker Compose'daki şifreyi gir
+    #   password: redispass  # Buraya Docker Compose'daki şifreyi gir
   flyway:
     enabled: false
 

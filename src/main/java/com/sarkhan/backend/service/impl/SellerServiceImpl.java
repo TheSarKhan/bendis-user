@@ -2,10 +2,11 @@ package com.sarkhan.backend.service.impl;
 
 import com.sarkhan.backend.dto.seller.SellerResponseDTO;
 import com.sarkhan.backend.handler.exception.DataNotFoundException;
+import com.sarkhan.backend.handler.exception.ResourceNotFoundException;
 import com.sarkhan.backend.jwt.JwtService;
 import com.sarkhan.backend.mapper.seller.SellerMapper;
-import com.sarkhan.backend.model.user.Seller;
-import com.sarkhan.backend.repository.user.SellerRepository;
+import com.sarkhan.backend.model.seller.Seller;
+import com.sarkhan.backend.repository.seller.SellerRepository;
 import com.sarkhan.backend.service.SellerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,14 @@ public class SellerServiceImpl implements SellerService {
     private final SellerRepository sellerRepository;
 
     public List<SellerResponseDTO> getAll() {
-        return sellerMapper.sellersToSellersResponseDto(sellerRepository.findAll());
+        return sellerMapper
+                .sellersToSellersResponseDto(sellerRepository.findAll());
+    }
+
+    @Override
+    public Seller getById(Long sellerId) {
+        return sellerRepository.findById(sellerId).orElseThrow(() ->
+                new ResourceNotFoundException("Seller with id: " + sellerId + " not found"));
     }
 
     @Override

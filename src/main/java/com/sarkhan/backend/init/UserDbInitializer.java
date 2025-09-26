@@ -2,7 +2,6 @@ package com.sarkhan.backend.init;
 
 import com.sarkhan.backend.model.enums.Gender;
 import com.sarkhan.backend.model.enums.Role;
-import com.sarkhan.backend.model.user.Seller;
 import com.sarkhan.backend.model.user.User;
 import com.sarkhan.backend.service.UserService;
 import jakarta.annotation.PostConstruct;

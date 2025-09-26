@@ -6,7 +6,7 @@ import com.sarkhan.backend.model.order.OrderItem;
 import com.sarkhan.backend.model.product.Product;
 import com.sarkhan.backend.repository.order.OrderItemRepository;
 import com.sarkhan.backend.repository.product.ProductRepository;
-import com.sarkhan.backend.repository.user.SellerRepository;
+import com.sarkhan.backend.repository.seller.SellerRepository;
 import com.sarkhan.backend.service.SellerDashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
