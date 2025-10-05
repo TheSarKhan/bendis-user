@@ -68,6 +68,10 @@ spring:
       url: jdbc:postgresql://localhost:5456/Seller
       username: root
       password: root
+    seventh:
+      url: jdbc:postgresql://localhost:5456/Admin
+      username: root
+      password: root
 
   jpa:
     hibernate:

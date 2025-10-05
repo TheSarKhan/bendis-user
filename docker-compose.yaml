@@ -10,7 +10,7 @@ services:
       - redis_data:/data
     restart: always
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -30,7 +30,7 @@ services:
       - UserData:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "User"]
+      test: [ "CMD", "pg_isready", "-U", "User" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -50,7 +50,7 @@ services:
       - ProductData:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "Product"]
+      test: [ "CMD", "pg_isready", "-U", "Product" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -70,7 +70,7 @@ services:
       - StoryData:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "Story"]
+      test: [ "CMD", "pg_isready", "-U", "Story" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -90,7 +90,7 @@ services:
       - CommentData:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "Comment"]
+      test: [ "CMD", "pg_isready", "-U", "Comment" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -110,7 +110,7 @@ services:
       - CartData:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "Cart"]
+      test: [ "CMD", "pg_isready", "-U", "Cart" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -130,7 +130,7 @@ services:
       - OrderData:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "Order"]
+      test: [ "CMD", "pg_isready", "-U", "Order" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -150,23 +150,45 @@ services:
       - SellerData:/var/lib/postgresql/data
     restart: always
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "Seller"]
+      test: [ "CMD", "pg_isready", "-U", "Seller" ]
       interval: 5s
       timeout: 5s
       retries: 5
     networks:
       - bendis
 
+  admin_service:
+    image: postgres
+    container_name: admin_service
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: Admin
+    ports:
+      - '5457:5432'
+    volumes:
+      - AdminData:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "Admin" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bendis
+
+
 volumes:
-  redis_data: {}
-  redis_seller_data: {}
-  UserData: {}
-  ProductData: {}
-  StoryData: {}
-  CommentData: {}
-  CartData: {}
-  OrderData: {}
-  SellerData: {}
+  redis_data: { }
+  redis_seller_data: { }
+  UserData: { }
+  ProductData: { }
+  StoryData: { }
+  CommentData: { }
+  CartData: { }
+  OrderData: { }
+  SellerData: { }
+  AdminData: { }
 
 networks:
   bendis:
